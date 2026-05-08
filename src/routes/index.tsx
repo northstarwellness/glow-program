@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { Shell, Placeholder, GoldDivider } from "@/components/Shell";
 import { CTALink } from "@/components/CTA";
 import { useGlow } from "@/lib/glow-store";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -16,7 +17,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const hydrated = useHydrated();
   const startedAt = useGlow((s) => s.startedAt);
+  const showResume = hydrated && !!startedAt;
 
   return (
     <Shell hideNav>
@@ -38,7 +41,7 @@ function Landing() {
 
       <div className="mt-8 flex flex-col gap-3">
         <CTALink to="/quiz" variant="primary">Begin Your Reset</CTALink>
-        {startedAt && (
+        {showResume && (
           <Link to="/today" className="text-center font-serif text-sm italic text-muted-foreground underline-offset-4 hover:underline">
             I've started before — continue
           </Link>

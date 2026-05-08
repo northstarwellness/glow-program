@@ -4,6 +4,7 @@ import { CTALink } from "@/components/CTA";
 import { useGlow, currentDay } from "@/lib/glow-store";
 import { JOURNAL_PROMPTS, RITUAL_STEPS, SMOOTHIES, reflect, REDS_URL } from "@/lib/glow-data";
 import { useState, useEffect } from "react";
+import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/today")({
   head: () => ({ meta: [{ title: "Today — NOURÉ Inner Glow" }] }),
@@ -11,7 +12,9 @@ export const Route = createFileRoute("/today")({
 });
 
 function Today() {
+  const hydrated = useHydrated();
   const startedAt = useGlow((s) => s.startedAt);
+  if (!hydrated) return <Shell><div className="h-32" /></Shell>;
   if (!startedAt) return <Navigate to="/" />;
   const day = currentDay(startedAt);
   return <DayView day={day} isToday />;
