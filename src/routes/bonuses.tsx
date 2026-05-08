@@ -1,9 +1,9 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { ARTICLES, INGREDIENTS, POLYPHENOLS, SOUNDS, REDS_URL } from "@/lib/content";
+import { ARTICLES, INGREDIENTS, POLYPHENOLS, RECIPES, SOUNDS, REDS_URL } from "@/lib/content";
 
 export const Route = createFileRoute("/bonuses")({ component: Bonuses });
 
@@ -11,25 +11,26 @@ function Bonuses() {
   const hydrated = useHydrated();
   const s = useApp();
   if (hydrated && !s.name) return <Navigate to="/" />;
-  const [tab, setTab] = useState<"poly" | "ing" | "sound" | "guide">("poly");
+  const [tab, setTab] = useState<"recipes" | "poly" | "ing" | "sound" | "guide">("recipes");
 
   return (
     <Frame>
       <TopBar name={s.name} />
-      <p className="label-caps text-[var(--gold)]">Your bonuses</p>
+      <p className="label-caps text-[var(--gold)]">✦ Your bonuses</p>
       <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Everything you also got.</h1>
 
       <div className="mt-5 flex gap-2 overflow-x-auto pb-2">
-        {(["poly", "ing", "sound", "guide"] as const).map((t) => (
+        {(["recipes", "poly", "ing", "sound", "guide"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
             className={`flex-shrink-0 rounded-full px-4 py-2 text-[12px] tracking-wide transition ${
               tab === t ? "bg-[var(--plum)] text-[var(--ivory)]" : "bg-[var(--sand)] text-[var(--plum)]"
             }`}>
-            {t === "poly" ? "Polyphenols" : t === "ing" ? "Ingredients" : t === "sound" ? "Sounds" : "Glow Guide"}
+            {t === "recipes" ? "Bonus Recipes" : t === "poly" ? "Polyphenols" : t === "ing" ? "Ingredients" : t === "sound" ? "Sounds" : "Glow Guide"}
           </button>
         ))}
       </div>
 
+      {tab === "recipes" && <BonusRecipes />}
       {tab === "poly" && <PolyTab />}
       {tab === "ing" && <IngTab />}
       {tab === "sound" && <SoundTab />}
@@ -38,9 +39,28 @@ function Bonuses() {
       <GoldDivider />
       <a href={REDS_URL} target="_blank" rel="noreferrer" className="block sand-card p-5 text-center">
         <p className="font-serif italic text-[14px] text-[var(--plum)]/70">The blend behind every morning</p>
-        <p className="mt-1 font-serif text-[22px] text-[var(--plum)]">Radiant Reds Superfood →</p>
+        <p className="mt-1 font-serif text-[22px] text-[var(--plum)]">✦ Radiant Reds Superfood →</p>
       </a>
     </Frame>
+  );
+}
+
+function BonusRecipes() {
+  const bonus = RECIPES.filter((r) => r.bonus);
+  return (
+    <div className="mt-5 grid grid-cols-2 gap-3">
+      {bonus.map((r) => (
+        <Link key={r.id} to="/recipes/$id" params={{ id: r.id }} className="block">
+          <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm" style={{ background: r.gradient }}>
+            <div className="flex h-full flex-col justify-end p-3 text-[var(--ivory)]">
+              <span className="self-start rounded-full bg-[var(--ivory)]/25 px-2 py-0.5 text-[9px] tracking-wider uppercase">{r.benefitTag}</span>
+              <h3 className="mt-2 font-serif text-[16px] leading-tight">{r.name}</h3>
+              <p className="mt-1 text-[10px] tracking-wide opacity-80">{r.prep}</p>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }
 
