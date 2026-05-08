@@ -9,58 +9,48 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TodayRouteImport } from './routes/today'
-import { Route as ResultRouteImport } from './routes/result'
-import { Route as ProgressRouteImport } from './routes/progress'
-import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as JournalRouteImport } from './routes/journal'
-import { Route as GroceryRouteImport } from './routes/grocery'
-import { Route as CompleteRouteImport } from './routes/complete'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as RitualsRouteImport } from './routes/rituals'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as CelebrateRouteImport } from './routes/celebrate'
+import { Route as BonusesRouteImport } from './routes/bonuses'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as QuizIndexRouteImport } from './routes/quiz.index'
-import { Route as QuizEmailRouteImport } from './routes/quiz.email'
-import { Route as QuizStepRouteImport } from './routes/quiz.$step'
+import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
+import { Route as JournalIndexRouteImport } from './routes/journal.index'
+import { Route as RecipesIdRouteImport } from './routes/recipes.$id'
+import { Route as MilestoneIdRouteImport } from './routes/milestone.$id'
+import { Route as JournalNRouteImport } from './routes/journal.$n'
 import { Route as DayNRouteImport } from './routes/day.$n'
 
-const TodayRoute = TodayRouteImport.update({
-  id: '/today',
-  path: '/today',
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ResultRoute = ResultRouteImport.update({
-  id: '/result',
-  path: '/result',
+const RitualsRoute = RitualsRouteImport.update({
+  id: '/rituals',
+  path: '/rituals',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProgressRoute = ProgressRouteImport.update({
-  id: '/progress',
-  path: '/progress',
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
-const NotificationsRoute = NotificationsRouteImport.update({
-  id: '/notifications',
-  path: '/notifications',
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JournalRoute = JournalRouteImport.update({
-  id: '/journal',
-  path: '/journal',
+const CelebrateRoute = CelebrateRouteImport.update({
+  id: '/celebrate',
+  path: '/celebrate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GroceryRoute = GroceryRouteImport.update({
-  id: '/grocery',
-  path: '/grocery',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CompleteRoute = CompleteRouteImport.update({
-  id: '/complete',
-  path: '/complete',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const BonusesRoute = BonusesRouteImport.update({
+  id: '/bonuses',
+  path: '/bonuses',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -68,19 +58,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuizIndexRoute = QuizIndexRouteImport.update({
-  id: '/quiz/',
-  path: '/quiz/',
+const RecipesIndexRoute = RecipesIndexRouteImport.update({
+  id: '/recipes/',
+  path: '/recipes/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuizEmailRoute = QuizEmailRouteImport.update({
-  id: '/quiz/email',
-  path: '/quiz/email',
+const JournalIndexRoute = JournalIndexRouteImport.update({
+  id: '/journal/',
+  path: '/journal/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const QuizStepRoute = QuizStepRouteImport.update({
-  id: '/quiz/$step',
-  path: '/quiz/$step',
+const RecipesIdRoute = RecipesIdRouteImport.update({
+  id: '/recipes/$id',
+  path: '/recipes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MilestoneIdRoute = MilestoneIdRouteImport.update({
+  id: '/milestone/$id',
+  path: '/milestone/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalNRoute = JournalNRouteImport.update({
+  id: '/journal/$n',
+  path: '/journal/$n',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DayNRoute = DayNRouteImport.update({
@@ -91,170 +91,156 @@ const DayNRoute = DayNRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/complete': typeof CompleteRoute
-  '/grocery': typeof GroceryRoute
-  '/journal': typeof JournalRoute
-  '/notifications': typeof NotificationsRoute
-  '/progress': typeof ProgressRoute
-  '/result': typeof ResultRoute
-  '/today': typeof TodayRoute
+  '/bonuses': typeof BonusesRoute
+  '/celebrate': typeof CelebrateRoute
+  '/home': typeof HomeRoute
+  '/profile': typeof ProfileRoute
+  '/rituals': typeof RitualsRoute
+  '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
-  '/quiz/$step': typeof QuizStepRoute
-  '/quiz/email': typeof QuizEmailRoute
-  '/quiz/': typeof QuizIndexRoute
+  '/journal/$n': typeof JournalNRoute
+  '/milestone/$id': typeof MilestoneIdRoute
+  '/recipes/$id': typeof RecipesIdRoute
+  '/journal/': typeof JournalIndexRoute
+  '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/complete': typeof CompleteRoute
-  '/grocery': typeof GroceryRoute
-  '/journal': typeof JournalRoute
-  '/notifications': typeof NotificationsRoute
-  '/progress': typeof ProgressRoute
-  '/result': typeof ResultRoute
-  '/today': typeof TodayRoute
+  '/bonuses': typeof BonusesRoute
+  '/celebrate': typeof CelebrateRoute
+  '/home': typeof HomeRoute
+  '/profile': typeof ProfileRoute
+  '/rituals': typeof RitualsRoute
+  '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
-  '/quiz/$step': typeof QuizStepRoute
-  '/quiz/email': typeof QuizEmailRoute
-  '/quiz': typeof QuizIndexRoute
+  '/journal/$n': typeof JournalNRoute
+  '/milestone/$id': typeof MilestoneIdRoute
+  '/recipes/$id': typeof RecipesIdRoute
+  '/journal': typeof JournalIndexRoute
+  '/recipes': typeof RecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/complete': typeof CompleteRoute
-  '/grocery': typeof GroceryRoute
-  '/journal': typeof JournalRoute
-  '/notifications': typeof NotificationsRoute
-  '/progress': typeof ProgressRoute
-  '/result': typeof ResultRoute
-  '/today': typeof TodayRoute
+  '/bonuses': typeof BonusesRoute
+  '/celebrate': typeof CelebrateRoute
+  '/home': typeof HomeRoute
+  '/profile': typeof ProfileRoute
+  '/rituals': typeof RitualsRoute
+  '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
-  '/quiz/$step': typeof QuizStepRoute
-  '/quiz/email': typeof QuizEmailRoute
-  '/quiz/': typeof QuizIndexRoute
+  '/journal/$n': typeof JournalNRoute
+  '/milestone/$id': typeof MilestoneIdRoute
+  '/recipes/$id': typeof RecipesIdRoute
+  '/journal/': typeof JournalIndexRoute
+  '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/about'
-    | '/complete'
-    | '/grocery'
-    | '/journal'
-    | '/notifications'
-    | '/progress'
-    | '/result'
-    | '/today'
+    | '/bonuses'
+    | '/celebrate'
+    | '/home'
+    | '/profile'
+    | '/rituals'
+    | '/welcome'
     | '/day/$n'
-    | '/quiz/$step'
-    | '/quiz/email'
-    | '/quiz/'
+    | '/journal/$n'
+    | '/milestone/$id'
+    | '/recipes/$id'
+    | '/journal/'
+    | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/about'
-    | '/complete'
-    | '/grocery'
-    | '/journal'
-    | '/notifications'
-    | '/progress'
-    | '/result'
-    | '/today'
+    | '/bonuses'
+    | '/celebrate'
+    | '/home'
+    | '/profile'
+    | '/rituals'
+    | '/welcome'
     | '/day/$n'
-    | '/quiz/$step'
-    | '/quiz/email'
-    | '/quiz'
+    | '/journal/$n'
+    | '/milestone/$id'
+    | '/recipes/$id'
+    | '/journal'
+    | '/recipes'
   id:
     | '__root__'
     | '/'
-    | '/about'
-    | '/complete'
-    | '/grocery'
-    | '/journal'
-    | '/notifications'
-    | '/progress'
-    | '/result'
-    | '/today'
+    | '/bonuses'
+    | '/celebrate'
+    | '/home'
+    | '/profile'
+    | '/rituals'
+    | '/welcome'
     | '/day/$n'
-    | '/quiz/$step'
-    | '/quiz/email'
-    | '/quiz/'
+    | '/journal/$n'
+    | '/milestone/$id'
+    | '/recipes/$id'
+    | '/journal/'
+    | '/recipes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
-  CompleteRoute: typeof CompleteRoute
-  GroceryRoute: typeof GroceryRoute
-  JournalRoute: typeof JournalRoute
-  NotificationsRoute: typeof NotificationsRoute
-  ProgressRoute: typeof ProgressRoute
-  ResultRoute: typeof ResultRoute
-  TodayRoute: typeof TodayRoute
+  BonusesRoute: typeof BonusesRoute
+  CelebrateRoute: typeof CelebrateRoute
+  HomeRoute: typeof HomeRoute
+  ProfileRoute: typeof ProfileRoute
+  RitualsRoute: typeof RitualsRoute
+  WelcomeRoute: typeof WelcomeRoute
   DayNRoute: typeof DayNRoute
-  QuizStepRoute: typeof QuizStepRoute
-  QuizEmailRoute: typeof QuizEmailRoute
-  QuizIndexRoute: typeof QuizIndexRoute
+  JournalNRoute: typeof JournalNRoute
+  MilestoneIdRoute: typeof MilestoneIdRoute
+  RecipesIdRoute: typeof RecipesIdRoute
+  JournalIndexRoute: typeof JournalIndexRoute
+  RecipesIndexRoute: typeof RecipesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/today': {
-      id: '/today'
-      path: '/today'
-      fullPath: '/today'
-      preLoaderRoute: typeof TodayRouteImport
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/result': {
-      id: '/result'
-      path: '/result'
-      fullPath: '/result'
-      preLoaderRoute: typeof ResultRouteImport
+    '/rituals': {
+      id: '/rituals'
+      path: '/rituals'
+      fullPath: '/rituals'
+      preLoaderRoute: typeof RitualsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/progress': {
-      id: '/progress'
-      path: '/progress'
-      fullPath: '/progress'
-      preLoaderRoute: typeof ProgressRouteImport
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notifications': {
-      id: '/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof NotificationsRouteImport
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/journal': {
-      id: '/journal'
-      path: '/journal'
-      fullPath: '/journal'
-      preLoaderRoute: typeof JournalRouteImport
+    '/celebrate': {
+      id: '/celebrate'
+      path: '/celebrate'
+      fullPath: '/celebrate'
+      preLoaderRoute: typeof CelebrateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/grocery': {
-      id: '/grocery'
-      path: '/grocery'
-      fullPath: '/grocery'
-      preLoaderRoute: typeof GroceryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/complete': {
-      id: '/complete'
-      path: '/complete'
-      fullPath: '/complete'
-      preLoaderRoute: typeof CompleteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/bonuses': {
+      id: '/bonuses'
+      path: '/bonuses'
+      fullPath: '/bonuses'
+      preLoaderRoute: typeof BonusesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -264,25 +250,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quiz/': {
-      id: '/quiz/'
-      path: '/quiz'
-      fullPath: '/quiz/'
-      preLoaderRoute: typeof QuizIndexRouteImport
+    '/recipes/': {
+      id: '/recipes/'
+      path: '/recipes'
+      fullPath: '/recipes/'
+      preLoaderRoute: typeof RecipesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quiz/email': {
-      id: '/quiz/email'
-      path: '/quiz/email'
-      fullPath: '/quiz/email'
-      preLoaderRoute: typeof QuizEmailRouteImport
+    '/journal/': {
+      id: '/journal/'
+      path: '/journal'
+      fullPath: '/journal/'
+      preLoaderRoute: typeof JournalIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/quiz/$step': {
-      id: '/quiz/$step'
-      path: '/quiz/$step'
-      fullPath: '/quiz/$step'
-      preLoaderRoute: typeof QuizStepRouteImport
+    '/recipes/$id': {
+      id: '/recipes/$id'
+      path: '/recipes/$id'
+      fullPath: '/recipes/$id'
+      preLoaderRoute: typeof RecipesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/milestone/$id': {
+      id: '/milestone/$id'
+      path: '/milestone/$id'
+      fullPath: '/milestone/$id'
+      preLoaderRoute: typeof MilestoneIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal/$n': {
+      id: '/journal/$n'
+      path: '/journal/$n'
+      fullPath: '/journal/$n'
+      preLoaderRoute: typeof JournalNRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/day/$n': {
@@ -297,18 +297,18 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
-  CompleteRoute: CompleteRoute,
-  GroceryRoute: GroceryRoute,
-  JournalRoute: JournalRoute,
-  NotificationsRoute: NotificationsRoute,
-  ProgressRoute: ProgressRoute,
-  ResultRoute: ResultRoute,
-  TodayRoute: TodayRoute,
+  BonusesRoute: BonusesRoute,
+  CelebrateRoute: CelebrateRoute,
+  HomeRoute: HomeRoute,
+  ProfileRoute: ProfileRoute,
+  RitualsRoute: RitualsRoute,
+  WelcomeRoute: WelcomeRoute,
   DayNRoute: DayNRoute,
-  QuizStepRoute: QuizStepRoute,
-  QuizEmailRoute: QuizEmailRoute,
-  QuizIndexRoute: QuizIndexRoute,
+  JournalNRoute: JournalNRoute,
+  MilestoneIdRoute: MilestoneIdRoute,
+  RecipesIdRoute: RecipesIdRoute,
+  JournalIndexRoute: JournalIndexRoute,
+  RecipesIndexRoute: RecipesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,58 +1,70 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Shell, Placeholder, GoldDivider } from "@/components/Shell";
-import { CTALink } from "@/components/CTA";
-import { useGlow } from "@/lib/glow-store";
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
+import { Pomegranate } from "@/components/Frame";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NOURÉ — The 21-Day Inner Glow Reset" },
-      { name: "description", content: "A 21-day morning ritual for radiant skin, a calm gut, and steady energy. From NOURÉ Wellness." },
-      { property: "og:title", content: "NOURÉ — The 21-Day Inner Glow Reset" },
-      { property: "og:description", content: "Beauty from within. 21 days of polyphenol-rich rituals and feminine wellness." },
+      { title: "NOURÉ — The Inner Glow Reset" },
+      { name: "description", content: "A 21-day morning ritual for radiant skin, a calm gut, and steady energy." },
     ],
   }),
-  component: Landing,
+  component: NameCapture,
 });
 
-function Landing() {
+function NameCapture() {
   const hydrated = useHydrated();
-  const startedAt = useGlow((s) => s.startedAt);
-  const showResume = hydrated && !!startedAt;
+  const name = useApp((s) => s.name);
+  const seenWelcome = useApp((s) => s.seenWelcome);
+  const setName = useApp((s) => s.setName);
+  const startReset = useApp((s) => s.startReset);
+  const navigate = useNavigate();
+  const [val, setVal] = useState("");
+
+  if (hydrated && name && seenWelcome) return <Navigate to="/home" />;
+  if (hydrated && name && !seenWelcome) return <Navigate to="/welcome" />;
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = val.trim();
+    if (!v) return;
+    setName(v);
+    startReset();
+    navigate({ to: "/welcome" });
+  };
 
   return (
-    <Shell hideNav>
-      <p className="font-sans text-[11px] uppercase tracking-[0.32em] text-accent">
-        A 21-Day Ritual by NOURÉ
-      </p>
-      <h1 className="mt-4 font-serif text-5xl leading-[1.05] text-primary">
-        Your Inner Glow,<br />
-        <em className="text-[var(--berry)]">Reset.</em>
-      </h1>
-      <p className="mt-5 max-w-[34ch] text-[15px] leading-relaxed text-muted-foreground">
-        A 21-day morning ritual for radiant skin, a calm gut, and steady energy —
-        rooted in polyphenol-rich rituals and feminine wellness.
-      </p>
+    <div className="ivory-frame min-h-screen">
+      <div className="mx-auto flex min-h-screen max-w-[440px] flex-col items-center px-6 pt-10 pb-12">
+        <p className="font-serif text-[15px] tracking-[0.4em] text-[var(--plum)]">NOURÉ</p>
 
-      <div className="mt-8">
-        <Placeholder label="hero image — provide your photography" ratio="aspect-[4/5]" />
+        <div className="mt-8">
+          <Pomegranate size={200} />
+        </div>
+
+        <h1 className="mt-6 text-center font-serif text-[40px] leading-tight text-[var(--plum)]">
+          Before we begin.
+        </h1>
+        <p className="mt-3 max-w-[30ch] text-center text-[15px] leading-relaxed text-[var(--plum)]/65">
+          This ritual is yours. Tell us your name.
+        </p>
+
+        <form onSubmit={submit} className="mt-10 w-full">
+          <input
+            autoFocus
+            value={val}
+            onChange={(e) => setVal(e.target.value)}
+            placeholder="Your first name"
+            className="w-full border-0 border-b border-[var(--plum)]/30 bg-transparent px-1 py-3 text-center font-serif text-2xl text-[var(--plum)] placeholder:text-[var(--plum)]/30 focus:border-[var(--gold)] focus:outline-none"
+            maxLength={32}
+          />
+          <button type="submit" disabled={!val.trim()} className="gold-pill-btn mt-10 w-full disabled:opacity-50">
+            Begin My Reset →
+          </button>
+        </form>
       </div>
-
-      <div className="mt-8 flex flex-col gap-3">
-        <CTALink to="/quiz" variant="primary">Begin Your Reset</CTALink>
-        {showResume && (
-          <Link to="/today" className="text-center font-serif text-sm italic text-muted-foreground underline-offset-4 hover:underline">
-            I've started before — continue
-          </Link>
-        )}
-      </div>
-
-      <GoldDivider />
-
-      <p className="text-center font-serif text-xs italic text-muted-foreground">
-        Free. No account needed. Two minutes to begin.
-      </p>
-    </Shell>
+    </div>
   );
 }
