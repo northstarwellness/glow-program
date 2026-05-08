@@ -9,38 +9,254 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TodayRouteImport } from './routes/today'
+import { Route as ResultRouteImport } from './routes/result'
+import { Route as ProgressRouteImport } from './routes/progress'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as JournalRouteImport } from './routes/journal'
+import { Route as GroceryRouteImport } from './routes/grocery'
+import { Route as CompleteRouteImport } from './routes/complete'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as QuizIndexRouteImport } from './routes/quiz.index'
+import { Route as QuizEmailRouteImport } from './routes/quiz.email'
+import { Route as QuizStepRouteImport } from './routes/quiz.$step'
+import { Route as DayNRouteImport } from './routes/day.$n'
 
+const TodayRoute = TodayRouteImport.update({
+  id: '/today',
+  path: '/today',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResultRoute = ResultRouteImport.update({
+  id: '/result',
+  path: '/result',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalRoute = JournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroceryRoute = GroceryRouteImport.update({
+  id: '/grocery',
+  path: '/grocery',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompleteRoute = CompleteRouteImport.update({
+  id: '/complete',
+  path: '/complete',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const QuizIndexRoute = QuizIndexRouteImport.update({
+  id: '/quiz/',
+  path: '/quiz/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizEmailRoute = QuizEmailRouteImport.update({
+  id: '/quiz/email',
+  path: '/quiz/email',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuizStepRoute = QuizStepRouteImport.update({
+  id: '/quiz/$step',
+  path: '/quiz/$step',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DayNRoute = DayNRouteImport.update({
+  id: '/day/$n',
+  path: '/day/$n',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/complete': typeof CompleteRoute
+  '/grocery': typeof GroceryRoute
+  '/journal': typeof JournalRoute
+  '/notifications': typeof NotificationsRoute
+  '/progress': typeof ProgressRoute
+  '/result': typeof ResultRoute
+  '/today': typeof TodayRoute
+  '/day/$n': typeof DayNRoute
+  '/quiz/$step': typeof QuizStepRoute
+  '/quiz/email': typeof QuizEmailRoute
+  '/quiz/': typeof QuizIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/complete': typeof CompleteRoute
+  '/grocery': typeof GroceryRoute
+  '/journal': typeof JournalRoute
+  '/notifications': typeof NotificationsRoute
+  '/progress': typeof ProgressRoute
+  '/result': typeof ResultRoute
+  '/today': typeof TodayRoute
+  '/day/$n': typeof DayNRoute
+  '/quiz/$step': typeof QuizStepRoute
+  '/quiz/email': typeof QuizEmailRoute
+  '/quiz': typeof QuizIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
+  '/complete': typeof CompleteRoute
+  '/grocery': typeof GroceryRoute
+  '/journal': typeof JournalRoute
+  '/notifications': typeof NotificationsRoute
+  '/progress': typeof ProgressRoute
+  '/result': typeof ResultRoute
+  '/today': typeof TodayRoute
+  '/day/$n': typeof DayNRoute
+  '/quiz/$step': typeof QuizStepRoute
+  '/quiz/email': typeof QuizEmailRoute
+  '/quiz/': typeof QuizIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/complete'
+    | '/grocery'
+    | '/journal'
+    | '/notifications'
+    | '/progress'
+    | '/result'
+    | '/today'
+    | '/day/$n'
+    | '/quiz/$step'
+    | '/quiz/email'
+    | '/quiz/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/about'
+    | '/complete'
+    | '/grocery'
+    | '/journal'
+    | '/notifications'
+    | '/progress'
+    | '/result'
+    | '/today'
+    | '/day/$n'
+    | '/quiz/$step'
+    | '/quiz/email'
+    | '/quiz'
+  id:
+    | '__root__'
+    | '/'
+    | '/about'
+    | '/complete'
+    | '/grocery'
+    | '/journal'
+    | '/notifications'
+    | '/progress'
+    | '/result'
+    | '/today'
+    | '/day/$n'
+    | '/quiz/$step'
+    | '/quiz/email'
+    | '/quiz/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
+  CompleteRoute: typeof CompleteRoute
+  GroceryRoute: typeof GroceryRoute
+  JournalRoute: typeof JournalRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ProgressRoute: typeof ProgressRoute
+  ResultRoute: typeof ResultRoute
+  TodayRoute: typeof TodayRoute
+  DayNRoute: typeof DayNRoute
+  QuizStepRoute: typeof QuizStepRoute
+  QuizEmailRoute: typeof QuizEmailRoute
+  QuizIndexRoute: typeof QuizIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/today': {
+      id: '/today'
+      path: '/today'
+      fullPath: '/today'
+      preLoaderRoute: typeof TodayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/result': {
+      id: '/result'
+      path: '/result'
+      fullPath: '/result'
+      preLoaderRoute: typeof ResultRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal': {
+      id: '/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof JournalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grocery': {
+      id: '/grocery'
+      path: '/grocery'
+      fullPath: '/grocery'
+      preLoaderRoute: typeof GroceryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/complete': {
+      id: '/complete'
+      path: '/complete'
+      fullPath: '/complete'
+      preLoaderRoute: typeof CompleteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +264,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/quiz/': {
+      id: '/quiz/'
+      path: '/quiz'
+      fullPath: '/quiz/'
+      preLoaderRoute: typeof QuizIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz/email': {
+      id: '/quiz/email'
+      path: '/quiz/email'
+      fullPath: '/quiz/email'
+      preLoaderRoute: typeof QuizEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/quiz/$step': {
+      id: '/quiz/$step'
+      path: '/quiz/$step'
+      fullPath: '/quiz/$step'
+      preLoaderRoute: typeof QuizStepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/day/$n': {
+      id: '/day/$n'
+      path: '/day/$n'
+      fullPath: '/day/$n'
+      preLoaderRoute: typeof DayNRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
+  CompleteRoute: CompleteRoute,
+  GroceryRoute: GroceryRoute,
+  JournalRoute: JournalRoute,
+  NotificationsRoute: NotificationsRoute,
+  ProgressRoute: ProgressRoute,
+  ResultRoute: ResultRoute,
+  TodayRoute: TodayRoute,
+  DayNRoute: DayNRoute,
+  QuizStepRoute: QuizStepRoute,
+  QuizEmailRoute: QuizEmailRoute,
+  QuizIndexRoute: QuizIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
