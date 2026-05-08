@@ -9,38 +9,240 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as RitualsRouteImport } from './routes/rituals'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as CelebrateRouteImport } from './routes/celebrate'
+import { Route as BonusesRouteImport } from './routes/bonuses'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
+import { Route as JournalIndexRouteImport } from './routes/journal.index'
+import { Route as RecipesIdRouteImport } from './routes/recipes.$id'
+import { Route as MilestoneIdRouteImport } from './routes/milestone.$id'
+import { Route as JournalNRouteImport } from './routes/journal.$n'
+import { Route as DayNRouteImport } from './routes/day.$n'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RitualsRoute = RitualsRouteImport.update({
+  id: '/rituals',
+  path: '/rituals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CelebrateRoute = CelebrateRouteImport.update({
+  id: '/celebrate',
+  path: '/celebrate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BonusesRoute = BonusesRouteImport.update({
+  id: '/bonuses',
+  path: '/bonuses',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RecipesIndexRoute = RecipesIndexRouteImport.update({
+  id: '/recipes/',
+  path: '/recipes/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalIndexRoute = JournalIndexRouteImport.update({
+  id: '/journal/',
+  path: '/journal/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecipesIdRoute = RecipesIdRouteImport.update({
+  id: '/recipes/$id',
+  path: '/recipes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MilestoneIdRoute = MilestoneIdRouteImport.update({
+  id: '/milestone/$id',
+  path: '/milestone/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JournalNRoute = JournalNRouteImport.update({
+  id: '/journal/$n',
+  path: '/journal/$n',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DayNRoute = DayNRouteImport.update({
+  id: '/day/$n',
+  path: '/day/$n',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/bonuses': typeof BonusesRoute
+  '/celebrate': typeof CelebrateRoute
+  '/home': typeof HomeRoute
+  '/profile': typeof ProfileRoute
+  '/rituals': typeof RitualsRoute
+  '/welcome': typeof WelcomeRoute
+  '/day/$n': typeof DayNRoute
+  '/journal/$n': typeof JournalNRoute
+  '/milestone/$id': typeof MilestoneIdRoute
+  '/recipes/$id': typeof RecipesIdRoute
+  '/journal/': typeof JournalIndexRoute
+  '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/bonuses': typeof BonusesRoute
+  '/celebrate': typeof CelebrateRoute
+  '/home': typeof HomeRoute
+  '/profile': typeof ProfileRoute
+  '/rituals': typeof RitualsRoute
+  '/welcome': typeof WelcomeRoute
+  '/day/$n': typeof DayNRoute
+  '/journal/$n': typeof JournalNRoute
+  '/milestone/$id': typeof MilestoneIdRoute
+  '/recipes/$id': typeof RecipesIdRoute
+  '/journal': typeof JournalIndexRoute
+  '/recipes': typeof RecipesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/bonuses': typeof BonusesRoute
+  '/celebrate': typeof CelebrateRoute
+  '/home': typeof HomeRoute
+  '/profile': typeof ProfileRoute
+  '/rituals': typeof RitualsRoute
+  '/welcome': typeof WelcomeRoute
+  '/day/$n': typeof DayNRoute
+  '/journal/$n': typeof JournalNRoute
+  '/milestone/$id': typeof MilestoneIdRoute
+  '/recipes/$id': typeof RecipesIdRoute
+  '/journal/': typeof JournalIndexRoute
+  '/recipes/': typeof RecipesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/bonuses'
+    | '/celebrate'
+    | '/home'
+    | '/profile'
+    | '/rituals'
+    | '/welcome'
+    | '/day/$n'
+    | '/journal/$n'
+    | '/milestone/$id'
+    | '/recipes/$id'
+    | '/journal/'
+    | '/recipes/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/bonuses'
+    | '/celebrate'
+    | '/home'
+    | '/profile'
+    | '/rituals'
+    | '/welcome'
+    | '/day/$n'
+    | '/journal/$n'
+    | '/milestone/$id'
+    | '/recipes/$id'
+    | '/journal'
+    | '/recipes'
+  id:
+    | '__root__'
+    | '/'
+    | '/bonuses'
+    | '/celebrate'
+    | '/home'
+    | '/profile'
+    | '/rituals'
+    | '/welcome'
+    | '/day/$n'
+    | '/journal/$n'
+    | '/milestone/$id'
+    | '/recipes/$id'
+    | '/journal/'
+    | '/recipes/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  BonusesRoute: typeof BonusesRoute
+  CelebrateRoute: typeof CelebrateRoute
+  HomeRoute: typeof HomeRoute
+  ProfileRoute: typeof ProfileRoute
+  RitualsRoute: typeof RitualsRoute
+  WelcomeRoute: typeof WelcomeRoute
+  DayNRoute: typeof DayNRoute
+  JournalNRoute: typeof JournalNRoute
+  MilestoneIdRoute: typeof MilestoneIdRoute
+  RecipesIdRoute: typeof RecipesIdRoute
+  JournalIndexRoute: typeof JournalIndexRoute
+  RecipesIndexRoute: typeof RecipesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rituals': {
+      id: '/rituals'
+      path: '/rituals'
+      fullPath: '/rituals'
+      preLoaderRoute: typeof RitualsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/celebrate': {
+      id: '/celebrate'
+      path: '/celebrate'
+      fullPath: '/celebrate'
+      preLoaderRoute: typeof CelebrateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/bonuses': {
+      id: '/bonuses'
+      path: '/bonuses'
+      fullPath: '/bonuses'
+      preLoaderRoute: typeof BonusesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,12 +250,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/recipes/': {
+      id: '/recipes/'
+      path: '/recipes'
+      fullPath: '/recipes/'
+      preLoaderRoute: typeof RecipesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal/': {
+      id: '/journal/'
+      path: '/journal'
+      fullPath: '/journal/'
+      preLoaderRoute: typeof JournalIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recipes/$id': {
+      id: '/recipes/$id'
+      path: '/recipes/$id'
+      fullPath: '/recipes/$id'
+      preLoaderRoute: typeof RecipesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/milestone/$id': {
+      id: '/milestone/$id'
+      path: '/milestone/$id'
+      fullPath: '/milestone/$id'
+      preLoaderRoute: typeof MilestoneIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/journal/$n': {
+      id: '/journal/$n'
+      path: '/journal/$n'
+      fullPath: '/journal/$n'
+      preLoaderRoute: typeof JournalNRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/day/$n': {
+      id: '/day/$n'
+      path: '/day/$n'
+      fullPath: '/day/$n'
+      preLoaderRoute: typeof DayNRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  BonusesRoute: BonusesRoute,
+  CelebrateRoute: CelebrateRoute,
+  HomeRoute: HomeRoute,
+  ProfileRoute: ProfileRoute,
+  RitualsRoute: RitualsRoute,
+  WelcomeRoute: WelcomeRoute,
+  DayNRoute: DayNRoute,
+  JournalNRoute: JournalNRoute,
+  MilestoneIdRoute: MilestoneIdRoute,
+  RecipesIdRoute: RecipesIdRoute,
+  JournalIndexRoute: JournalIndexRoute,
+  RecipesIndexRoute: RecipesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
