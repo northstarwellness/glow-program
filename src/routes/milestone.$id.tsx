@@ -17,6 +17,19 @@ function Milestone() {
   if (!m) return <Navigate to="/home" />;
   const title = m.title.replace(/\{name\}/g, s.name ?? "");
 
+  // Parse the completed day number from the ID (e.g. "day-1" → 1)
+  const dayMatch = id.match(/^day-(\d+)$/);
+  const milestoneDay = dayMatch ? parseInt(dayMatch[1], 10) : null;
+  const nextDay = milestoneDay && milestoneDay < 21 ? milestoneDay + 1 : null;
+
+  const handleContinue = () => {
+    if (nextDay) {
+      navigate({ to: "/day/$n", params: { n: String(nextDay) } });
+    } else {
+      navigate({ to: "/home" });
+    }
+  };
+
   return (
     <div className="ivory-frame fade-rise relative min-h-screen">
       <Confetti />
@@ -29,9 +42,17 @@ function Milestone() {
           <p className="px-3 text-center font-serif text-[18px] leading-tight text-[var(--gold)]">{m.badge}</p>
         </div>
 
-        <button onClick={() => navigate({ to: "/home" })} className="gold-pill-btn mt-12 w-full">
-          Continue
+        <button onClick={handleContinue} className="gold-pill-btn mt-12 w-full">
+          {nextDay ? `Start Day ${nextDay} →` : "Return home"}
         </button>
+        {nextDay && (
+          <button
+            onClick={() => navigate({ to: "/home" })}
+            className="mt-3 w-full rounded-full py-3 text-center font-serif text-[13px] text-[var(--plum)]/45"
+          >
+            Return home
+          </button>
+        )}
       </div>
     </div>
   );

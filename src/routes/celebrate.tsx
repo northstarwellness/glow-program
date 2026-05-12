@@ -2,7 +2,7 @@ import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { useApp, glowScore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { Pomegranate } from "@/components/Frame";
+import { GlowMark } from "@/components/Frame";
 import { REDS_URL } from "@/lib/content";
 
 export const Route = createFileRoute("/celebrate")({ component: Celebrate });
@@ -24,7 +24,7 @@ function Celebrate() {
           You did it,<br /><em className="text-[var(--berry)]">{s.name}.</em>
         </h1>
 
-        <div className="mt-6"><Pomegranate size={180} /></div>
+        <div className="mt-6"><GlowMark size={180} /></div>
 
         <div className="sand-card mt-6 p-6">
           <p className="label-caps text-[var(--gold)]">Your Glow Score</p>

@@ -1,23 +1,31 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { ARTICLES, INGREDIENTS, POLYPHENOLS, RECIPES, SOUNDS, REDS_URL } from "@/lib/content";
 
-export const Route = createFileRoute("/bonuses")({ component: Bonuses });
+export const Route = createFileRoute("/bonuses")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: (search.tab as string) ?? "",
+  }),
+  component: Bonuses,
+});
 
 function Bonuses() {
   const hydrated = useHydrated();
   const s = useApp();
+  const search = useSearch({ from: "/bonuses" });
   if (hydrated && !s.name) return <Navigate to="/" />;
-  const [tab, setTab] = useState<"recipes" | "poly" | "ing" | "sound" | "guide">("recipes");
+  const [tab, setTab] = useState<"recipes" | "poly" | "ing" | "sound" | "guide">(
+    search.tab === "sound" ? "sound" : "recipes"
+  );
 
   return (
     <Frame>
       <TopBar name={s.name} />
-      <p className="label-caps text-[var(--gold)]">✦ Your bonuses</p>
-      <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Everything you also got.</h1>
+      <p className="label-caps text-[var(--gold)]">Bonuses & sounds</p>
+      <h1 className="font-serif text-[32px] leading-tight text-[var(--plum)]">Everything you also got.</h1>
 
       <div className="mt-5 flex gap-2 overflow-x-auto pb-2">
         {(["recipes", "poly", "ing", "sound", "guide"] as const).map((t) => (
@@ -126,47 +134,139 @@ function IngTab() {
   );
 }
 
+// Module-level ref so stopping one sound stops all
+let _activeCtx: AudioContext | null = null;
+
+function buildAmbient(ctx: AudioContext, id: string) {
+  const master = ctx.createGain();
+  master.connect(ctx.destination);
+
+  if (id === "bowl") {
+    master.gain.value = 0.32;
+    ([[432, 0.4], [648, 0.14], [864, 0.07], [1296, 0.03]] as [number, number][]).forEach(([freq, vol]) => {
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const lfo = ctx.createOscillator();
+      lfo.frequency.value = 0.25;
+      const lfoG = ctx.createGain();
+      lfoG.gain.value = 1.5;
+      lfo.connect(lfoG);
+      lfoG.connect(osc.frequency);
+      lfo.start();
+      const g = ctx.createGain();
+      g.gain.value = vol;
+      osc.connect(g);
+      g.connect(master);
+      osc.start();
+    });
+  } else {
+    // Pink noise for all other sounds
+    const sr = ctx.sampleRate;
+    const buf = ctx.createBuffer(2, sr * 4, sr);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = buf.getChannelData(ch);
+      let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+      for (let i = 0; i < sr * 4; i++) {
+        const w = Math.random() * 2 - 1;
+        b0 = 0.99886 * b0 + w * 0.0555179;
+        b1 = 0.99332 * b1 + w * 0.0750759;
+        b2 = 0.96900 * b2 + w * 0.1538520;
+        b3 = 0.86650 * b3 + w * 0.3104856;
+        b4 = 0.55000 * b4 + w * 0.5329522;
+        b5 = -0.7616 * b5 - w * 0.0168980;
+        d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362) * 0.11;
+        b6 = w * 0.115926;
+      }
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+    const f = ctx.createBiquadFilter();
+    if (id === "rain") {
+      f.type = "bandpass"; f.frequency.value = 900; f.Q.value = 0.4;
+      master.gain.value = 0.38;
+    } else if (id === "birds") {
+      f.type = "highpass"; f.frequency.value = 500;
+      master.gain.value = 0.28;
+    } else if (id === "silence") {
+      f.type = "lowpass"; f.frequency.value = 160;
+      master.gain.value = 0.07;
+    } else {
+      f.type = "lowpass"; f.frequency.value = 480;
+      master.gain.value = 0.32;
+    }
+    src.connect(f);
+    f.connect(master);
+    src.start();
+  }
+}
+
 function SoundTab() {
   return (
     <div id="sounds" className="mt-5 space-y-3">
-      {SOUNDS.map((s) => <SoundPlayer key={s.id} {...s} />)}
-      <p className="mt-3 text-center text-[11px] italic text-[var(--plum)]/45">Audio streams from Pixabay (royalty-free).</p>
+      {SOUNDS.map((s) => <SoundPlayer key={s.id} id={s.id} name={s.name} duration={s.duration} />)}
+      <p className="mt-3 text-center text-[11px] italic text-[var(--plum)]/45">
+        Ambient audio generated in-browser. No external files needed.
+      </p>
     </div>
   );
 }
 
-function SoundPlayer({ name, duration, url }: { name: string; duration: string; url: string }) {
-  const ref = useRef<HTMLAudioElement | null>(null);
+function SoundPlayer({ id, name, duration }: { id: string; name: string; duration: string }) {
   const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    const a = ref.current; if (!a) return;
-    const onTime = () => setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0);
-    const onEnd = () => setPlaying(false);
-    a.addEventListener("timeupdate", onTime);
-    a.addEventListener("ended", onEnd);
-    return () => { a.removeEventListener("timeupdate", onTime); a.removeEventListener("ended", onEnd); };
-  }, []);
-  const toggle = () => {
-    const a = ref.current; if (!a) return;
-    if (playing) { a.pause(); setPlaying(false); }
-    else { a.play().then(() => setPlaying(true)).catch(() => setPlaying(false)); }
+  const [elapsed, setElapsed] = useState(0);
+  const ctxRef = useRef<AudioContext | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stop = () => {
+    if (ctxRef.current) { ctxRef.current.close().catch(() => {}); ctxRef.current = null; _activeCtx = null; }
+    if (timerRef.current !== null) { clearInterval(timerRef.current); timerRef.current = null; }
+    setPlaying(false);
   };
+
+  useEffect(() => () => { stop(); }, []);
+
+  const toggle = () => {
+    if (playing) { stop(); return; }
+    if (_activeCtx) { _activeCtx.close().catch(() => {}); _activeCtx = null; }
+    try {
+      const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+      ctxRef.current = ctx;
+      _activeCtx = ctx;
+      buildAmbient(ctx, id);
+      const startedAt = Date.now() - elapsed * 1000;
+      timerRef.current = setInterval(() => setElapsed(Math.floor((Date.now() - startedAt) / 1000)), 1000);
+      setPlaying(true);
+    } catch {
+      setPlaying(false);
+    }
+  };
+
+  const fmt = (sec: number) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, "0")}`;
+
   return (
     <div className="sand-card p-4">
       <div className="flex items-center justify-between">
         <div>
           <p className="font-serif text-[18px] text-[var(--plum)]">{name}</p>
-          <p className="text-[11px] tracking-wide uppercase text-[var(--plum)]/55">{duration}</p>
+          <p className="text-[11px] tracking-wide uppercase text-[var(--plum)]/55">
+            {playing ? `${fmt(elapsed)} · playing` : duration}
+          </p>
         </div>
-        <button onClick={toggle} className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--plum)] text-[var(--ivory)]">
-          {playing ? "❚❚" : "▶"}
+        <button
+          onClick={toggle}
+          className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--plum)] text-[var(--ivory)] transition-opacity active:opacity-70"
+        >
+          {playing
+            ? <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="4" height="16" rx="1"/><rect x="15" y="4" width="4" height="16" rx="1"/></svg>
+            : <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M5 3l14 9-14 9V3z"/></svg>
+          }
         </button>
       </div>
       <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[var(--plum)]/10">
-        <div className="h-full bg-[var(--gold)]" style={{ width: `${progress}%` }} />
+        <div className="h-full rounded-full bg-[var(--gold)] transition-all" style={{ width: playing ? `${Math.min((elapsed / 480) * 100, 100)}%` : "0%" }} />
       </div>
-      <audio ref={ref} src={url} preload="none" />
     </div>
   );
 }
