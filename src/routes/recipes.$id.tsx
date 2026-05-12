@@ -20,6 +20,7 @@ function RecipeView() {
   if (!r) return <Navigate to="/recipes" />;
   const saved = s.savedRecipes.includes(r.id);
   const [active, setActive] = useState<string | null>(null);
+  const [shareMsg, setShareMsg] = useState<string | null>(null);
 
   // Match ingredient by finding which INGREDIENTS entry name appears in the clicked string
   const ing = active
@@ -28,9 +29,37 @@ function RecipeView() {
         .sort((a, b) => b.name.length - a.name.length)[0] ?? null
     : null;
 
-  const share = () => {
-    const text = `${r.name} — ${r.benefitTag}. ${r.benefit}`;
-    if (navigator.clipboard) navigator.clipboard.writeText(text);
+  const share = async () => {
+    const url = window.location.href;
+    const title = r.name;
+    const text = `${r.benefitTag} — ${r.benefit.slice(0, 120)}`;
+
+    // Web Share API — works natively on mobile and supported desktop browsers
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title, text, url });
+        return; // native sheet handled it
+      } catch (e) {
+        if ((e as Error).name === "AbortError") return; // user dismissed — no message needed
+        // Other error: fall through to clipboard
+      }
+    }
+
+    // Clipboard fallback
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        setShareMsg("Recipe link copied.");
+        setTimeout(() => setShareMsg(null), 3000);
+        return;
+      } catch {
+        // clipboard write denied
+      }
+    }
+
+    // Last resort
+    setShareMsg("Copy this page URL to share.");
+    setTimeout(() => setShareMsg(null), 4000);
   };
 
   return (
@@ -120,35 +149,48 @@ function RecipeView() {
       )}
 
       {/* Radiant Reds Boost */}
-      <div className="mt-6 overflow-hidden rounded-3xl border border-[var(--gold)]/35 bg-[var(--card)] shadow-sm">
-        <div className="px-5 pt-5">
-          <p className="label-caps text-[var(--gold)]">Radiant Reds boost</p>
-          <h3 className="mt-0.5 font-serif text-[21px] leading-tight text-[var(--plum)]">
-            Why this glass works better with Reds
+      <div className="relative mt-6 overflow-hidden rounded-3xl border border-[var(--gold)]/30 bg-[var(--card)] shadow-md">
+        {/* Gold top accent line */}
+        <div className="h-[2px] w-full" style={{ background: "linear-gradient(90deg, transparent, var(--color-gold), transparent)" }} />
+        {/* Subtle berry radial glow */}
+        <div className="pointer-events-none absolute inset-0 rounded-3xl" style={{ background: "radial-gradient(ellipse 80% 45% at 50% 0%, color-mix(in srgb, var(--color-berry) 9%, transparent), transparent 70%)" }} />
+
+        <div className="relative px-5 pt-5">
+          {/* Flanked label */}
+          <div className="flex items-center gap-2">
+            <span className="h-px flex-1 bg-[var(--gold)]/30" />
+            <p className="label-caps text-[var(--gold)]">Radiant Reds</p>
+            <span className="h-px flex-1 bg-[var(--gold)]/30" />
+          </div>
+          <h3 className="mt-3 font-serif text-[22px] leading-snug text-[var(--plum)]">
+            Made to go deeper with Reds.
           </h3>
-          <p className="mt-2 font-serif italic text-[14px] leading-snug text-[var(--plum)]/70">
+          <p className="mt-1.5 font-serif italic text-[13.5px] leading-relaxed text-[var(--plum)]/65">
             {r.redsBoost.why}
           </p>
         </div>
-        <div className="mt-4 grid grid-cols-1 gap-2 px-5 pb-5">
+
+        <div className="relative mt-4 space-y-2 px-5 pb-5">
           {r.redsBoost.proof.map((p, i) => (
-            <div key={i} className="flex items-start gap-2.5 rounded-xl bg-[var(--sand)] px-3.5 py-2.5">
-              <span className="mt-[2px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--gold)]" />
-              <span className="text-[12.5px] leading-relaxed text-[var(--plum)]/85">{p}</span>
+            <div key={i} className="flex items-start gap-3 rounded-2xl border border-[var(--plum)]/8 bg-[var(--ivory)] px-4 py-3 shadow-sm">
+              <span className="mt-[3px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--gold)]" />
+              <span className="text-[12.5px] leading-relaxed text-[var(--plum)]/80">{p}</span>
             </div>
           ))}
         </div>
+
         <a
           href={REDS_URL}
           target="_blank"
           rel="noreferrer"
-          className="block border-t border-[var(--gold)]/25 bg-[var(--sand)] px-5 py-4 text-center"
+          className="relative block px-5 py-4 text-center"
+          style={{ background: "linear-gradient(to bottom, color-mix(in srgb, var(--color-gold) 8%, var(--color-sand)), var(--color-sand))", borderTop: "1px solid color-mix(in srgb, var(--color-gold) 25%, transparent)" }}
         >
-          <p className="font-serif text-[15px] tracking-[0.14em] uppercase text-[var(--gold)]">
-            Add Radiant Reds
+          <p className="font-serif text-[15px] tracking-[0.18em] uppercase text-[var(--gold)]">
+            Add Radiant Reds →
           </p>
-          <p className="mt-0.5 font-serif italic text-[12px] text-[var(--plum)]/60">
-            shop the blend behind every morning
+          <p className="mt-0.5 font-serif italic text-[11.5px] text-[var(--plum)]/50">
+            the polyphenol blend behind every morning
           </p>
         </a>
       </div>
@@ -164,6 +206,9 @@ function RecipeView() {
           Share
         </button>
       </div>
+      {shareMsg && (
+        <p className="mt-2 text-center font-serif italic text-[12px] text-[var(--plum)]/55 fade-rise">{shareMsg}</p>
+      )}
 
       <GoldDivider />
 
