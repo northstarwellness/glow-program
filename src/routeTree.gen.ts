@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as RitualsRouteImport } from './routes/rituals'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HomeRouteImport } from './routes/home'
@@ -26,6 +27,11 @@ import { Route as DayNRouteImport } from './routes/day.$n'
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RitualsRoute = RitualsRouteImport.update({
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
+  '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
   '/journal/$n': typeof JournalNRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
+  '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
   '/journal/$n': typeof JournalNRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
+  '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
   '/journal/$n': typeof JournalNRoute
@@ -144,6 +153,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/profile'
     | '/rituals'
+    | '/verify'
     | '/welcome'
     | '/day/$n'
     | '/journal/$n'
@@ -159,6 +169,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/profile'
     | '/rituals'
+    | '/verify'
     | '/welcome'
     | '/day/$n'
     | '/journal/$n'
@@ -174,6 +185,7 @@ export interface FileRouteTypes {
     | '/home'
     | '/profile'
     | '/rituals'
+    | '/verify'
     | '/welcome'
     | '/day/$n'
     | '/journal/$n'
@@ -190,6 +202,7 @@ export interface RootRouteChildren {
   HomeRoute: typeof HomeRoute
   ProfileRoute: typeof ProfileRoute
   RitualsRoute: typeof RitualsRoute
+  VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
   DayNRoute: typeof DayNRoute
   JournalNRoute: typeof JournalNRoute
@@ -206,6 +219,13 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rituals': {
@@ -302,6 +322,7 @@ const rootRouteChildren: RootRouteChildren = {
   HomeRoute: HomeRoute,
   ProfileRoute: ProfileRoute,
   RitualsRoute: RitualsRoute,
+  VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,
   DayNRoute: DayNRoute,
   JournalNRoute: JournalNRoute,

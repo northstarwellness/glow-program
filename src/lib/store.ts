@@ -5,6 +5,7 @@ export type DailyLog = { reds?: boolean; ritual?: boolean; journal?: boolean };
 export type JournalEntry = { prompt: string; entry: string; response: string; timestamp: string };
 
 type State = {
+  verifiedEmail: string | null;
   name: string | null;
   startDate: string | null;
   completedDays: number[];
@@ -17,6 +18,7 @@ type State = {
   seenWelcome: boolean;
   shownMilestones: string[];
 
+  setVerifiedEmail: (email: string) => void;
   setName: (n: string) => void;
   startReset: () => void;
   setSeenWelcome: () => void;
@@ -34,6 +36,7 @@ type State = {
 export const useApp = create<State>()(
   persist(
     (set) => ({
+      verifiedEmail: null,
       name: null,
       startDate: null,
       completedDays: [],
@@ -46,6 +49,7 @@ export const useApp = create<State>()(
       seenWelcome: false,
       shownMilestones: [],
 
+      setVerifiedEmail: (email) => set({ verifiedEmail: email }),
       setName: (n) => set({ name: n.trim() }),
       startReset: () => set((s) => ({ startDate: s.startDate ?? new Date().toISOString() })),
       setSeenWelcome: () => set({ seenWelcome: true }),
@@ -73,6 +77,7 @@ export const useApp = create<State>()(
       setPhoto: (day, dataUrl) => set((s) => ({ photos: { ...s.photos, [day]: dataUrl } })),
       resetAll: () =>
         set({
+          verifiedEmail: null,
           name: null,
           startDate: null,
           completedDays: [],

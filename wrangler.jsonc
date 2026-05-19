@@ -1,7 +1,14 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "tanstack-start-app",
+  "name": "noure-glow-program",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+  // Add SHOPIFY_TOKEN as a secret via: wrangler secret put SHOPIFY_TOKEN
+  "vars": {
+    "SHOPIFY_STORE": "nourewellness.myshopify.com"
+  },
+  "routes": [
+    { "pattern": "glow.nourewellness.com/*", "zone_name": "nourewellness.com" }
+  ]
 }

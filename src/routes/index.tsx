@@ -16,6 +16,7 @@ export const Route = createFileRoute("/")({
 
 function NameCapture() {
   const hydrated = useHydrated();
+  const verifiedEmail = useApp((s) => s.verifiedEmail);
   const name = useApp((s) => s.name);
   const seenWelcome = useApp((s) => s.seenWelcome);
   const setName = useApp((s) => s.setName);
@@ -23,6 +24,7 @@ function NameCapture() {
   const navigate = useNavigate();
   const [val, setVal] = useState("");
 
+  if (hydrated && !verifiedEmail) return <Navigate to="/verify" />;
   if (hydrated && name && seenWelcome) return <Navigate to="/home" />;
   if (hydrated && name && !seenWelcome) return <Navigate to="/welcome" />;
 
