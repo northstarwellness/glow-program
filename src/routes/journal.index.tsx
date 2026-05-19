@@ -19,9 +19,9 @@ function JournalIndex() {
       <p className="mt-1 font-serif italic text-[15px] text-[var(--plum)]/60">21 prompts. 21 entries.</p>
 
       <Link to="/journal/$n" params={{ n: String(day) }} className="mt-5 block rounded-2xl border-l-4 border-[var(--gold)] bg-[var(--card)] p-5 shadow-sm">
-        <p className="label-caps text-[var(--gold)]">Today · Day {day}</p>
+        <p className="label-caps text-[var(--gold)]">Today / Day {day}</p>
         <p className="mt-2 font-serif italic text-[18px] text-[var(--plum)]">"{JOURNAL_PROMPTS[day]?.(s.name ?? "")}"</p>
-        <p className="mt-3 text-[12px] text-[var(--plum)]/60">Tap to write →</p>
+        <p className="mt-3 text-[12px] text-[var(--plum)]/60">Tap to write</p>
       </Link>
 
       <h2 className="mt-8 font-serif text-[22px] text-[var(--plum)]">All entries</h2>

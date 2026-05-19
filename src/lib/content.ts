@@ -534,6 +534,70 @@ export function reflectJournal(text: string, name: string): string {
   return pick.replace(/\{name\}/g, name);
 }
 
+export type GroceryItem = { id: string; name: string; note?: string };
+export type GroceryCategory = { name: string; items: GroceryItem[] };
+
+export const GROCERY_LIST: GroceryCategory[] = [
+  {
+    name: "Fresh Produce",
+    items: [
+      { id: "pomegranate", name: "Pomegranate seeds or juice", note: "1 cup per use — frozen works" },
+      { id: "raspberries", name: "Raspberries", note: "Fresh or frozen" },
+      { id: "blueberries", name: "Blueberries", note: "Wild if available" },
+      { id: "strawberries", name: "Strawberries" },
+      { id: "banana", name: "Banana", note: "Slightly green = more prebiotic fiber" },
+      { id: "plum", name: "Plum (2–3)", note: "Ripe, any variety" },
+      { id: "watermelon", name: "Watermelon" },
+      { id: "black-fig", name: "Black figs (4–6)", note: "Fresh or dried" },
+      { id: "beet", name: "Beet (2 small)", note: "Pre-roast for the week" },
+      { id: "tart-cherry", name: "Tart cherries", note: "Frozen or jarred unsweetened" },
+      { id: "peach", name: "Peach or nectarine" },
+      { id: "kiwi", name: "Kiwi (2)" },
+      { id: "orange", name: "Orange" },
+      { id: "lime", name: "Lime (4–5)" },
+      { id: "lemon", name: "Lemon (2)" },
+      { id: "cucumber", name: "Cucumber" },
+      { id: "ginger", name: "Fresh ginger root" },
+      { id: "mint", name: "Fresh mint" },
+    ],
+  },
+  {
+    name: "Bases",
+    items: [
+      { id: "oat-milk", name: "Oat milk (2 cartons)", note: "Unsweetened, barista or plain" },
+      { id: "almond-milk", name: "Almond milk", note: "Unsweetened" },
+      { id: "coconut-yogurt", name: "Coconut yogurt", note: "Plain, live cultures" },
+      { id: "hibiscus-tea", name: "Hibiscus tea (dried or bags)" },
+      { id: "green-tea", name: "Green tea (ceremonial-grade matcha or loose leaf)" },
+    ],
+  },
+  {
+    name: "Pantry",
+    items: [
+      { id: "reds", name: "Radiant Reds", note: "1 bag covers the full 21 days" },
+      { id: "cacao", name: "Raw cacao powder" },
+      { id: "almond-butter", name: "Almond butter", note: "No added sugar" },
+      { id: "chia", name: "Chia seeds" },
+      { id: "cinnamon", name: "Cinnamon (ground)" },
+      { id: "honey", name: "Raw honey" },
+      { id: "rose-water", name: "Rose water", note: "Culinary grade, small bottle" },
+      { id: "vanilla", name: "Vanilla extract" },
+      { id: "almonds", name: "Raw almonds (small bag)" },
+      { id: "turmeric", name: "Turmeric (ground)" },
+      { id: "black-pepper", name: "Black pepper", note: "Pairs with turmeric for absorption" },
+    ],
+  },
+  {
+    name: "Optional Upgrades",
+    items: [
+      { id: "collagen", name: "Collagen peptides (unflavored)", note: "Pairs with any recipe" },
+      { id: "acai-packets", name: "Frozen açaí packets" },
+      { id: "saffron", name: "Saffron (pinch jar)", note: "For the Peach & Saffron ritual" },
+      { id: "cardamom", name: "Cardamom (ground)" },
+    ],
+  },
+];
+
 export const NOTIFICATIONS: Record<number, string> = {
   1: "Your reset begins this morning, {name}.",
   2: "Day 2. The ritual is still new. Show up anyway.",

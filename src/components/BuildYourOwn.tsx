@@ -75,11 +75,11 @@ export function BuildYourOwn() {
         </div>
 
         <div className="sand-card mt-5 p-5">
-          <p className="label-caps text-[var(--gold)]">✦ Your benefits</p>
+          <p className="label-caps text-[var(--gold)]">Your benefits</p>
           <ul className="mt-3 space-y-2.5">
             {benefits.map((b, i) => (
               <li key={i} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-[var(--plum)]/85">
-                <span className="mt-[2px] text-[var(--gold)]">✦</span> <span>{b}</span>
+                <span className="mt-[3px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--gold)]" /> <span>{b}</span>
               </li>
             ))}
           </ul>
@@ -88,18 +88,18 @@ export function BuildYourOwn() {
         {!includesReds && (
           <a href={REDS_URL} target="_blank" rel="noreferrer"
              className="mt-5 block overflow-hidden rounded-3xl border border-[var(--gold)]/40 bg-[var(--card)] p-5 text-center shadow-sm">
-            <p className="label-caps text-[var(--gold)]">✦ Make it a glow ritual</p>
+            <p className="label-caps text-[var(--gold)]">Make it a glow ritual</p>
             <p className="mt-2 font-serif text-[20px] text-[var(--plum)]">Add Radiant Reds</p>
             <p className="mt-1 font-serif italic text-[13px] text-[var(--plum)]/65">
               The polyphenol blend that makes any glass a Reset glass.
             </p>
-            <p className="mt-3 font-serif text-[13px] tracking-[0.18em] uppercase text-[var(--gold)]">Shop the blend →</p>
+            <p className="mt-3 font-serif text-[13px] tracking-[0.18em] uppercase text-[var(--gold)]">Shop the blend</p>
           </a>
         )}
 
         <button onClick={() => { setPicks({}); setStep(0); }}
           className="mt-5 w-full rounded-full border border-[var(--plum)]/20 px-4 py-3 font-serif text-[15px] text-[var(--plum)]">
-          ✧ Build another
+          Build another
         </button>
       </div>
     );

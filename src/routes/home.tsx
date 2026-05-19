@@ -66,7 +66,7 @@ function Home() {
         </div>
         {allLogged && (
           <p className="mt-2 text-center font-serif italic text-[14px] text-[var(--plum)]">
-            {s.name}, today is complete. ✓
+            {s.name}, today is complete.
           </p>
         )}
       </div>

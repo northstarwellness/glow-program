@@ -73,7 +73,7 @@ function DayView() {
       </div>
 
       <button onClick={complete} className="gold-pill-btn mt-8 w-full">
-        {done ? "Marked complete ✓" : "Mark Day " + dayNum + " complete"}
+        {done ? "Day " + dayNum + " complete" : "Mark Day " + dayNum + " complete"}
       </button>
     </Frame>
   );

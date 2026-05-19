@@ -14,6 +14,7 @@ import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as RitualsRouteImport } from './routes/rituals'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as GroceryRouteImport } from './routes/grocery'
 import { Route as CelebrateRouteImport } from './routes/celebrate'
 import { Route as BonusesRouteImport } from './routes/bonuses'
 import { Route as IndexRouteImport } from './routes/index'
@@ -47,6 +48,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroceryRoute = GroceryRouteImport.update({
+  id: '/grocery',
+  path: '/grocery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CelebrateRoute = CelebrateRouteImport.update({
@@ -99,6 +105,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
   '/celebrate': typeof CelebrateRoute
+  '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
@@ -115,6 +122,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
   '/celebrate': typeof CelebrateRoute
+  '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
@@ -132,6 +140,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
   '/celebrate': typeof CelebrateRoute
+  '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
@@ -150,6 +159,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bonuses'
     | '/celebrate'
+    | '/grocery'
     | '/home'
     | '/profile'
     | '/rituals'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bonuses'
     | '/celebrate'
+    | '/grocery'
     | '/home'
     | '/profile'
     | '/rituals'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/'
     | '/bonuses'
     | '/celebrate'
+    | '/grocery'
     | '/home'
     | '/profile'
     | '/rituals'
@@ -199,6 +211,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BonusesRoute: typeof BonusesRoute
   CelebrateRoute: typeof CelebrateRoute
+  GroceryRoute: typeof GroceryRoute
   HomeRoute: typeof HomeRoute
   ProfileRoute: typeof ProfileRoute
   RitualsRoute: typeof RitualsRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grocery': {
+      id: '/grocery'
+      path: '/grocery'
+      fullPath: '/grocery'
+      preLoaderRoute: typeof GroceryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/celebrate': {
@@ -319,6 +339,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BonusesRoute: BonusesRoute,
   CelebrateRoute: CelebrateRoute,
+  GroceryRoute: GroceryRoute,
   HomeRoute: HomeRoute,
   ProfileRoute: ProfileRoute,
   RitualsRoute: RitualsRoute,

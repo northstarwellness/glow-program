@@ -17,6 +17,7 @@ type State = {
   badgesEarned: string[];
   seenWelcome: boolean;
   shownMilestones: string[];
+  groceryChecked: Record<string, boolean>;
 
   setVerifiedEmail: (email: string) => void;
   setName: (n: string) => void;
@@ -30,6 +31,8 @@ type State = {
   earnBadge: (id: string) => void;
   markMilestoneShown: (id: string) => void;
   setPhoto: (day: number, dataUrl: string) => void;
+  toggleGrocery: (id: string) => void;
+  clearGrocery: () => void;
   resetAll: () => void;
 };
 
@@ -48,6 +51,7 @@ export const useApp = create<State>()(
       badgesEarned: [],
       seenWelcome: false,
       shownMilestones: [],
+      groceryChecked: {},
 
       setVerifiedEmail: (email) => set({ verifiedEmail: email }),
       setName: (n) => set({ name: n.trim() }),
@@ -75,6 +79,11 @@ export const useApp = create<State>()(
       markMilestoneShown: (id) =>
         set((s) => (s.shownMilestones.includes(id) ? s : { shownMilestones: [...s.shownMilestones, id] })),
       setPhoto: (day, dataUrl) => set((s) => ({ photos: { ...s.photos, [day]: dataUrl } })),
+      toggleGrocery: (id) =>
+        set((s) => ({
+          groceryChecked: { ...s.groceryChecked, [id]: !s.groceryChecked[id] },
+        })),
+      clearGrocery: () => set({ groceryChecked: {} }),
       resetAll: () =>
         set({
           verifiedEmail: null,
@@ -88,6 +97,7 @@ export const useApp = create<State>()(
           badgesEarned: [],
           seenWelcome: false,
           shownMilestones: [],
+          groceryChecked: {},
         }),
     }),
     { name: "noure_app_v1" }

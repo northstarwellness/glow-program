@@ -16,8 +16,8 @@ function Bonuses() {
   return (
     <Frame>
       <TopBar name={s.name} />
-      <p className="label-caps text-[var(--gold)]">✦ Your bonuses</p>
-      <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Everything you also got.</h1>
+      <p className="label-caps text-[var(--plum)]/55">The Glow Guide</p>
+      <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Everything inside.</h1>
 
       <div className="mt-5 flex gap-2 overflow-x-auto pb-2">
         {(["recipes", "poly", "ing", "sound", "guide"] as const).map((t) => (
@@ -39,7 +39,7 @@ function Bonuses() {
       <GoldDivider />
       <a href={REDS_URL} target="_blank" rel="noreferrer" className="block sand-card p-5 text-center">
         <p className="font-serif italic text-[14px] text-[var(--plum)]/70">The blend behind every morning</p>
-        <p className="mt-1 font-serif text-[22px] text-[var(--plum)]">✦ Radiant Reds Superfood →</p>
+        <p className="mt-1 font-serif text-[22px] text-[var(--plum)]">Radiant Reds Superfood</p>
       </a>
     </Frame>
   );
@@ -160,7 +160,7 @@ function SoundPlayer({ name, duration, url }: { name: string; duration: string; 
           <p className="text-[11px] tracking-wide uppercase text-[var(--plum)]/55">{duration}</p>
         </div>
         <button onClick={toggle} className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--plum)] text-[var(--ivory)]">
-          {playing ? "❚❚" : "▶"}
+          {playing ? <PauseIcon /> : <PlayIcon />}
         </button>
       </div>
       <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[var(--plum)]/10">
@@ -170,6 +170,9 @@ function SoundPlayer({ name, duration, url }: { name: string; duration: string; 
     </div>
   );
 }
+
+function PlayIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.14v14l11-7-11-7z" /></svg>; }
+function PauseIcon() { return <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>; }
 
 function GuideTab() {
   const [active, setActive] = useState<string | null>(null);

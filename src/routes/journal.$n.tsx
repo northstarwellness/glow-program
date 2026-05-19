@@ -54,21 +54,24 @@ function JournalDay() {
             className="mt-4 w-full resize-none rounded-2xl border border-[var(--plum)]/15 bg-[var(--card)] p-4 text-[15px] leading-relaxed text-[var(--plum)] placeholder:text-[var(--plum)]/30 focus:border-[var(--gold)] focus:outline-none"
           />
           <button onClick={save} disabled={!text.trim()} className="gold-pill-btn mt-4 w-full disabled:opacity-50">
-            ✦ Save + Get Glow Insight
+            Save + Get Your Glow Insight
           </button>
         </>
       )}
 
       {response && (
         <div className="mt-6 fade-rise">
-          <div className="mb-4 flex items-center justify-center gap-2 text-[var(--gold)]">
-            <span>✦</span><span className="label-caps">Logged</span><span>✦</span>
+          <div className="mb-4 flex items-center gap-3">
+            <div className="gold-divider flex-1" />
+            <span className="label-caps text-[var(--gold)]">Logged</span>
+            <div className="gold-divider flex-1" />
           </div>
+
           <div className="rounded-3xl border border-[var(--gold)]/30 bg-[var(--card)] p-6 shadow-sm">
-            <p className="text-center text-[24px] leading-none tracking-[0.4em] text-[var(--gold)]">✦ ✧ ✦</p>
-            <p className="mt-4 text-center label-caps text-[var(--gold)]">Your glow insight</p>
-            <p className="mt-3 text-center font-serif italic text-[20px] leading-snug text-[var(--plum)]">"{response}"</p>
-            <p className="mt-5 text-center text-[24px] leading-none tracking-[0.4em] text-[var(--gold)]">✧ ✦ ✧</p>
+            <p className="label-caps text-center text-[var(--gold)]">Your glow insight</p>
+            <p className="mt-4 text-center font-serif italic text-[20px] leading-snug text-[var(--plum)]">
+              "{response}"
+            </p>
           </div>
 
           <details className="mt-5 rounded-2xl bg-[var(--sand)] p-4">
@@ -79,7 +82,7 @@ function JournalDay() {
           </details>
 
           <Link to="/journal" className="mt-5 block rounded-full border border-[var(--plum)]/20 py-3 text-center font-serif text-[15px] text-[var(--plum)]">
-            ✧ Close + return to journal
+            Return to journal
           </Link>
         </div>
       )}

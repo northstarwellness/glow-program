@@ -12,12 +12,12 @@ export function Frame({ children, hideNav = false }: { children: ReactNode; hide
   );
 }
 
-const NAV: { to: "/home" | "/rituals" | "/recipes" | "/journal" | "/bonuses"; label: string; icon: ReactNode }[] = [
+const NAV: { to: "/home" | "/rituals" | "/recipes" | "/journal" | "/grocery"; label: string; icon: ReactNode }[] = [
   { to: "/home",     label: "Home",     icon: <IconHome /> },
   { to: "/rituals",  label: "Rituals",  icon: <IconLeaf /> },
   { to: "/recipes",  label: "Recipes",  icon: <IconGlass /> },
   { to: "/journal",  label: "Journal",  icon: <IconBook /> },
-  { to: "/bonuses",  label: "Bonuses",  icon: <IconStar /> },
+  { to: "/grocery",  label: "Grocery",  icon: <IconList /> },
 ];
 
 function BottomNav() {
@@ -46,8 +46,8 @@ export function TopBar({ name, day }: { name?: string | null; day?: number }) {
       <Link to="/home" className="font-serif text-base tracking-[0.32em] text-[var(--plum)]">NOURÉ</Link>
       {typeof day === "number" && (
         <div className="flex items-center gap-1.5 text-[11px] tracking-[0.16em] uppercase text-[var(--plum)]/70">
-          <span className="text-[var(--gold)]">✦</span> Day {day} of 21
-          {name && <span className="ml-1 text-[var(--plum)]/40">· {name}</span>}
+          <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" /> Day {day} of 21
+          {name && <span className="ml-1 text-[var(--plum)]/40">/ {name}</span>}
         </div>
       )}
     </div>
@@ -61,7 +61,7 @@ function IconHome() { return <svg width="20" height="20" viewBox="0 0 24 24" fil
 function IconLeaf() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M5 21c0-9 7-16 16-16-1 9-7 16-16 16z" /><path d="M5 21c4-4 8-8 12-12" /></svg>; }
 function IconGlass() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 3h12l-2 12a4 4 0 01-8 0L6 3z" /><path d="M9 21h6" /></svg>; }
 function IconBook() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M4 4h12a4 4 0 014 4v12H8a4 4 0 01-4-4V4z" /><path d="M4 16a4 4 0 014-4h12" /></svg>; }
-function IconStar() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M12 3l2.6 5.8 6.4.6-4.8 4.4 1.4 6.2L12 17l-5.6 3 1.4-6.2L3 9.4l6.4-.6L12 3z" /></svg>; }
+function IconList() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>; }
 
 export function Pomegranate({ size = 180 }: { size?: number }) {
   return (
