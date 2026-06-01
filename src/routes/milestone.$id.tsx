@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate, useNavigate, useParams } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { MILESTONES } from "@/lib/content";
@@ -38,16 +38,23 @@ function Milestone() {
 }
 
 function Confetti() {
-  const pieces = Array.from({ length: 28 });
+  const pieces = useMemo(() =>
+    Array.from({ length: 28 }, (_, i) => ({
+      left: (i * 37 + 13) % 100,
+      duration: 3 + (i * 7) % 3,
+      delay: ((i * 53) % 15) / 10,
+      width: 4 + (i % 6),
+      height: 4 + ((i + 3) % 6),
+    })), []);
   return (
     <div className="gold-confetti">
-      {pieces.map((_, i) => (
+      {pieces.map((p, i) => (
         <span key={i} style={{
-          left: `${Math.random() * 100}%`,
-          animationDuration: `${3 + Math.random() * 3}s`,
-          animationDelay: `${Math.random() * 1.5}s`,
-          width: `${4 + Math.random() * 6}px`,
-          height: `${4 + Math.random() * 6}px`,
+          left: `${p.left}%`,
+          animationDuration: `${p.duration}s`,
+          animationDelay: `${p.delay}s`,
+          width: `${p.width}px`,
+          height: `${p.height}px`,
           background: i % 2 ? "var(--color-gold)" : "var(--color-berry)",
         }} />
       ))}
