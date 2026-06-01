@@ -12,8 +12,9 @@ function Home() {
   const s = useApp();
   const navigate = useNavigate();
 
-  if (hydrated && !s.name) return <Navigate to="/" />;
-  if (hydrated && s.name && !s.seenWelcome) return <Navigate to="/welcome" />;
+  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
+  if (!s.name) return <Navigate to="/" />;
+  if (!s.seenWelcome) return <Navigate to="/welcome" />;
 
   const day = currentDay(s.startDate);
   const phase = phaseFor(day);

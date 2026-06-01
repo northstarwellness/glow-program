@@ -85,7 +85,7 @@ export const useApp = create<State>()(
           shownMilestones: [],
         }),
     }),
-    { name: "noure_app_v1" }
+    { name: "noure_app_v1", skipHydration: true }
   )
 );
 
