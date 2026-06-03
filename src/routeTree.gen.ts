@@ -35,11 +35,6 @@ const TrackerRoute = TrackerRouteImport.update({
   path: '/tracker',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GroceryRoute = GroceryRouteImport.update({
-  id: '/grocery',
-  path: '/grocery',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RitualsRoute = RitualsRouteImport.update({
   id: '/rituals',
   path: '/rituals',
@@ -53,6 +48,11 @@ const ProfileRoute = ProfileRouteImport.update({
 const HomeRoute = HomeRouteImport.update({
   id: '/home',
   path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroceryRoute = GroceryRouteImport.update({
+  id: '/grocery',
+  path: '/grocery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CelebrateRoute = CelebrateRouteImport.update({
@@ -241,13 +241,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrackerRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/grocery': {
-      id: '/grocery'
-      path: '/grocery'
-      fullPath: '/grocery'
-      preLoaderRoute: typeof GroceryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/rituals': {
       id: '/rituals'
       path: '/rituals'
@@ -267,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/home'
       fullPath: '/home'
       preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grocery': {
+      id: '/grocery'
+      path: '/grocery'
+      fullPath: '/grocery'
+      preLoaderRoute: typeof GroceryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/celebrate': {
