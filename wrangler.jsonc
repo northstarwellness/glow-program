@@ -4,4 +4,9 @@
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
+  // Shopify purchase verification — set these as secrets in Cloudflare:
+  //   wrangler secret put SHOPIFY_STORE_DOMAIN   (e.g. "nourewellness.myshopify.com")
+  //   wrangler secret put SHOPIFY_ADMIN_TOKEN     (Admin API access token from Shopify > Apps > Private)
+  //   wrangler secret put SHOPIFY_PRODUCT_ID      (numeric product ID for the ritual app; leave unset to allow any paid order)
+  "vars": {}
 }

@@ -26,7 +26,7 @@ function Profile() {
   }, [hydrated]);
 
   if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.name) return <Navigate to="/" />;
+  if (!s.unlocked) return <Navigate to="/" />;
 
   const reset = () => {
     if (confirm < 2) { setConfirm(confirm + 1); return; }

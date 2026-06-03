@@ -12,7 +12,7 @@ function Celebrate() {
   const s = useApp();
   useEffect(() => { s.markMilestoneShown("day-21"); s.earnBadge("day-21"); }, []);
   if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.name) return <Navigate to="/" />;
+  if (!s.unlocked) return <Navigate to="/" />;
   const score = glowScore(s);
   const date = new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
 

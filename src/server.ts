@@ -4,8 +4,27 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
 type ServerEntry = {
-  fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
+  fetch: (request: Request, env: Env, ctx: unknown) => Promise<Response> | Response;
 };
+
+interface Env {
+  SHOPIFY_STORE_DOMAIN?: string;
+  SHOPIFY_ADMIN_TOKEN?: string;
+  SHOPIFY_PRODUCT_ID?: string;
+}
+
+interface ShopifyLineItem {
+  product_id: number | null;
+}
+
+interface ShopifyCustomer {
+  first_name?: string;
+}
+
+interface ShopifyOrder {
+  line_items?: ShopifyLineItem[];
+  customer?: ShopifyCustomer;
+}
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
@@ -50,8 +69,6 @@ function isCatastrophicSsrErrorBody(body: string, responseStatus: number): boole
   );
 }
 
-// h3 swallows in-handler throws into a normal 500 Response with body
-// {"unhandled":true,"message":"HTTPError"} — try/catch alone never fires for those.
 async function normalizeCatastrophicSsrResponse(response: Response): Promise<Response> {
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
@@ -66,11 +83,92 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   return brandedErrorResponse();
 }
 
+const JSON_HEADERS = {
+  "Content-Type": "application/json",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+async function handleVerifyPurchase(request: Request, env: Env): Promise<Response> {
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: JSON_HEADERS });
+  }
+
+  try {
+    const body = await request.json() as { email?: string };
+    const email = (body.email ?? "").trim().toLowerCase();
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return Response.json({ unlocked: false, error: "invalid-email" }, { status: 400, headers: JSON_HEADERS });
+    }
+
+    if (!env.SHOPIFY_STORE_DOMAIN || !env.SHOPIFY_ADMIN_TOKEN) {
+      console.error("Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_TOKEN env vars");
+      return Response.json({ unlocked: false, error: "config-missing" }, { status: 503, headers: JSON_HEADERS });
+    }
+
+    const domain = env.SHOPIFY_STORE_DOMAIN.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    const params = new URLSearchParams({
+      email,
+      financial_status: "paid",
+      status: "any",
+      limit: "10",
+      fields: "id,line_items,customer",
+    });
+
+    const shopifyRes = await fetch(
+      `https://${domain}/admin/api/2024-01/orders.json?${params}`,
+      {
+        headers: {
+          "X-Shopify-Access-Token": env.SHOPIFY_ADMIN_TOKEN,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    if (!shopifyRes.ok) {
+      const errText = await shopifyRes.text();
+      console.error("Shopify API error", shopifyRes.status, errText);
+      return Response.json({ unlocked: false, error: "shopify-error" }, { status: 502, headers: JSON_HEADERS });
+    }
+
+    const data = await shopifyRes.json() as { orders: ShopifyOrder[] };
+    const orders = data.orders ?? [];
+
+    if (orders.length === 0) {
+      return Response.json({ unlocked: false, error: "no-orders" }, { headers: JSON_HEADERS });
+    }
+
+    const productId = env.SHOPIFY_PRODUCT_ID;
+    const hasProduct = !productId || orders.some((order) =>
+      order.line_items?.some((item) => String(item.product_id) === productId)
+    );
+
+    if (!hasProduct) {
+      return Response.json({ unlocked: false, error: "wrong-product" }, { headers: JSON_HEADERS });
+    }
+
+    const firstName = orders[0]?.customer?.first_name ?? null;
+    return Response.json({ unlocked: true, name: firstName }, { headers: JSON_HEADERS });
+
+  } catch (err) {
+    console.error("verify-purchase handler error:", err);
+    return Response.json({ unlocked: false, error: "server-error" }, { status: 500, headers: JSON_HEADERS });
+  }
+}
+
 export default {
-  async fetch(request: Request, env: unknown, ctx: unknown) {
+  async fetch(request: Request, env: Env, ctx: unknown) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/verify-purchase") {
+      return handleVerifyPurchase(request, env);
+    }
+
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      const response = await handler.fetch(request, env as unknown, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);

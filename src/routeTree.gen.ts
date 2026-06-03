@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as TrackerRouteImport } from './routes/tracker'
 import { Route as RitualsRouteImport } from './routes/rituals'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as HomeRouteImport } from './routes/home'
+import { Route as GroceryRouteImport } from './routes/grocery'
 import { Route as CelebrateRouteImport } from './routes/celebrate'
 import { Route as BonusesRouteImport } from './routes/bonuses'
 import { Route as IndexRouteImport } from './routes/index'
@@ -26,6 +28,16 @@ import { Route as DayNRouteImport } from './routes/day.$n'
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TrackerRoute = TrackerRouteImport.update({
+  id: '/tracker',
+  path: '/tracker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GroceryRoute = GroceryRouteImport.update({
+  id: '/grocery',
+  path: '/grocery',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RitualsRoute = RitualsRouteImport.update({
@@ -93,9 +105,11 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
   '/celebrate': typeof CelebrateRoute
+  '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
+  '/tracker': typeof TrackerRoute
   '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
   '/journal/$n': typeof JournalNRoute
@@ -108,9 +122,11 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
   '/celebrate': typeof CelebrateRoute
+  '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
+  '/tracker': typeof TrackerRoute
   '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
   '/journal/$n': typeof JournalNRoute
@@ -124,9 +140,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
   '/celebrate': typeof CelebrateRoute
+  '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
   '/profile': typeof ProfileRoute
   '/rituals': typeof RitualsRoute
+  '/tracker': typeof TrackerRoute
   '/welcome': typeof WelcomeRoute
   '/day/$n': typeof DayNRoute
   '/journal/$n': typeof JournalNRoute
@@ -141,9 +159,11 @@ export interface FileRouteTypes {
     | '/'
     | '/bonuses'
     | '/celebrate'
+    | '/grocery'
     | '/home'
     | '/profile'
     | '/rituals'
+    | '/tracker'
     | '/welcome'
     | '/day/$n'
     | '/journal/$n'
@@ -156,9 +176,11 @@ export interface FileRouteTypes {
     | '/'
     | '/bonuses'
     | '/celebrate'
+    | '/grocery'
     | '/home'
     | '/profile'
     | '/rituals'
+    | '/tracker'
     | '/welcome'
     | '/day/$n'
     | '/journal/$n'
@@ -171,9 +193,11 @@ export interface FileRouteTypes {
     | '/'
     | '/bonuses'
     | '/celebrate'
+    | '/grocery'
     | '/home'
     | '/profile'
     | '/rituals'
+    | '/tracker'
     | '/welcome'
     | '/day/$n'
     | '/journal/$n'
@@ -187,9 +211,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BonusesRoute: typeof BonusesRoute
   CelebrateRoute: typeof CelebrateRoute
+  GroceryRoute: typeof GroceryRoute
   HomeRoute: typeof HomeRoute
   ProfileRoute: typeof ProfileRoute
   RitualsRoute: typeof RitualsRoute
+  TrackerRoute: typeof TrackerRoute
   WelcomeRoute: typeof WelcomeRoute
   DayNRoute: typeof DayNRoute
   JournalNRoute: typeof JournalNRoute
@@ -206,6 +232,20 @@ declare module '@tanstack/react-router' {
       path: '/welcome'
       fullPath: '/welcome'
       preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tracker': {
+      id: '/tracker'
+      path: '/tracker'
+      fullPath: '/tracker'
+      preLoaderRoute: typeof TrackerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/grocery': {
+      id: '/grocery'
+      path: '/grocery'
+      fullPath: '/grocery'
+      preLoaderRoute: typeof GroceryRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rituals': {
@@ -299,9 +339,11 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BonusesRoute: BonusesRoute,
   CelebrateRoute: CelebrateRoute,
+  GroceryRoute: GroceryRoute,
   HomeRoute: HomeRoute,
   ProfileRoute: ProfileRoute,
   RitualsRoute: RitualsRoute,
+  TrackerRoute: TrackerRoute,
   WelcomeRoute: WelcomeRoute,
   DayNRoute: DayNRoute,
   JournalNRoute: JournalNRoute,

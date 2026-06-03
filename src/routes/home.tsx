@@ -13,7 +13,7 @@ function Home() {
   const navigate = useNavigate();
 
   if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.name) return <Navigate to="/" />;
+  if (!s.unlocked) return <Navigate to="/" />;
   if (!s.seenWelcome) return <Navigate to="/welcome" />;
 
   const day = currentDay(s.startDate);
@@ -116,6 +116,25 @@ function Home() {
         <p className="mt-3 text-[12px] text-[var(--plum)]/55">Tap to write →</p>
       </Link>
 
+      {/* Tools */}
+      <div className="mt-6">
+        <p className="label-caps text-[var(--plum)]/55">Your toolkit</p>
+        <div className="mt-2 grid grid-cols-3 gap-2">
+          <Link to="/tracker" className="flex flex-col items-center gap-2 rounded-2xl bg-[var(--card)] p-4 text-center shadow-sm">
+            <HeartIcon />
+            <span className="font-serif text-[13px] leading-tight text-[var(--plum)]">How I feel</span>
+          </Link>
+          <Link to="/grocery" className="flex flex-col items-center gap-2 rounded-2xl bg-[var(--card)] p-4 text-center shadow-sm">
+            <ListIcon />
+            <span className="font-serif text-[13px] leading-tight text-[var(--plum)]">Grocery list</span>
+          </Link>
+          <Link to="/recipes/$id" params={{ id: "build" }} className="flex flex-col items-center gap-2 rounded-2xl bg-[var(--card)] p-4 text-center shadow-sm">
+            <BlendIcon />
+            <span className="font-serif text-[13px] leading-tight text-[var(--plum)]">Build a smoothie</span>
+          </Link>
+        </div>
+      </div>
+
       <GoldDivider />
       <Link to="/profile" className="block text-center font-serif italic text-[13px] text-[var(--plum)]/55">
         Profile & settings
@@ -141,6 +160,9 @@ function LogTile({ label, icon, done, onClick }: { label: string; icon: "glass" 
     </button>
   );
 }
+function HeartIcon() { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-[var(--gold)]"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>; }
+function ListIcon() { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-[var(--gold)]"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>; }
+function BlendIcon() { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="text-[var(--gold)]"><path d="M6 3h12l-2 12a4 4 0 01-8 0L6 3z"/><path d="M4 7h16"/></svg>; }
 function CheckIcon() { return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 13l4 4L20 6" /></svg>; }
 function TileIcon({ name }: { name: "glass" | "leaf" | "sun" }) {
   if (name === "glass") return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 3h12l-2 12a4 4 0 01-8 0L6 3z" /></svg>;

@@ -13,7 +13,7 @@ function DayView() {
   const navigate = useNavigate();
 
   if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.name) return <Navigate to="/" />;
+  if (!s.unlocked) return <Navigate to="/" />;
 
   const dayNum = Math.max(1, Math.min(21, parseInt(n, 10) || 1));
   const today = currentDay(s.startDate);
