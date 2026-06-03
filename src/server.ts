@@ -15,6 +15,7 @@ interface Env {
 
 interface ShopifyLineItem {
   product_id: number | null;
+  title: string;
 }
 
 interface ShopifyCustomer {
@@ -24,6 +25,26 @@ interface ShopifyCustomer {
 interface ShopifyOrder {
   line_items?: ShopifyLineItem[];
   customer?: ShopifyCustomer;
+}
+
+// Product names that grant access — case-insensitive substring match on line item title
+const APPROVED_KEYWORDS = [
+  "radiant reds",
+  "inner glow reset",
+  "ritual app",
+  "glow reset",
+  "21-day",
+  "21 day",
+  "beauty ritual",
+  "smoothie system",
+  "noure",
+  "nourè",
+];
+
+function lineItemApproved(item: ShopifyLineItem, allowedId?: string): boolean {
+  if (allowedId && item.product_id && String(item.product_id) === allowedId) return true;
+  const t = (item.title ?? "").toLowerCase();
+  return APPROVED_KEYWORDS.some((kw) => t.includes(kw));
 }
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
@@ -137,19 +158,23 @@ async function handleVerifyPurchase(request: Request, env: Env): Promise<Respons
     const orders = data.orders ?? [];
 
     if (orders.length === 0) {
+      console.log("verify-purchase: no paid orders found for email");
       return Response.json({ unlocked: false, error: "no-orders" }, { headers: JSON_HEADERS });
     }
 
     const productId = env.SHOPIFY_PRODUCT_ID;
-    const hasProduct = !productId || orders.some((order) =>
-      order.line_items?.some((item) => String(item.product_id) === productId)
+    const hasProduct = orders.some((order) =>
+      order.line_items?.some((item) => lineItemApproved(item, productId))
     );
 
     if (!hasProduct) {
+      const titles = orders.flatMap((o) => o.line_items?.map((i) => i.title) ?? []);
+      console.log("verify-purchase: orders found but no approved product. Titles:", titles.join(", "));
       return Response.json({ unlocked: false, error: "wrong-product" }, { headers: JSON_HEADERS });
     }
 
     const firstName = orders[0]?.customer?.first_name ?? null;
+    console.log("verify-purchase: access granted, name:", firstName ?? "(none)");
     return Response.json({ unlocked: true, name: firstName }, { headers: JSON_HEADERS });
 
   } catch (err) {

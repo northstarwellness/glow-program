@@ -20,8 +20,9 @@ function DayView() {
   const locked = dayNum > today;
   if (locked) return <Navigate to="/rituals" />;
   const d = DAYS[dayNum - 1];
+  if (!d) return <Navigate to="/rituals" />;
   const phase = phaseFor(dayNum);
-  const recipe = RECIPES.find((r) => r.id === d.recipeId)!;
+  const recipe = RECIPES.find((r) => r.id === d.recipeId) ?? RECIPES[0];
   const done = s.completedDays.includes(dayNum);
 
   const complete = () => {

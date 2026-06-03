@@ -58,9 +58,13 @@ function UnlockGate() {
       }
 
       setStatus("error");
-      if (data.error === "no-orders" || data.error === "wrong-product") {
+      if (data.error === "no-orders") {
         setErrorMsg(
           "We couldn't find a purchase with that email. Please use the exact email from your order confirmation."
+        );
+      } else if (data.error === "wrong-product") {
+        setErrorMsg(
+          "We found your order, but it doesn't include the NOURÉ Ritual App or Radiant Reds. Please use the email from those purchases."
         );
       } else if (data.error === "config-missing") {
         setErrorMsg("Access verification is temporarily unavailable. Please try again shortly.");
