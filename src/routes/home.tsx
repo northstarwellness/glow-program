@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp, currentDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -11,6 +11,10 @@ function Home() {
   const hydrated = useHydrated();
   const s = useApp();
   const navigate = useNavigate();
+  const markMilestoneShown = useApp((st) => st.markMilestoneShown);
+  // Stable ref so the milestone effect never has navigate in its deps
+  const navigateRef = useRef(navigate);
+  useEffect(() => { navigateRef.current = navigate; });
 
   if (!hydrated) return <div className="ivory-frame min-h-screen" />;
   if (!s.unlocked) return <Navigate to="/" />;
@@ -19,26 +23,34 @@ function Home() {
   const day = currentDay(s.startDate);
   const phase = phaseFor(day);
   const today = DAYS[day - 1];
-  const recipe = RECIPES.find((r) => r.id === today.recipeId)!;
+  const recipe = RECIPES.find((r) => r.id === today.recipeId) ?? RECIPES[0];
   const log = s.dailyLogs[day] ?? {};
   const allLogged = log.reds && log.ritual && log.journal;
   const promptText = JOURNAL_PROMPTS[day]?.(s.name ?? "") ?? "";
 
-  // Milestones
+  // Milestones — navigate is kept in a ref so it never appears in deps,
+  // preventing the router-state-change → new navigate reference → infinite loop.
+  // markMilestoneShown is called BEFORE navigate so the condition is false on the
+  // next render even if this component somehow remounts.
   useEffect(() => {
     if (!hydrated) return;
     const trigger = (id: string) => {
       if (s.completedDays.includes(parseMilestone(id)) && !s.shownMilestones.includes(id)) {
-        navigate({ to: "/milestone/$id", params: { id } });
+        markMilestoneShown(id);
+        navigateRef.current({ to: "/milestone/$id", params: { id } });
       }
     };
     if (s.completedDays.includes(1)) trigger("day-1");
     if (s.completedDays.includes(7)) trigger("day-7");
     if (s.completedDays.includes(14)) trigger("day-14");
     if (s.completedDays.includes(21)) {
-      if (!s.shownMilestones.includes("day-21")) navigate({ to: "/celebrate" });
+      if (!s.shownMilestones.includes("day-21")) {
+        markMilestoneShown("day-21");
+        navigateRef.current({ to: "/celebrate" });
+      }
     }
-  }, [hydrated, s.completedDays, s.shownMilestones, navigate]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, s.completedDays, s.shownMilestones, markMilestoneShown]);
 
   return (
     <Frame>
