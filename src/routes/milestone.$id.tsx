@@ -11,7 +11,8 @@ function Milestone() {
   const hydrated = useHydrated();
   const s = useApp();
   const navigate = useNavigate();
-  if (hydrated && !s.name) return <Navigate to="/" />;
+  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
+  if (!s.unlocked) return <Navigate to="/" />;
   const m = MILESTONES[id];
   useEffect(() => { if (m) { s.markMilestoneShown(id); s.earnBadge(id); } }, [id, m]);
   if (!m) return <Navigate to="/home" />;

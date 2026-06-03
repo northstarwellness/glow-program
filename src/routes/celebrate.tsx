@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useApp, glowScore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { Pomegranate } from "@/components/Frame";
@@ -11,7 +11,8 @@ function Celebrate() {
   const hydrated = useHydrated();
   const s = useApp();
   useEffect(() => { s.markMilestoneShown("day-21"); s.earnBadge("day-21"); }, []);
-  if (hydrated && !s.name) return <Navigate to="/" />;
+  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
+  if (!s.unlocked) return <Navigate to="/" />;
   const score = glowScore(s);
   const date = new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
 
@@ -50,16 +51,23 @@ function Celebrate() {
 }
 
 function Confetti() {
-  const pieces = Array.from({ length: 50 });
+  const pieces = useMemo(() =>
+    Array.from({ length: 50 }, (_, i) => ({
+      left: (i * 41 + 7) % 100,
+      duration: 3 + (i * 11) % 4,
+      delay: ((i * 67) % 20) / 10,
+      width: 5 + (i % 7),
+      height: 5 + ((i + 2) % 7),
+    })), []);
   return (
     <div className="gold-confetti">
-      {pieces.map((_, i) => (
+      {pieces.map((p, i) => (
         <span key={i} style={{
-          left: `${Math.random() * 100}%`,
-          animationDuration: `${3 + Math.random() * 4}s`,
-          animationDelay: `${Math.random() * 2}s`,
-          width: `${5 + Math.random() * 7}px`,
-          height: `${5 + Math.random() * 7}px`,
+          left: `${p.left}%`,
+          animationDuration: `${p.duration}s`,
+          animationDelay: `${p.delay}s`,
+          width: `${p.width}px`,
+          height: `${p.height}px`,
           background: i % 3 === 0 ? "var(--color-berry)" : i % 3 === 1 ? "var(--color-gold)" : "var(--color-plum)",
         }} />
       ))}

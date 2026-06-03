@@ -3,13 +3,17 @@ import { persist } from "zustand/middleware";
 
 export type DailyLog = { reds?: boolean; ritual?: boolean; journal?: boolean };
 export type JournalEntry = { prompt: string; entry: string; response: string; timestamp: string };
+export type DailyCheck = { energy: number; skin: number; bloating: number; mood: number };
 
 type State = {
+  email: string | null;
+  unlocked: boolean;
   name: string | null;
   startDate: string | null;
   completedDays: number[];
   journalEntries: Record<number, JournalEntry>;
   dailyLogs: Record<number, DailyLog>;
+  dailyChecks: Record<number, DailyCheck>;
   savedRecipes: string[];
   photos: Record<number, string>;
   notificationTime: string;
@@ -17,6 +21,7 @@ type State = {
   seenWelcome: boolean;
   shownMilestones: string[];
 
+  setUnlocked: (email: string, name: string | null) => void;
   setName: (n: string) => void;
   startReset: () => void;
   setSeenWelcome: () => void;
@@ -28,17 +33,21 @@ type State = {
   earnBadge: (id: string) => void;
   markMilestoneShown: (id: string) => void;
   setPhoto: (day: number, dataUrl: string) => void;
+  setDailyCheck: (day: number, check: DailyCheck) => void;
   resetAll: () => void;
 };
 
 export const useApp = create<State>()(
   persist(
     (set) => ({
+      email: null,
+      unlocked: false,
       name: null,
       startDate: null,
       completedDays: [],
       journalEntries: {},
       dailyLogs: {},
+      dailyChecks: {},
       savedRecipes: [],
       photos: {},
       notificationTime: "07:00",
@@ -46,6 +55,8 @@ export const useApp = create<State>()(
       seenWelcome: false,
       shownMilestones: [],
 
+      setUnlocked: (email, name) =>
+        set({ email, unlocked: true, name: name?.trim() || null }),
       setName: (n) => set({ name: n.trim() }),
       startReset: () => set((s) => ({ startDate: s.startDate ?? new Date().toISOString() })),
       setSeenWelcome: () => set({ seenWelcome: true }),
@@ -71,13 +82,18 @@ export const useApp = create<State>()(
       markMilestoneShown: (id) =>
         set((s) => (s.shownMilestones.includes(id) ? s : { shownMilestones: [...s.shownMilestones, id] })),
       setPhoto: (day, dataUrl) => set((s) => ({ photos: { ...s.photos, [day]: dataUrl } })),
+      setDailyCheck: (day, check) =>
+        set((s) => ({ dailyChecks: { ...s.dailyChecks, [day]: check } })),
       resetAll: () =>
         set({
+          email: null,
+          unlocked: false,
           name: null,
           startDate: null,
           completedDays: [],
           journalEntries: {},
           dailyLogs: {},
+          dailyChecks: {},
           savedRecipes: [],
           photos: {},
           badgesEarned: [],

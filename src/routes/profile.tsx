@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -10,10 +10,23 @@ function Profile() {
   const hydrated = useHydrated();
   const s = useApp();
   const navigate = useNavigate();
-  if (hydrated && !s.name) return <Navigate to="/" />;
+
+  // Hooks must be declared unconditionally before any conditional returns
   const [name, setName] = useState(s.name ?? "");
   const [time, setTime] = useState(s.notificationTime);
   const [confirm, setConfirm] = useState(0);
+
+  // Sync local state after hydration (store values weren't available on first render)
+  useEffect(() => {
+    if (hydrated) {
+      setName(s.name ?? "");
+      setTime(s.notificationTime);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
+  if (!s.unlocked) return <Navigate to="/" />;
 
   const reset = () => {
     if (confirm < 2) { setConfirm(confirm + 1); return; }

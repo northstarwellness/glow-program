@@ -9,7 +9,8 @@ export const Route = createFileRoute("/rituals")({ component: Rituals });
 function Rituals() {
   const hydrated = useHydrated();
   const s = useApp();
-  if (hydrated && !s.name) return <Navigate to="/" />;
+  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
+  if (!s.unlocked) return <Navigate to="/" />;
   const day = currentDay(s.startDate);
 
   return (

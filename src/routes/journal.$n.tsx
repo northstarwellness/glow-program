@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate, useParams } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp, currentDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -11,16 +11,29 @@ function JournalDay() {
   const { n } = useParams({ from: "/journal/$n" });
   const hydrated = useHydrated();
   const s = useApp();
-  if (hydrated && !s.name) return <Navigate to="/" />;
   const day = Math.max(1, Math.min(21, parseInt(n, 10) || 1));
-  const today = currentDay(s.startDate);
-  if (day > today) return <Navigate to="/journal" />;
 
+  // Hooks must be declared unconditionally before any conditional returns
   const existing = s.journalEntries[day];
-  const prompt = JOURNAL_PROMPTS[day]?.(s.name ?? "") ?? "";
   const [text, setText] = useState(existing?.entry ?? "");
   const [response, setResponse] = useState<string | null>(existing?.response ?? null);
 
+  // Sync with store after hydration (existing entry wasn't available on first render)
+  useEffect(() => {
+    if (hydrated && s.journalEntries[day]) {
+      const e = s.journalEntries[day];
+      setText(e.entry ?? "");
+      setResponse(e.response ?? null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
+  if (!s.unlocked) return <Navigate to="/" />;
+  const today = currentDay(s.startDate);
+  if (day > today) return <Navigate to="/journal" />;
+
+  const prompt = JOURNAL_PROMPTS[day]?.(s.name ?? "") ?? "";
   const save = () => {
     if (!text.trim()) return;
     const r = reflectJournal(text, s.name ?? "");
