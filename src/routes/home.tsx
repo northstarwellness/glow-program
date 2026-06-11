@@ -179,6 +179,19 @@ function Home() {
         </Link>
       </div>
 
+      {/* Quick Glow Mornings — bonus quick smoothies */}
+      <Link to="/recipes" hash="quick-glow"
+        className="mt-5 block rounded-2xl bg-white border border-[var(--taupe)]/20 p-5 shadow-sm cursor-pointer">
+        <p className="label-caps text-[var(--gold)]">Bonus</p>
+        <p className="mt-1.5 font-serif text-[17px] leading-snug text-[var(--charcoal)]">
+          Quick Glow Mornings.
+        </p>
+        <p className="mt-1 font-serif italic text-[13px] text-[var(--charcoal)]/55">
+          Seven five-minute smoothies for rushed mornings.
+        </p>
+        <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-[var(--gold)]">Open the set →</p>
+      </Link>
+
       {/* Radiant Reds upsell */}
       <a href={REDS_URL} target="_top" className="mt-5 block rounded-2xl px-5 py-4 cursor-pointer"
          style={{ background: "linear-gradient(135deg, oklch(0.970 0.022 68) 0%, oklch(0.985 0.015 72) 100%)", border: "1px solid oklch(0.720 0.082 65 / 0.25)" }}>

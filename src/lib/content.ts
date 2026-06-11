@@ -84,6 +84,8 @@ export type Recipe = {
   benefit: string; benefitTag: string; ingredients: string[]; method: string[];
   redsBoost: { why: string; proof: string[] };
   bonus?: boolean;
+  /** Quick Glow Mornings — bonus five-minute smoothies outside the 21-day rotation */
+  quick?: boolean;
   /** Optional override path for smoothie photo. Defaults to /images/smoothies/${id}.jpg */
   image?: string;
 };
@@ -275,6 +277,50 @@ export const RECIPES: Recipe[] = [
     ingredients: ["Blueberry", "Banana", "Almond", "Coconut yogurt", "Honey"],
     method: ["Blend 1 frozen banana with ½ cup frozen blueberries.", "Add 2 tbsp coconut yogurt and 1 tbsp almond butter.", "Scoop into a chilled bowl, drizzle honey."],
     redsBoost: { why: "Sprinkle Radiant Reds on top — sorbet becomes a polyphenol ritual without losing the indulgence.", proof: REDS_PROOF.glow } },
+
+  // ——— QUICK GLOW MORNINGS — 7 bonus five-minute smoothies (outside the 21-day rotation) ———
+  { id: "berry-reds-yogurt-shake", name: "Berry Reds Yogurt Shake", gradient: G.plumGold, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Steady",
+    benefit: "Creamy, antioxidant-rich, and quietly filling.",
+    ingredients: ["1 cup frozen mixed berries", "1/2 cup Greek yogurt or kefir", "3/4 cup almond milk", "1 tsp chia seeds", "1/2 banana (optional)", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add almond milk, yogurt, berries, chia, and banana to the blender.", "Blend until smooth, about 30 seconds.", "Add your Glow Boost and pulse twice to keep the color bright.", "Pour and sip slowly.", "Texture — thick and spoonable; add a splash more almond milk to drink it.", "Swap — no kefir? Plain Greek yogurt works. Dairy-free: coconut yogurt + oat milk."],
+    redsBoost: { why: "Folded into a berry-and-yogurt base, a scoop of Radiant Reds layers in concentrated polyphenols from red superfruits.", proof: ["Polyphenol-rich pomegranate, açaí, and beetroot", "Supports skin radiance and antioxidant protection"] } },
+  { id: "pomegranate-vanilla-glow", name: "Pomegranate Vanilla Glow", gradient: G.creamGold, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Radiant",
+    benefit: "Bright, polyphenol-rich, and a little luxurious.",
+    ingredients: ["1/2 cup pomegranate juice", "1 cup frozen strawberries", "1/2 cup Greek yogurt", "1/4 tsp vanilla extract", "1/2 cup ice", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Pour pomegranate juice into the blender first.", "Add strawberries, yogurt, vanilla, and ice.", "Blend until silky.", "Stir in your Glow Boost at the end.", "Texture — light and pourable, almost like a drinkable sorbet.", "Swap — use frozen cherries for a deeper, less sweet flavor."],
+    redsBoost: { why: "Pomegranate is already one of the most polyphenol-rich fruits — the Glow Boost concentrates that even further.", proof: ["Concentrated red-fruit polyphenols", "Antioxidant support for everyday radiance"] } },
+  { id: "cucumber-mint-lightness", name: "Cucumber Mint Lightness Smoothie", gradient: G.sageIvory, quick: true,
+    prep: "5 min", servings: "1", benefitTag: "Refreshed",
+    benefit: "Crisp, cooling, and feather-light.",
+    ingredients: ["1/2 cucumber, roughly chopped", "1 cup frozen pineapple", "Juice of 1/2 lime", "4–5 fresh mint leaves", "3/4 cup coconut water", "1 tsp chia seeds", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coconut water, cucumber, and pineapple to the blender.", "Add lime, mint, and chia.", "Blend until smooth and pale green.", "Finish with your Glow Boost and a quick pulse.", "Texture — thin and refreshing; best served over ice.", "Swap — no fresh mint? A drop of mint extract works. Honeydew can stand in for cucumber."],
+    redsBoost: { why: "A scoop of Radiant Reds adds antioxidant depth to an otherwise light, hydrating blend.", proof: ["Polyphenols from red superfruits", "Antioxidant support without heaviness"] } },
+  { id: "cherry-cacao-calm-glow", name: "Cherry Cacao Calm Glow", gradient: G.plumDeep, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Calm",
+    benefit: "Rich, chocolatey, and grounding.",
+    ingredients: ["1 cup frozen cherries", "1 tbsp cacao powder", "1/2 banana", "1/2 cup Greek yogurt", "3/4 cup almond milk", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add almond milk, cherries, banana, and yogurt to the blender.", "Add cacao and blend until smooth.", "Stir in your Glow Boost at the end.", "Texture — velvety and dessert-like; add ice for a thicker, colder finish.", "Swap — frozen blueberries can replace cherries. Oat milk for a creamier dairy-free version."],
+    redsBoost: { why: "Cherries and cacao bring their own polyphenols; the Glow Boost rounds out the antioxidant profile.", proof: ["Polyphenol-rich red superfruits", "Supports antioxidant protection"] } },
+  { id: "peach-ginger-gut-glow", name: "Peach Ginger Gut-Glow", gradient: G.goldSand, quick: true,
+    prep: "5 min", servings: "1", benefitTag: "Balanced",
+    benefit: "Warm-spiced, golden, and gentle.",
+    ingredients: ["1 cup frozen peaches", "1/2 inch fresh ginger (or 1/4 tsp ground)", "1 tbsp ground flax or chia seeds", "1/2 cup Greek yogurt or kefir", "3/4 cup coconut water", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coconut water, peaches, and ginger to the blender.", "Add flax or chia and yogurt.", "Blend until smooth and golden.", "Finish with your Glow Boost.", "Texture — smooth with a little body from the flax; thin with extra coconut water if needed.", "Swap — frozen mango works in place of peaches. Skip the ginger if you prefer it mellow."],
+    redsBoost: { why: "A scoop of Radiant Reds adds concentrated red-fruit polyphenols to this gentle, golden blend.", proof: ["Polyphenols from pomegranate and beetroot", "Antioxidant support from within"] } },
+  { id: "mocha-reds-morning", name: "Mocha Reds Morning Smoothie", gradient: G.sandPlum, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Energized",
+    benefit: "Coffee and breakfast in one glass.",
+    ingredients: ["1/2 cup cold brew or chilled coffee", "1 tbsp cacao powder", "1 scoop vanilla protein or 1/2 cup Greek yogurt", "1 frozen banana", "1/2 cup almond milk", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coffee, almond milk, banana, and protein or yogurt to the blender.", "Add cacao and blend until smooth.", "Stir in your Glow Boost at the end.", "Texture — creamy and frothy; add a few ice cubes if you like it colder.", "Swap — decaf or half-caf works just as well. Oat milk for extra creaminess."],
+    redsBoost: { why: "Folded into coffee and cacao, the Glow Boost adds polyphenols alongside your morning caffeine.", proof: ["Concentrated red-superfruit polyphenols", "Antioxidant support to start the day"] } },
+  { id: "tropical-reds-quickie", name: "Tropical Reds Quickie", gradient: G.sageGold, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Light",
+    benefit: "Bright, sunny, and effortless.",
+    ingredients: ["1 cup frozen mango", "1/2 cup frozen papaya (or extra mango)", "Juice of 1/2 lime", "3/4 cup coconut water", "1 tsp chia seeds", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coconut water, mango, and papaya to the blender.", "Add lime and chia.", "Blend until smooth and golden-orange.", "Finish with your Glow Boost and a quick pulse.", "Texture — smooth and tropical; naturally sweet, no added sugar needed.", "Swap — pineapple can replace papaya. Add a handful of spinach for greens; the color stays bright."],
+    redsBoost: { why: "A scoop of Radiant Reds brings red-fruit polyphenols to a bright tropical base.", proof: ["Polyphenol-rich red fruits and roots", "Everyday antioxidant support"] } },
 ];
 
 export type Ingredient = {
@@ -866,6 +912,23 @@ export const GROCERY_LIST: GroceryCategory[] = [
       { id: "acai-packets", name: "Frozen açaí packets" },
       { id: "saffron", name: "Saffron (pinch jar)", note: "For the Peach & Saffron ritual" },
       { id: "cardamom", name: "Cardamom (ground)" },
+    ],
+  },
+  {
+    name: "Quick Glow Mornings",
+    items: [
+      { id: "qg-frozen-berries", name: "Frozen mixed berries", note: "Berry Reds Yogurt Shake" },
+      { id: "qg-frozen-cherries", name: "Frozen cherries", note: "Cherry Cacao Calm Glow" },
+      { id: "qg-frozen-mango", name: "Frozen mango", note: "Tropical Reds Quickie" },
+      { id: "qg-frozen-papaya", name: "Frozen papaya", note: "Or extra mango" },
+      { id: "qg-frozen-pineapple", name: "Frozen pineapple", note: "Cucumber Mint Lightness" },
+      { id: "qg-cucumber", name: "Cucumber", note: "Cucumber Mint Lightness" },
+      { id: "qg-greek-yogurt", name: "Greek yogurt or kefir", note: "Most quick recipes" },
+      { id: "qg-coconut-water", name: "Coconut water", note: "Three quick recipes" },
+      { id: "qg-cold-brew", name: "Cold brew or chilled coffee", note: "Mocha Reds Morning" },
+      { id: "qg-flax", name: "Ground flax", note: "Or use chia seeds" },
+      { id: "qg-vanilla", name: "Vanilla extract", note: "Pomegranate Vanilla Glow" },
+      { id: "qg-protein", name: "Vanilla protein (optional)", note: "Mocha Reds Morning" },
     ],
   },
 ];

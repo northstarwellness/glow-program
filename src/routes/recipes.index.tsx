@@ -8,7 +8,7 @@ import { SmoothieImage } from "@/components/SmoothieImage";
 
 export const Route = createFileRoute("/recipes/")({ component: Recipes });
 
-type PhaseFilter = "all" | "foundation" | "build" | "glow" | "bonus";
+type PhaseFilter = "all" | "foundation" | "build" | "glow" | "bonus" | "quick";
 
 const PHASE_LABELS: Record<PhaseFilter, string> = {
   all: "All",
@@ -16,9 +16,11 @@ const PHASE_LABELS: Record<PhaseFilter, string> = {
   build: "Build",
   glow: "Glow",
   bonus: "Bonus",
+  quick: "Quick Glow",
 };
 
-const core = RECIPES.filter((r) => !r.bonus);
+const core = RECIPES.filter((r) => !r.bonus && !r.quick);
+const quickGlow = RECIPES.filter((r) => r.quick);
 
 function Recipes() {
   const hydrated = useHydrated();
@@ -33,6 +35,7 @@ function Recipes() {
     if (filter === "build") return core.slice(7, 14);
     if (filter === "glow") return core.slice(14, 21);
     if (filter === "bonus") return RECIPES.filter((r) => r.bonus);
+    if (filter === "quick") return quickGlow;
     return core;
   })();
 
@@ -46,7 +49,7 @@ function Recipes() {
 
       {/* Phase filter pills */}
       <div className="mt-5 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {(["all", "foundation", "build", "glow", "bonus"] as PhaseFilter[]).map((f) => (
+        {(["all", "foundation", "build", "glow", "bonus", "quick"] as PhaseFilter[]).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
@@ -63,28 +66,9 @@ function Recipes() {
 
       {/* Recipe grid */}
       <div className="mt-5 grid grid-cols-2 gap-3">
-        {displayRecipes.map((r) => {
-          const saved = s.savedRecipes.includes(r.id);
-          return (
-            <Link key={r.id} to="/recipes/$id" params={{ id: r.id }} className="group block">
-              <div className="overflow-hidden rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm transition-shadow group-hover:shadow-md">
-                {/* Smoothie photo with gradient fallback */}
-                <SmoothieImage recipe={r} className="h-[80px] w-full" />
-                <div className="p-3.5">
-                  <span className="inline-block rounded-full px-2.5 py-0.5 text-[9.5px] tracking-[0.15em] uppercase font-medium"
-                        style={{ background: "oklch(0.205 0 0 / 0.06)", color: "var(--charcoal)" }}>
-                    {r.benefitTag}
-                  </span>
-                  <h3 className="mt-1.5 font-serif text-[15px] leading-tight text-[var(--charcoal)]">{r.name}</h3>
-                  <p className="mt-1 text-[11px] text-[var(--charcoal)]/40">{r.prep}</p>
-                  {saved && (
-                    <p className="mt-1.5 text-[9.5px] tracking-[0.14em] uppercase text-[var(--gold)]">Saved</p>
-                  )}
-                </div>
-              </div>
-            </Link>
-          );
-        })}
+        {displayRecipes.map((r) => (
+          <RecipeCard key={r.id} recipe={r} saved={s.savedRecipes.includes(r.id)} />
+        ))}
       </div>
 
       {filter === "bonus" && (
@@ -92,6 +76,49 @@ function Recipes() {
           Bonus rituals — beyond the 21-day rotation.
         </p>
       )}
+
+      {filter === "quick" && (
+        <p className="mt-4 text-center font-serif italic text-[13px] text-[var(--charcoal)]/40">
+          A bonus set — five-minute smoothies outside the 21-day rotation.
+        </p>
+      )}
+
+      {/* Quick Glow Mornings — bonus section under the full library */}
+      {filter === "all" && quickGlow.length > 0 && (
+        <section id="quick-glow" className="mt-9">
+          <h2 className="font-serif text-[26px] leading-tight text-[var(--charcoal)]">Quick Glow Mornings.</h2>
+          <p className="mt-1 font-serif italic text-[14px] text-[var(--charcoal)]/55">
+            Five minutes to radiant.
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {quickGlow.map((r) => (
+              <RecipeCard key={r.id} recipe={r} saved={s.savedRecipes.includes(r.id)} />
+            ))}
+          </div>
+        </section>
+      )}
     </Frame>
+  );
+}
+
+function RecipeCard({ recipe: r, saved }: { recipe: (typeof RECIPES)[number]; saved: boolean }) {
+  return (
+    <Link to="/recipes/$id" params={{ id: r.id }} className="group block">
+      <div className="overflow-hidden rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm transition-shadow group-hover:shadow-md">
+        {/* Smoothie photo with gradient fallback */}
+        <SmoothieImage recipe={r} className="h-[80px] w-full" />
+        <div className="p-3.5">
+          <span className="inline-block rounded-full px-2.5 py-0.5 text-[9.5px] tracking-[0.15em] uppercase font-medium"
+                style={{ background: "oklch(0.205 0 0 / 0.06)", color: "var(--charcoal)" }}>
+            {r.benefitTag}
+          </span>
+          <h3 className="mt-1.5 font-serif text-[15px] leading-tight text-[var(--charcoal)]">{r.name}</h3>
+          <p className="mt-1 text-[11px] text-[var(--charcoal)]/40">{r.prep}</p>
+          {saved && (
+            <p className="mt-1.5 text-[9.5px] tracking-[0.14em] uppercase text-[var(--gold)]">Saved</p>
+          )}
+        </div>
+      </div>
+    </Link>
   );
 }
