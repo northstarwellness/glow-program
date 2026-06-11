@@ -281,8 +281,10 @@ const QUICK_TAPS: { label: string; icon: React.ReactNode; outcome: string }[] = 
   },
 ];
 
+const NO_OUTCOMES: string[] = [];
+
 function GlowCheckIn({ day }: { day: number }) {
-  const outcomes = useApp((s) => s.outcomesByDay[day] ?? []);
+  const outcomes = useApp((s) => s.outcomesByDay[day]) ?? NO_OUTCOMES;
   const toggle = useApp((s) => s.toggleOutcomeForDay);
 
   return (
