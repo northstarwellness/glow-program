@@ -4,6 +4,19 @@ import { persist } from "zustand/middleware";
 export type DailyLog = { reds?: boolean; ritual?: boolean; journal?: boolean };
 export type JournalEntry = { prompt: string; entry: string; response: string; timestamp: string };
 
+/** Approved outcome labels — no medical claims */
+export const OUTCOMES = [
+  "Lighter",
+  "Less bloated",
+  "Full but light",
+  "Energized",
+  "Calm digestion",
+  "Satisfied",
+  "Glowy",
+  "Clearer mood",
+] as const;
+export type Outcome = typeof OUTCOMES[number];
+
 type State = {
   verifiedEmail: string | null;
   name: string | null;
@@ -18,6 +31,8 @@ type State = {
   seenWelcome: boolean;
   shownMilestones: string[];
   groceryChecked: Record<string, boolean>;
+  /** Feeling chips selected per day */
+  outcomesByDay: Record<number, string[]>;
 
   setVerifiedEmail: (email: string) => void;
   setName: (n: string) => void;
@@ -33,6 +48,7 @@ type State = {
   setPhoto: (day: number, dataUrl: string) => void;
   toggleGrocery: (id: string) => void;
   clearGrocery: () => void;
+  toggleOutcomeForDay: (day: number, outcome: string) => void;
   resetAll: () => void;
 };
 
@@ -52,6 +68,7 @@ export const useApp = create<State>()(
       seenWelcome: false,
       shownMilestones: [],
       groceryChecked: {},
+      outcomesByDay: {},
 
       setVerifiedEmail: (email) => set({ verifiedEmail: email }),
       setName: (n) => set({ name: n.trim() }),
@@ -84,6 +101,14 @@ export const useApp = create<State>()(
           groceryChecked: { ...s.groceryChecked, [id]: !s.groceryChecked[id] },
         })),
       clearGrocery: () => set({ groceryChecked: {} }),
+      toggleOutcomeForDay: (day, outcome) =>
+        set((s) => {
+          const current = s.outcomesByDay[day] ?? [];
+          const next = current.includes(outcome)
+            ? current.filter((o) => o !== outcome)
+            : [...current, outcome];
+          return { outcomesByDay: { ...s.outcomesByDay, [day]: next } };
+        }),
       resetAll: () =>
         set({
           verifiedEmail: null,
@@ -98,6 +123,7 @@ export const useApp = create<State>()(
           seenWelcome: false,
           shownMilestones: [],
           groceryChecked: {},
+          outcomesByDay: {},
         }),
     }),
     { name: "noure_app_v1" }
@@ -110,6 +136,13 @@ export function currentDay(startDate: string | null): number {
   const now = new Date();
   const ms = now.setHours(0, 0, 0, 0) - new Date(start).setHours(0, 0, 0, 0);
   return Math.max(1, Math.min(21, Math.floor(ms / 86400000) + 1));
+}
+
+/** Unlocked up to whichever is further: calendar day OR next after last completed day */
+export function unlockedUpTo(startDate: string | null, completedDays: number[]): number {
+  const calDay = currentDay(startDate);
+  const nextAfterCompletion = completedDays.length + 1;
+  return Math.min(21, Math.max(calDay, nextAfterCompletion));
 }
 
 export function glowScore(s: {

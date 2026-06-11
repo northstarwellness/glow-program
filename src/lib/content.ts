@@ -84,6 +84,8 @@ export type Recipe = {
   benefit: string; benefitTag: string; ingredients: string[]; method: string[];
   redsBoost: { why: string; proof: string[] };
   bonus?: boolean;
+  /** Optional override path for smoothie photo. Defaults to /images/smoothies/${id}.jpg */
+  image?: string;
 };
 
 // Elegant, feminine, light gradients — NO red. Plum, gold, sand, sage, lavender, dusty rose, cream.
@@ -448,6 +450,276 @@ export const ARTICLES = [
   { id: "after-21", title: "After 21 Days: How to Keep the Ritual",
     body: `Twenty-one days is enough to build a habit. It's not enough to finish a transformation.\n\nThe most common mistake is to treat day 22 as the end. Don't. The ritual that worked for 21 days is the ritual that works for 121.\n\nKeep the morning glass. Keep the slow start. Rotate the recipes. Add a second polyphenol moment in the afternoon if you want to deepen.\n\nThe Inner Glow Reset isn't a 21-day product. It's the entry point to a morning you keep.` },
 ];
+
+export type BlendTip = { thick: string; thin: string; pro: string };
+
+export const BLEND_TIPS: Record<string, BlendTip> = {
+  "pomegranate-elixir": {
+    thick: "Add ½ frozen banana or 2 tbsp coconut yogurt. The fat deepens the texture and makes it feel more like a meal.",
+    thin: "Use ¾ cup oat milk instead of ½, or add a splash of cold hibiscus tea. Strain through a fine mesh for extra silk.",
+    pro: "Chill the glass first. Pour slowly. The color is the ritual — let it land.",
+  },
+  "berry-bloom": {
+    thick: "Add 1 tbsp almond butter or use half a frozen banana. Let it sit 5 minutes after blending — the chia blooms and thickens naturally.",
+    thin: "Use 1¼ cups almond milk and skip the chia. Strain over ice for a bright, clean pour.",
+    pro: "Freeze the berries the night before. Cold blending keeps the anthocyanins from degrading in heat.",
+  },
+  "cherry-cacao": {
+    thick: "Double the almond butter to 2 tbsp and use ¾ cup oat milk. This becomes a proper morning meal.",
+    thin: "Add an extra ¼ cup oat milk and skip the almond butter. Run the blender an extra 30 seconds for a silky finish.",
+    pro: "Use frozen tart cherries straight from the bag — no need to thaw. The cold intensifies the dark flavor.",
+  },
+  "plum-rose": {
+    thick: "Add 3 tbsp coconut yogurt and reduce rose water to ½ tsp. The yogurt rounds the tartness and gives it body.",
+    thin: "Add 2 tbsp cold water and blend until completely smooth. This one is better thinner — let the rose water breathe.",
+    pro: "Use very ripe plums — the skin is where most of the polyphenols live. Don't peel them.",
+  },
+  "watermelon-reds": {
+    thick: "Freeze the watermelon cubes overnight. Blend frozen — it becomes a sorbet-style slush with no extra ingredients.",
+    thin: "Double the hibiscus tea and serve over crushed ice. The palest, most refreshing version.",
+    pro: "Brew the hibiscus tea strong, then chill overnight. Add Radiant Reds after blending, not before — heat degrades some polyphenols.",
+  },
+  "fig-almond": {
+    thick: "Add 1 tbsp almond butter and use ¾ cup oat milk. The fig and almond together become almost caramel-like.",
+    thin: "Use 1¼ cups oat milk and blend longer. Strain if the fig seeds bother you.",
+    pro: "Soak dried figs in warm water for 15 minutes before blending — they open up completely and the texture becomes silky.",
+  },
+  "beet-glow": {
+    thick: "Add 1 small frozen banana to balance the earthiness. The natural starch makes it thick and almost dessert-like.",
+    thin: "Extra orange juice and no banana. Strain through a fine mesh — the result is a clear, jewel-red glass.",
+    pro: "Roast the beet ahead of time and freeze in cubes. Game-changer for texture and sweetness.",
+  },
+  "golden-turmeric": {
+    thick: "Use oat milk and whisk in ½ tsp coconut oil. The fat emulsifies everything and adds body.",
+    thin: "Use almond milk and let it stay warm. Don't blend — just whisk gently.",
+    pro: "Add a crack of black pepper — it increases curcumin absorption by up to 2000%. A pinch is enough.",
+  },
+  "matcha-cloud": {
+    thick: "Add ½ frozen banana and use ¾ cup almond milk. Blend until completely smooth — it becomes thick and pale green.",
+    thin: "Whisk the matcha separately, then pour over ice and top with almond milk. No blending needed.",
+    pro: "Sift the matcha before whisking. Clumps are the enemy. A bamboo whisk in a zig-zag motion, not circular.",
+  },
+  "lavender-honey": {
+    thick: "Stir in 1 tbsp raw honey and 2 tbsp coconut yogurt after steeping. Serve at room temperature.",
+    thin: "Double the water, steep 3 minutes, strain well, serve over ice. The lightest, most delicate version.",
+    pro: "Don't over-steep culinary lavender — 4 minutes maximum or it turns soapy.",
+  },
+  "rose-cardamom": {
+    thick: "Add ¼ tsp coconut cream to the oat milk before warming. The result is luscious and almost dessert-like.",
+    thin: "Reduce to ¾ cup oat milk and add ¼ cup water. Keep it warm, not hot.",
+    pro: "Crush cardamom pods fresh if you have them — the fragrance is completely different from ground.",
+  },
+  "blueberry-basil": {
+    thick: "Use frozen wild blueberries and add ½ banana. The frozen fruit makes it naturally thick without yogurt.",
+    thin: "Add ¼ cup cold water and strain through a fine mesh. Serve very cold.",
+    pro: "Add the basil last — just a few seconds in the blender. Over-blending turns it slightly bitter.",
+  },
+  "papaya-lime": {
+    thick: "Add 2 tbsp coconut yogurt. The enzyme and fat combination is incredibly smooth.",
+    thin: "Blend with ¼ cup cold water and strain. Papaya thins beautifully — it's almost juice-like.",
+    pro: "Let papaya ripen until it's fully yielding. The more ripe, the more enzymes, the more digestive benefit.",
+  },
+  "peach-saffron": {
+    thick: "Use ½ cup almond milk and add 1 tbsp almond butter. Luxurious texture.",
+    thin: "Add ¼ cup extra almond milk. Serve over a single large ice cube.",
+    pro: "Steep the saffron in warm milk — not hot water — for 10 minutes before blending. The milk extraction is richer.",
+  },
+  "fig-vanilla": {
+    thick: "Use ¾ cup oat milk and blend in 2 tbsp almond butter. This is a full meal.",
+    thin: "1¼ cups oat milk and strain. The natural sweetness of fig makes it work as a light drink.",
+    pro: "Use a vanilla bean scraped directly if you can — the flavor depth is worth it.",
+  },
+  "cucumber-mint": {
+    thick: "Don't — this one lives in thin territory. Freeze it in popsicle molds instead.",
+    thin: "Add ¼ cup sparkling water at the end, don't blend the bubbles. Serve immediately.",
+    pro: "Don't peel the cucumber — the skin has more silica and polyphenols than the flesh.",
+  },
+  "apricot-almond": {
+    thick: "Add 1 tbsp almond butter and use ¾ cup oat milk. Let it rest 2 minutes — it thickens as it sits.",
+    thin: "Use 1 cup oat milk and add a splash of cold water. Strain for a delicate, pale gold pour.",
+    pro: "Use ripe apricots that yield to gentle pressure. The carotenoid content doubles at peak ripeness.",
+  },
+  "kiwi-spinach": {
+    thick: "Add ½ frozen banana. The banana smooths the sharpness of kiwi and adds body.",
+    thin: "Skip the banana, add ¼ cup more almond milk. Strain for a completely clear, jewel-green glass.",
+    pro: "Kiwi skin is edible and has 3× the fiber of the flesh. Try blending whole if your blender is powerful.",
+  },
+  "vanilla-chia": {
+    thick: "Add an extra tablespoon of chia and let it sit overnight rather than a few hours.",
+    thin: "Use 1¼ cups oat milk in the mix. The ratio is everything with chia.",
+    pro: "Stir twice during the first 10 minutes of refrigerating — this prevents clumping and gives the smoothest texture.",
+  },
+  "ginger-pear": {
+    thick: "Add ½ banana and blend the ginger fully. Warming and filling.",
+    thin: "Juice instead of blend — press pear and ginger through a juicer for a completely clear, spicy morning shot.",
+    pro: "Freeze the pear first if you want it cold and thick. Fresh pear makes it thinner and more delicate.",
+  },
+  "honey-almond": {
+    thick: "Use 2 tbsp almond butter instead of 1 and reduce oat milk to ¾ cup.",
+    thin: "1¼ cups oat milk and just ½ tbsp almond butter. Warm and silky.",
+    pro: "Warm gently — don't boil. Raw honey loses its enzymes above 40°C.",
+  },
+  "bonus-cacao-tonic": {
+    thick: "Add 1 tbsp almond butter and reduce to ¾ cup oat milk. This becomes a true nightcap.",
+    thin: "Use 1¼ cups oat milk and just whisk — no need to blend.",
+    pro: "Drink this 90 minutes before bed. The magnesium in cacao supports sleep quality.",
+  },
+  "bonus-rose-collagen": {
+    thick: "Add 2 tbsp coconut yogurt and stir gently — don't over-mix.",
+    thin: "More sparkling water, less sparkling. The lighter it is, the more elegant.",
+    pro: "Add the sparkling water last, after everything else is mixed.",
+  },
+  "bonus-green-glow": {
+    thick: "Add ½ frozen banana. It turns completely smooth and green.",
+    thin: "Skip the banana, strain, serve very cold.",
+    pro: "Blend the mint for just 3 seconds — any longer and it can turn bitter.",
+  },
+  "bonus-warm-elixir": {
+    thick: "Muddle the berries hard before adding the tea. Let it steep together for 2 extra minutes.",
+    thin: "Strain and serve hot without muddling — a clean, garnet-colored cup.",
+    pro: "Add Radiant Reds only after the tea cools below 40°C — heat degrades heat-sensitive polyphenols.",
+  },
+  "bonus-glow-sorbet": {
+    thick: "Use less coconut yogurt and blend from frozen — it comes out like ice cream.",
+    thin: "Add 2 tbsp oat milk and blend until completely smooth.",
+    pro: "Pre-freeze your bowl. Cold bowl, cold sorbet, right consistency.",
+  },
+};
+
+export type GlowBoostStory = { headline: string; skinStory: string; moment: string };
+
+export const GLOW_BOOST_STORIES: Record<string, GlowBoostStory> = {
+  "pomegranate-elixir": {
+    headline: "Double the clarity in a single glass.",
+    skinStory: "Pomegranate already delivers punicalagins — the compound your gut converts to urolithin A, which protects collagen. Add Radiant Reds and you're stacking a second pomegranate source with beet nitrates for circulation and hibiscus anthocyanins for tone. The result: the same polyphenol conversation happening at twice the volume, across more of your skin's systems simultaneously.",
+    moment: "Add one scoop to the blender before blending. The color deepens. The flavor stays bright.",
+  },
+  "berry-bloom": {
+    headline: "Your microbiome has been waiting for this combination.",
+    skinStory: "Blueberries and strawberries feed bifidobacteria — a specific family of gut bacteria directly linked to clearer skin. Radiant Reds adds 24 additional polyphenol sources to that same feeding. The result isn't additive — it's multiplicative. Your microbiome diversifies faster, and diverse microbiomes produce the metabolites that show up as tone and brightness.",
+    moment: "Stir in after blending, not before. The blueberry and Reds stay visually separate — swirl once before drinking.",
+  },
+  "cherry-cacao": {
+    headline: "Anti-inflammatory stacking — for the skin that holds onto stress.",
+    skinStory: "Tart cherry anthocyanins calm systemic inflammation. Cacao flavanols support skin density and hydration at the cellular level. Radiant Reds adds hibiscus, açaí, and beet — all with overlapping anti-inflammatory mechanisms. If stress shows on your face first, this combination works on every channel that stress uses. Less puffiness. Less redness. Faster morning recovery.",
+    moment: "Blend Radiant Reds in with everything. The cherry-cacao flavor carries it completely.",
+  },
+  "plum-rose": {
+    headline: "Gentle ritual, maximum polyphenol yield.",
+    skinStory: "Plum delivers chlorogenic acid — the same polyphenol found in green coffee, studied for even skin tone. Rose water is calming to the nervous system, which calms cortisol, which shows up on your skin as less reactivity. Add Radiant Reds and the gentle ritual becomes a full polyphenol event without disturbing its softness. Your skin gets the calming properties and the active compounds.",
+    moment: "Stir Radiant Reds into the finished bowl — it folds into the plum color beautifully.",
+  },
+  "watermelon-reds": {
+    headline: "Hydration meets polyphenol density.",
+    skinStory: "Watermelon is lycopene-rich — a carotenoid that accumulates in skin tissue and acts as internal UV protection. Hibiscus adds anthocyanins for vascular support and micro-circulation. Radiant Reds layers beet nitrates — improving blood flow to the skin — on top of all of that. The result is a glass that hydrates from the inside while feeding every layer of your skin's defense system.",
+    moment: "Stir Radiant Reds in after blending — don't blend it. The watermelon flavor stays pure and the Reds blends smoothly.",
+  },
+  "fig-almond": {
+    headline: "The prebiotic-polyphenol duo your gut notices first.",
+    skinStory: "Fig fiber is prebiotic — it feeds gut bacteria directly. Polyphenols feed a different layer of the same system. Together, they're the combination your microbiome responds to fastest. Radiant Reds brings 27 polyphenol sources to sit alongside the fig's fiber, creating a gut environment where the bacteria that produce skin-clearing metabolites can genuinely thrive.",
+    moment: "Add Radiant Reds to the blender with everything. The creamGold color takes on a richer, warmer tone.",
+  },
+  "beet-glow": {
+    headline: "Circulation, doubled. Glow, accelerated.",
+    skinStory: "Beet nitrates drive nitric oxide — which dilates blood vessels, improving circulation and skin oxygenation. That's what 'lit from within' means biologically. Radiant Reds adds more beet and layers hibiscus for vascular support. The result: your skin gets more oxygen, more nutrient delivery, and better color saturation. This is the recipe that makes other people ask what you're doing differently.",
+    moment: "Add Radiant Reds in the blender — it deepens the jewel color and amplifies the earthy-sweet flavor.",
+  },
+  "golden-turmeric": {
+    headline: "Two anti-inflammatory systems, one warm glass.",
+    skinStory: "Curcumin and polyphenols work on overlapping but distinct anti-inflammatory pathways. Curcumin suppresses specific inflammatory signals; polyphenols calm a broader inflammatory environment and feed the bacteria that regulate it. Adding Radiant Reds after it cools means you're running both systems simultaneously — and the gut-skin axis benefits from both. This is the glass for the woman whose skin reacts to everything.",
+    moment: "Wait until the latte cools to drinking temperature. Stir in Radiant Reds then — heat kills some polyphenols.",
+  },
+  "matcha-cloud": {
+    headline: "EGCG and anthocyanins — two polyphenol families, two skin systems.",
+    skinStory: "EGCG (the primary polyphenol in matcha) works primarily as a UV-protective and anti-oxidative compound in the skin. Anthocyanins (the primary polyphenols in Radiant Reds) work primarily via the gut-skin axis — feeding bacteria that produce the metabolites your skin uses for tone and clarity. These two families don't compete — they work through different mechanisms and cover more of your skin's needs than either could alone.",
+    moment: "Stir Radiant Reds into the finished glass over ice. The matcha green and Reds garnet swirl — drink before it fully blends for the full effect.",
+  },
+  "lavender-honey": {
+    headline: "Calm your nervous system and feed your skin — at the same time.",
+    skinStory: "Lavender calms the nervous system. A calm nervous system produces less cortisol. Cortisol at high levels breaks down collagen, increases oil production, and shows up as dullness and reactivity. Radiant Reds adds the polyphenol layer that actively feeds the gut bacteria regulating inflammation. The combination works on skin from both the top-down (nervous system → skin) and the bottom-up (gut → skin) simultaneously.",
+    moment: "Add Radiant Reds after the tea cools completely. Stir gently — this should stay delicate.",
+  },
+  "rose-cardamom": {
+    headline: "Feminine, warming, and now fully polyphenol-backed.",
+    skinStory: "Cardamom contains essential oils that are mildly anti-inflammatory and digestive-supportive. Rose water calms the nervous system. This glass is already doing quiet, real work. Add Radiant Reds and that quiet work gets amplified — the polyphenols feed the gut that's already been soothed, and the skin downstream gets both the calming signals and the active compounds for brightness and tone.",
+    moment: "Wait until it reaches drinking temperature. Stir in Radiant Reds last. Sip slowly.",
+  },
+  "blueberry-basil": {
+    headline: "Two anthocyanin sources hitting the same skin target from different angles.",
+    skinStory: "Blueberries deliver anthocyanins that your gut converts into the metabolites that show up as skin brightness and protection. Radiant Reds delivers wild blueberry, açaí, and pomegranate — all hitting the same anthocyanin pathway, each with a slightly different molecular profile. Your gut converts all of them. More diversity means more of the metabolites that cross the gut-skin axis and reach your face.",
+    moment: "Blend Radiant Reds in with the fruit. The deep blue-purple color intensifies — striking and saturated.",
+  },
+  "papaya-lime": {
+    headline: "Enzymes open the door. Polyphenols walk through.",
+    skinStory: "Papain — papaya's primary enzyme — supports digestion and reduces gut inflammation. A calmer gut is a more permeable membrane for the polyphenols that follow it. Radiant Reds, added alongside papaya, benefits from this enzymatic opening. The polyphenols absorb more efficiently in a gut that's been primed by papain. This is the sequence your microbiome notices.",
+    moment: "Stir Radiant Reds into the finished glass — don't blend it in. The enzyme stays more active that way.",
+  },
+  "peach-saffron": {
+    headline: "The mood-skin connection, fully supported.",
+    skinStory: "Saffron has been studied for mood support — and mood affects skin. Chronic low-grade sadness or anxiety elevates cortisol, which degrades collagen and dulls tone. Radiant Reds layers polyphenols that specifically feed gut bacteria involved in neurotransmitter production — including the same pathways saffron touches. This glass works on your skin through your nervous system, your gut, and your circulation.",
+    moment: "Add Radiant Reds after blending, before topping with cinnamon. Stir once.",
+  },
+  "fig-vanilla": {
+    headline: "Prebiotic fiber meets polyphenol density — the gut's favorite combination.",
+    skinStory: "Fig's soluble fiber is the substrate — it feeds the bacteria. Radiant Reds delivers the polyphenols those bacteria ferment into the compounds that reach your skin. It's the same relationship as soil and seeds: the fiber creates the environment, the polyphenols grow what your skin needs. Fig and Reds together accelerate the microbiome shift that shows up first as clearer digestion, then as clearer skin.",
+    moment: "Add Radiant Reds to the blender. The vanilla and Reds create a complex, warm aroma that makes the morning feel like something.",
+  },
+  "cucumber-mint": {
+    headline: "Hydration unlocks polyphenol absorption.",
+    skinStory: "Polyphenols absorb most efficiently when you're well-hydrated. Cucumber is over 95% water — it actively prepares the gut environment for what comes next. Radiant Reds, added to this glass, arrives in the most receptive gut state possible. The polyphenols move faster, absorb more completely, and reach the gut bacteria that run your skin's glow engine.",
+    moment: "Stir Radiant Reds into the finished cooler after straining. The clear cucumber base takes on a deep garnet color — serve immediately.",
+  },
+  "apricot-almond": {
+    headline: "Two pigment families, one lit-from-within effect.",
+    skinStory: "Apricots are beta-carotene-rich — a carotenoid that the body converts to vitamin A and accumulates in skin tissue, giving a warm, golden tone. Radiant Reds adds anthocyanins — the red and purple pigments that support tone evenness and circulation. Together, the warm gold of carotenoids and the deep red of anthocyanins are what researchers mean when they describe 'glow.' This is the glass for that.",
+    moment: "Add Radiant Reds before blending. The apricot gold and Reds deepen into a stunning warm tone.",
+  },
+  "kiwi-spinach": {
+    headline: "Vitamin C and polyphenols — the collagen connection.",
+    skinStory: "Vitamin C is the rate-limiting factor in collagen synthesis — your body cannot make collagen without it. Kiwi delivers more vitamin C than oranges by weight. Radiant Reds adds anthocyanins that protect the collagen once it's made. The result is a glass that supports collagen at every stage: synthesis (vitamin C), protection from oxidation (polyphenols), and the gut environment where both are regulated.",
+    moment: "Add Radiant Reds before blending. The green and garnet make a deep teal blend — unexpected, beautiful.",
+  },
+  "vanilla-chia": {
+    headline: "Omega-3 and polyphenols for the skin barrier.",
+    skinStory: "Skin barrier function is about fats and inflammation. Chia's ALA omega-3 feeds the lipid layer your barrier needs. Radiant Reds adds polyphenols that calm the inflammation that breaks that barrier down. The gut-skin axis is also at work: omega-3 and polyphenols together shift the microbiome toward bacteria that produce short-chain fatty acids — the compounds that repair the gut lining and, downstream, the skin.",
+    moment: "Sprinkle Radiant Reds on top like a dusting. The crimson on cream is one of the most beautiful presentations in the reset.",
+  },
+  "ginger-pear": {
+    headline: "Motility, microbiome, skin — in that order.",
+    skinStory: "Ginger supports gut motility — the gentle movement that keeps digestion flowing. A moving gut is a healthier gut lining. Pear adds soluble fiber. Radiant Reds adds the polyphenols that feed the bacteria in the now-moving, fiber-supported gut. The chain runs: motility → healthy lining → better microbiome → cleaner skin. This glass supports every link.",
+    moment: "Add Radiant Reds before blending. The ginger warmth and Reds complement each other completely.",
+  },
+  "honey-almond": {
+    headline: "Clean energy that doesn't steal from your skin.",
+    skinStory: "Blood sugar spikes glycate collagen — the process that makes skin look dull and aged. Almond fat and fiber blunt the morning blood sugar response. Radiant Reds adds polyphenols that, separately, slow glucose absorption and feed the bacteria that regulate insulin sensitivity. This glass keeps energy steady, keeps cortisol low, and keeps collagen intact — three skin wins from one morning ritual.",
+    moment: "Stir Radiant Reds in after blending. Add a cinnamon dusting last — this is one of the most grounding morning cups in the reset.",
+  },
+  "bonus-cacao-tonic": {
+    headline: "Evening polyphenols — while your skin does its overnight work.",
+    skinStory: "Skin repair peaks between 11pm and 2am. The polyphenols you take in the evening are available in circulation during that repair window. Radiant Reds adds the polyphenol density cacao doesn't deliver — a quiet evening dose that reaches your skin's nighttime repair process and gives it more to work with while you sleep.",
+    moment: "Wait until fully cooled. Stir in Radiant Reds. Sip slowly one hour before bed.",
+  },
+  "bonus-rose-collagen": {
+    headline: "Vitamin C primes collagen. Polyphenols protect it.",
+    skinStory: "Your body needs vitamin C to make collagen, and polyphenols to stop it from breaking down. Strawberry brings vitamin C. Radiant Reds brings the polyphenol protection layer. Together, they support both ends of the collagen lifecycle in a single glass. This is one of the most complete skin-support combinations in the entire recipe library.",
+    moment: "Stir Radiant Reds into the finished glass before topping with sparkling water. The garnet color through the bubbles is striking.",
+  },
+  "bonus-green-glow": {
+    headline: "Green pigments and red pigments — the full spectrum.",
+    skinStory: "Chlorophyll (from cucumber and kiwi) is a green pigment that supports liver function and, through that, clearer skin. Anthocyanins (from Radiant Reds) are red and purple pigments that support the gut-skin axis directly. Plants use different pigment families to run different biological functions. Adding Radiant Reds to a chlorophyll-forward glass means you're running the full spectrum of plant-pigment skin support simultaneously.",
+    moment: "Stir Radiant Reds into the strained glass, not the blender. The crimson drops through the green — beautiful.",
+  },
+  "bonus-warm-elixir": {
+    headline: "Heat-sensitive ritual, carefully built.",
+    skinStory: "Some polyphenols in Radiant Reds are heat-sensitive — they degrade above 40°C. This warm glass needs to cool before Radiant Reds goes in. Once it does, the hibiscus anthocyanins in the tea and the pomegranate, beet, and açaí in Radiant Reds create one of the deepest polyphenol concentrations in the entire recipe library. A warming cup that delivers a cold-process polyphenol punch.",
+    moment: "Cool to drinking temperature — test with your wrist. Then stir in Radiant Reds and drink immediately.",
+  },
+  "bonus-glow-sorbet": {
+    headline: "Dessert that works like a ritual.",
+    skinStory: "Frozen berries retain their anthocyanins better than fresh during blending — cold processing preserves polyphenols that heat would degrade. Coconut yogurt adds live cultures alongside the fruit. Radiant Reds on top means the polyphenols hit an already-primed gut, where the probiotics and fruit fiber have prepared the environment. This is the most indulgent delivery mechanism in the reset.",
+    moment: "Dust Radiant Reds on top like finishing powder. The crimson on ivory sorbet is the most beautiful thing you'll make in 21 days.",
+  },
+};
 
 export const SOUNDS = [
   { id: "rain", name: "Morning Rain", duration: "8 min", url: "https://cdn.pixabay.com/audio/2022/03/10/audio_a8e603753c.mp3" },

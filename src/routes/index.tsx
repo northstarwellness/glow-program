@@ -2,12 +2,11 @@ import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { Pomegranate } from "@/components/Frame";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NOURÉ — The Inner Glow Reset" },
+      { title: "Ritual App — The Inner Glow Reset" },
       { name: "description", content: "A 21-day morning ritual for radiant skin, a calm gut, and steady energy." },
     ],
   }),
@@ -39,33 +38,56 @@ function NameCapture() {
 
   return (
     <div className="ivory-frame min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-[440px] flex-col items-center px-6 pt-10 pb-12">
-        <p className="font-serif text-[15px] tracking-[0.4em] text-[var(--plum)]">NOURÉ</p>
+      <div className="mx-auto flex min-h-screen max-w-[440px] flex-col px-8">
 
-        <div className="mt-8">
-          <Pomegranate size={200} />
+        {/* Top wordmark */}
+        <div className="pt-14 pb-0">
+          <p className="font-serif text-[11px] tracking-[0.55em] text-[var(--charcoal)]/40 uppercase">
+            RITUAL APP
+          </p>
         </div>
 
-        <h1 className="mt-6 text-center font-serif text-[40px] leading-tight text-[var(--plum)]">
-          Before we begin.
-        </h1>
-        <p className="mt-3 max-w-[30ch] text-center text-[15px] leading-relaxed text-[var(--plum)]/65">
-          This ritual is yours. Tell us your name.
-        </p>
+        {/* Main content — vertically centered */}
+        <div className="flex flex-1 flex-col justify-center pb-16">
 
-        <form onSubmit={submit} className="mt-10 w-full">
-          <input
-            autoFocus
-            value={val}
-            onChange={(e) => setVal(e.target.value)}
-            placeholder="Your first name"
-            className="w-full border-0 border-b border-[var(--plum)]/30 bg-transparent px-1 py-3 text-center font-serif text-2xl text-[var(--plum)] placeholder:text-[var(--plum)]/30 focus:border-[var(--gold)] focus:outline-none"
-            maxLength={32}
-          />
-          <button type="submit" disabled={!val.trim()} className="gold-pill-btn mt-10 w-full disabled:opacity-50">
-            Begin My Reset →
-          </button>
-        </form>
+          {/* Thin gold rule */}
+          <div className="mb-10 h-px w-10 bg-[var(--gold)]/50" />
+
+          <h1 className="font-serif text-[46px] leading-[1.05] text-[var(--charcoal)]">
+            Your skin notices<br />everything.
+          </h1>
+
+          <p className="mt-5 font-serif italic text-[16px] leading-relaxed text-[var(--charcoal)]/50 max-w-[30ch]">
+            The Inner Glow Reset is a 21-day morning ritual built for the woman who's doing everything right and still not seeing it on her face.
+          </p>
+
+          <form onSubmit={submit} className="mt-12">
+            <label className="block font-serif text-[11px] tracking-[0.38em] uppercase text-[var(--charcoal)]/40 mb-5">
+              Who's doing this reset?
+            </label>
+            <input
+              autoFocus
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              placeholder="Your first name"
+              maxLength={32}
+              className="w-full border-0 border-b border-[var(--taupe)]/40 bg-transparent pb-3 font-serif text-[28px] text-[var(--charcoal)] placeholder:text-[var(--charcoal)]/20 focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
+            />
+            <button
+              type="submit"
+              disabled={!val.trim()}
+              className="gold-pill-btn mt-10 w-full disabled:opacity-30"
+            >
+              Begin My Reset
+            </button>
+          </form>
+
+          {/* Bottom note */}
+          <p className="mt-8 font-serif italic text-[12px] text-[var(--charcoal)]/30 text-center">
+            21 days. One morning ritual. No shortcuts.
+          </p>
+        </div>
+
       </div>
     </div>
   );

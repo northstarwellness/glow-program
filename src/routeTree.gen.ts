@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as RitualsRouteImport } from './routes/rituals'
+import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as LandingRouteImport } from './routes/landing'
 import { Route as HomeRouteImport } from './routes/home'
 import { Route as GroceryRouteImport } from './routes/grocery'
 import { Route as CelebrateRouteImport } from './routes/celebrate'
+import { Route as BoostsRouteImport } from './routes/boosts'
 import { Route as BonusesRouteImport } from './routes/bonuses'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesIndexRouteImport } from './routes/recipes.index'
@@ -40,9 +43,19 @@ const RitualsRoute = RitualsRouteImport.update({
   path: '/rituals',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProgressRoute = ProgressRouteImport.update({
+  id: '/progress',
+  path: '/progress',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LandingRoute = LandingRouteImport.update({
+  id: '/landing',
+  path: '/landing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeRoute = HomeRouteImport.update({
@@ -58,6 +71,11 @@ const GroceryRoute = GroceryRouteImport.update({
 const CelebrateRoute = CelebrateRouteImport.update({
   id: '/celebrate',
   path: '/celebrate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BoostsRoute = BoostsRouteImport.update({
+  id: '/boosts',
+  path: '/boosts',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BonusesRoute = BonusesRouteImport.update({
@@ -104,10 +122,13 @@ const DayNRoute = DayNRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
+  '/boosts': typeof BoostsRoute
   '/celebrate': typeof CelebrateRoute
   '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
+  '/landing': typeof LandingRoute
   '/profile': typeof ProfileRoute
+  '/progress': typeof ProgressRoute
   '/rituals': typeof RitualsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
@@ -121,10 +142,13 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
+  '/boosts': typeof BoostsRoute
   '/celebrate': typeof CelebrateRoute
   '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
+  '/landing': typeof LandingRoute
   '/profile': typeof ProfileRoute
+  '/progress': typeof ProgressRoute
   '/rituals': typeof RitualsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
@@ -139,10 +163,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/bonuses': typeof BonusesRoute
+  '/boosts': typeof BoostsRoute
   '/celebrate': typeof CelebrateRoute
   '/grocery': typeof GroceryRoute
   '/home': typeof HomeRoute
+  '/landing': typeof LandingRoute
   '/profile': typeof ProfileRoute
+  '/progress': typeof ProgressRoute
   '/rituals': typeof RitualsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
@@ -158,10 +185,13 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/bonuses'
+    | '/boosts'
     | '/celebrate'
     | '/grocery'
     | '/home'
+    | '/landing'
     | '/profile'
+    | '/progress'
     | '/rituals'
     | '/verify'
     | '/welcome'
@@ -175,10 +205,13 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/bonuses'
+    | '/boosts'
     | '/celebrate'
     | '/grocery'
     | '/home'
+    | '/landing'
     | '/profile'
+    | '/progress'
     | '/rituals'
     | '/verify'
     | '/welcome'
@@ -192,10 +225,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/bonuses'
+    | '/boosts'
     | '/celebrate'
     | '/grocery'
     | '/home'
+    | '/landing'
     | '/profile'
+    | '/progress'
     | '/rituals'
     | '/verify'
     | '/welcome'
@@ -210,10 +246,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BonusesRoute: typeof BonusesRoute
+  BoostsRoute: typeof BoostsRoute
   CelebrateRoute: typeof CelebrateRoute
   GroceryRoute: typeof GroceryRoute
   HomeRoute: typeof HomeRoute
+  LandingRoute: typeof LandingRoute
   ProfileRoute: typeof ProfileRoute
+  ProgressRoute: typeof ProgressRoute
   RitualsRoute: typeof RitualsRoute
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -248,11 +287,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RitualsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/progress': {
+      id: '/progress'
+      path: '/progress'
+      fullPath: '/progress'
+      preLoaderRoute: typeof ProgressRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/profile': {
       id: '/profile'
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/landing': {
+      id: '/landing'
+      path: '/landing'
+      fullPath: '/landing'
+      preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home': {
@@ -274,6 +327,13 @@ declare module '@tanstack/react-router' {
       path: '/celebrate'
       fullPath: '/celebrate'
       preLoaderRoute: typeof CelebrateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/boosts': {
+      id: '/boosts'
+      path: '/boosts'
+      fullPath: '/boosts'
+      preLoaderRoute: typeof BoostsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/bonuses': {
@@ -338,10 +398,13 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BonusesRoute: BonusesRoute,
+  BoostsRoute: BoostsRoute,
   CelebrateRoute: CelebrateRoute,
   GroceryRoute: GroceryRoute,
   HomeRoute: HomeRoute,
+  LandingRoute: LandingRoute,
   ProfileRoute: ProfileRoute,
+  ProgressRoute: ProgressRoute,
   RitualsRoute: RitualsRoute,
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,

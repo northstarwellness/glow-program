@@ -4,91 +4,61 @@ import { Frame, TopBar } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { RECIPES } from "@/lib/content";
+import { SmoothieImage } from "@/components/SmoothieImage";
 
 export const Route = createFileRoute("/recipes/")({ component: Recipes });
 
-type Feel = {
-  id: string;
-  label: string;
-  sub: string;
-  recipeIds: string[];
+type PhaseFilter = "all" | "foundation" | "build" | "glow" | "bonus";
+
+const PHASE_LABELS: Record<PhaseFilter, string> = {
+  all: "All",
+  foundation: "Foundation",
+  build: "Build",
+  glow: "Glow",
+  bonus: "Bonus",
 };
 
-const FEELS: Feel[] = [
-  { id: "glowing",   label: "Glowing skin",       sub: "Polyphenol-dense for the gut-skin axis",       recipeIds: ["pomegranate-elixir", "beet-glow", "berry-bloom"] },
-  { id: "bloating",  label: "Less bloated",        sub: "Prebiotic fiber and gentle motility support",   recipeIds: ["fig-almond", "ginger-pear", "papaya-lime"] },
-  { id: "energy",    label: "Steady energy",       sub: "Beet nitrates and clean morning fuel",          recipeIds: ["beet-glow", "honey-almond", "matcha-cloud"] },
-  { id: "hormone",   label: "Hormone support",     sub: "Adaptogens and anti-inflammatory polyphenols",  recipeIds: ["plum-rose", "peach-saffron", "cherry-cacao"] },
-  { id: "digestion", label: "Digestion",           sub: "Enzymes, ginger, and gut-calming ingredients", recipeIds: ["papaya-lime", "fig-almond", "ginger-pear"] },
-  { id: "reset",     label: "Morning reset",       sub: "Hydration and polyphenol clarity",              recipeIds: ["pomegranate-elixir", "watermelon-reds", "matcha-cloud"] },
-  { id: "beauty",    label: "Beauty from within",  sub: "Rose, saffron, and skin-tone polyphenols",      recipeIds: ["rose-cardamom", "blueberry-basil", "peach-saffron"] },
-  { id: "calm",      label: "Calm nervous system", sub: "Lavender, rose, and anti-cortisol adaptogens",  recipeIds: ["lavender-honey", "rose-cardamom", "plum-rose"] },
-];
+const core = RECIPES.filter((r) => !r.bonus);
 
 function Recipes() {
   const hydrated = useHydrated();
   const s = useApp();
+  const [filter, setFilter] = useState<PhaseFilter>("all");
+
   if (hydrated && !s.name) return <Navigate to="/" />;
 
-  const [activeFeel, setActiveFeel] = useState<Feel | null>(null);
-  const core = RECIPES.filter((r) => !r.bonus);
-
-  const displayRecipes = activeFeel
-    ? activeFeel.recipeIds.map((id) => RECIPES.find((r) => r.id === id)!).filter(Boolean)
-    : core;
+  const displayRecipes = (() => {
+    if (filter === "all") return core;
+    if (filter === "foundation") return core.slice(0, 7);
+    if (filter === "build") return core.slice(7, 14);
+    if (filter === "glow") return core.slice(14, 21);
+    if (filter === "bonus") return RECIPES.filter((r) => r.bonus);
+    return core;
+  })();
 
   return (
     <Frame>
       <TopBar name={s.name} />
-      <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Smoothie rituals.</h1>
-      <p className="mt-1 font-serif italic text-[15px] text-[var(--plum)]/60">
-        {core.length} recipes built for the gut-skin axis.
+      <h1 className="font-serif text-[34px] leading-tight text-[var(--charcoal)]">The 21 smoothies.</h1>
+      <p className="mt-1 font-serif italic text-[15px] text-[var(--charcoal)]/55">
+        Polyphenol rituals for every morning.
       </p>
 
-      {/* Build your own */}
-      <Link to="/recipes/$id" params={{ id: "build" }} className="mt-5 block">
-        <div className="overflow-hidden rounded-3xl border border-[var(--gold)]/40 bg-[var(--card)] p-5 shadow-sm">
-          <p className="label-caps text-[var(--gold)]">Custom ritual</p>
-          <h3 className="mt-1 font-serif text-[22px] leading-tight text-[var(--plum)]">Build your own smoothie</h3>
-          <p className="mt-1 text-[12.5px] italic text-[var(--plum)]/65">
-            Choose your ingredients layer by layer. We write the benefits.
-          </p>
-          <p className="mt-3 text-[11px] tracking-[0.18em] uppercase text-[var(--gold)]">Begin</p>
-        </div>
-      </Link>
-
-      {/* How do you want to feel */}
-      <div className="mt-7">
-        <p className="label-caps text-[var(--plum)]/55">How do you want to feel?</p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          {FEELS.map((f) => {
-            const active = activeFeel?.id === f.id;
-            return (
-              <button
-                key={f.id}
-                onClick={() => setActiveFeel(active ? null : f)}
-                className={`rounded-2xl border p-3.5 text-left transition-all ${
-                  active
-                    ? "border-[var(--gold)] bg-[var(--gold)]/10"
-                    : "border-[var(--plum)]/12 bg-[var(--card)]"
-                }`}
-              >
-                <p className={`font-serif text-[16px] leading-tight ${active ? "text-[var(--plum)]" : "text-[var(--plum)]"}`}>
-                  {f.label}
-                </p>
-                <p className="mt-0.5 text-[11px] italic text-[var(--plum)]/55">{f.sub}</p>
-              </button>
-            );
-          })}
-        </div>
-        {activeFeel && (
+      {/* Phase filter pills */}
+      <div className="mt-5 flex gap-2 overflow-x-auto pb-1 no-scrollbar">
+        {(["all", "foundation", "build", "glow", "bonus"] as PhaseFilter[]).map((f) => (
           <button
-            onClick={() => setActiveFeel(null)}
-            className="mt-2 text-[11px] text-[var(--plum)]/50"
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`flex-shrink-0 rounded-full px-4 py-2 text-[12px] font-medium tracking-[0.1em] uppercase transition-all cursor-pointer ${
+              filter === f
+                ? "bg-[var(--charcoal)] text-[var(--ivory)]"
+                : "bg-white text-[var(--charcoal)]/55 border border-[var(--taupe)]/30"
+            }`}
           >
-            Clear filter — show all recipes
+            {PHASE_LABELS[f]}
           </button>
-        )}
+        ))}
       </div>
 
       {/* Recipe grid */}
@@ -97,22 +67,31 @@ function Recipes() {
           const saved = s.savedRecipes.includes(r.id);
           return (
             <Link key={r.id} to="/recipes/$id" params={{ id: r.id }} className="group block">
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm" style={{ background: r.gradient }}>
-                <div className="flex h-full flex-col justify-end p-3 text-[var(--ivory)]">
-                  <span className="self-start rounded-full bg-[var(--ivory)]/25 px-2 py-0.5 text-[9px] tracking-wider uppercase">
+              <div className="overflow-hidden rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm transition-shadow group-hover:shadow-md">
+                {/* Smoothie photo with gradient fallback */}
+                <SmoothieImage recipe={r} className="h-[80px] w-full" />
+                <div className="p-3.5">
+                  <span className="inline-block rounded-full px-2.5 py-0.5 text-[9.5px] tracking-[0.15em] uppercase font-medium"
+                        style={{ background: "oklch(0.205 0 0 / 0.06)", color: "var(--charcoal)" }}>
                     {r.benefitTag}
                   </span>
-                  <h3 className="mt-2 font-serif text-[16px] leading-tight">{r.name}</h3>
-                  <p className="mt-1 text-[10px] tracking-wide opacity-80">{r.prep}</p>
+                  <h3 className="mt-1.5 font-serif text-[15px] leading-tight text-[var(--charcoal)]">{r.name}</h3>
+                  <p className="mt-1 text-[11px] text-[var(--charcoal)]/40">{r.prep}</p>
+                  {saved && (
+                    <p className="mt-1.5 text-[9.5px] tracking-[0.14em] uppercase text-[var(--gold)]">Saved</p>
+                  )}
                 </div>
               </div>
-              {saved && (
-                <p className="mt-1 text-[10px] tracking-[0.14em] uppercase text-[var(--gold)]">Saved</p>
-              )}
             </Link>
           );
         })}
       </div>
+
+      {filter === "bonus" && (
+        <p className="mt-4 text-center font-serif italic text-[13px] text-[var(--charcoal)]/40">
+          Bonus rituals — beyond the 21-day rotation.
+        </p>
+      )}
     </Frame>
   );
 }

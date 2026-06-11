@@ -35,6 +35,9 @@
   --color-ring: var(--ring);
   --color-ivory: var(--ivory);
   --color-sand: var(--sand);
+  --color-beige: var(--beige);
+  --color-taupe: var(--taupe);
+  --color-charcoal: var(--charcoal);
   --color-plum: var(--plum);
   --color-plum-deep: var(--plum-deep);
   --color-gold: var(--gold);
@@ -47,33 +50,39 @@
 :root {
   --radius: 0.875rem;
 
-  --ivory:     oklch(0.972 0.012 75);
-  --sand:      oklch(0.935 0.020 70);
-  --sand-deep: oklch(0.905 0.025 68);
+  --ivory:     oklch(0.974 0.010 75);   /* #FAF7F3 */
+  --sand:      oklch(0.942 0.018 70);
+  --sand-deep: oklch(0.912 0.022 68);
+  --beige:     oklch(0.938 0.022 70);   /* #F1EAE0 */
+  --taupe:     oklch(0.748 0.012 65);   /* #B9B1A6 */
+  --charcoal:  oklch(0.205 0 0);        /* #2A2A2A */
   --plum:      oklch(0.388 0.108 354);
   --plum-deep: oklch(0.255 0.072 354);
-  --gold:      oklch(0.732 0.082 65);
-  --gold-deep: oklch(0.66 0.090 60);
+  --gold:      oklch(0.720 0.082 65);   /* #C8A46A */
+  --gold-deep: oklch(0.650 0.090 60);
   --berry:     oklch(0.42 0.155 18);
+  --rose:      oklch(0.82 0.06 10);
+  --blush:     oklch(0.946 0.018 12);   /* #F6E6E1 */
+  --sage:      oklch(0.83 0.038 145);
 
   --background: var(--ivory);
-  --foreground: var(--plum-deep);
-  --card: oklch(0.985 0.010 75);
-  --card-foreground: var(--plum-deep);
+  --foreground: var(--charcoal);
+  --card: oklch(0.998 0.005 75);
+  --card-foreground: var(--charcoal);
   --popover: var(--card);
-  --popover-foreground: var(--plum-deep);
-  --primary: var(--plum);
+  --popover-foreground: var(--charcoal);
+  --primary: var(--charcoal);
   --primary-foreground: var(--ivory);
-  --secondary: var(--sand);
-  --secondary-foreground: var(--plum-deep);
-  --muted: var(--sand);
-  --muted-foreground: oklch(0.48 0.04 354);
+  --secondary: var(--beige);
+  --secondary-foreground: var(--charcoal);
+  --muted: var(--beige);
+  --muted-foreground: oklch(0.52 0 0);
   --accent: var(--gold);
   --accent-foreground: oklch(0.99 0 0);
   --destructive: oklch(0.55 0.2 25);
   --destructive-foreground: var(--ivory);
-  --border: oklch(0.88 0.02 70);
-  --input: oklch(0.92 0.015 70);
+  --border: oklch(0.900 0.012 70);
+  --input: oklch(0.940 0.010 70);
   --ring: var(--gold);
 }
 
@@ -102,7 +111,8 @@
 @layer utilities {
   .ivory-frame {
     background:
-      radial-gradient(120% 60% at 50% 0%, oklch(0.99 0.012 70) 0%, transparent 60%),
+      radial-gradient(80% 40% at 50% 0%, oklch(0.99 0.015 70 / 0.9) 0%, transparent 70%),
+      radial-gradient(60% 30% at 80% 100%, oklch(0.92 0.025 10 / 0.25) 0%, transparent 60%),
       var(--color-background);
   }
   .gold-divider {
@@ -115,27 +125,72 @@
   }
   .ritual-card {
     background: var(--color-card);
-    border: 1px solid var(--color-border);
+    border: 1px solid oklch(0.900 0.012 70);
     border-radius: var(--radius-2xl);
-    box-shadow: 0 2px 12px rgba(123, 45, 78, 0.08);
+    box-shadow: 0 2px 12px oklch(0.205 0 0 / 0.05);
   }
   .sand-card {
-    background: var(--color-sand);
+    background: var(--color-beige);
+    border: 1px solid oklch(0.900 0.012 70);
     border-radius: var(--radius-2xl);
-    box-shadow: 0 2px 12px rgba(123, 45, 78, 0.06);
+    box-shadow: 0 2px 8px oklch(0.205 0 0 / 0.04);
+  }
+  .glass-card {
+    background: oklch(0.999 0.004 75 / 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid oklch(0.900 0.012 70 / 0.7);
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      0 4px 20px oklch(0.205 0 0 / 0.06),
+      0 1px 0 oklch(0.99 0 0 / 0.8) inset;
+  }
+  .glow-card {
+    background: var(--color-card);
+    border: 1px solid oklch(0.900 0.012 70);
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      0 8px 32px oklch(0.205 0 0 / 0.07),
+      0 2px 8px oklch(0.205 0 0 / 0.04);
+  }
+  .gold-glow-card {
+    background: linear-gradient(135deg, oklch(0.985 0.018 70) 0%, oklch(0.97 0.025 65) 100%);
+    border: 1px solid oklch(0.732 0.082 65 / 0.35);
+    border-radius: var(--radius-2xl);
+    box-shadow:
+      0 8px 32px oklch(0.732 0.082 65 / 0.20),
+      0 2px 8px oklch(0.732 0.082 65 / 0.10);
+  }
+  .blush-card {
+    background: linear-gradient(135deg, oklch(0.975 0.015 10) 0%, oklch(0.965 0.018 15) 100%);
+    border: 1px solid oklch(0.82 0.06 10 / 0.25);
+    border-radius: var(--radius-2xl);
+    box-shadow: 0 4px 20px oklch(0.42 0.155 18 / 0.08);
+  }
+  .hero-gradient {
+    background: linear-gradient(155deg,
+      oklch(0.388 0.108 354) 0%,
+      oklch(0.42 0.155 18) 55%,
+      oklch(0.32 0.09 354) 100%);
   }
   .gold-pill-btn {
-    background: var(--color-gold);
+    display: block;
+    background: linear-gradient(135deg, var(--color-gold) 0%, var(--gold-deep) 100%);
     color: var(--color-ivory);
     border-radius: 999px;
     padding: 14px 24px;
     font-family: var(--font-serif);
     font-size: 17px;
     letter-spacing: 0.02em;
+    text-align: center;
     transition: all .2s;
-    box-shadow: 0 4px 16px oklch(0.732 0.082 65 / 0.35);
+    box-shadow: 0 6px 20px oklch(0.732 0.082 65 / 0.40);
   }
-  .gold-pill-btn:hover { background: var(--gold-deep); }
+  .gold-pill-btn:hover {
+    background: linear-gradient(135deg, var(--gold-deep) 0%, oklch(0.60 0.095 58) 100%);
+    box-shadow: 0 8px 28px oklch(0.732 0.082 65 / 0.50);
+    transform: translateY(-1px);
+  }
   .gold-pill-btn:active { transform: scale(.98); }
   .ivory-pill-btn {
     background: var(--color-ivory);
@@ -181,5 +236,15 @@
   }
   @keyframes fall {
     to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+  .streak-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    transition: all 0.2s;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--color-gold), oklch(0.82 0.06 10));
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 }
