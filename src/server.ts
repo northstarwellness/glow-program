@@ -228,8 +228,9 @@ async function handleVerifyApi(request: Request, env: Env): Promise<Response> {
       return Response.json({ verified: false }, { headers: cors });
     }
 
-    // 3. No verification configured — open (remove before full launch)
-    return Response.json({ verified: true }, { headers: cors });
+    // 3. Not in KV and not in the allowlist — deny (default-deny / fail closed).
+    //    Real purchasers are unlocked via the Shopify webhook → KV path above.
+    return Response.json({ verified: false }, { headers: cors });
   } catch {
     return Response.json({ verified: false }, { status: 500, headers: cors });
   }
