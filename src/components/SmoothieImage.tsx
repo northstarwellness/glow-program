@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Recipe } from "@/lib/content";
 
 interface Props {
@@ -7,22 +7,39 @@ interface Props {
   style?: React.CSSProperties;
 }
 
-/** Tries to load the recipe photo (recipe.image or /images/smoothies/{id}.jpg);
- *  falls back to the recipe's CSS gradient on any error. */
+/** Paints the recipe gradient immediately and fades the photo
+ *  (recipe.image or /images/smoothies/{id}.jpg) in only once it loads.
+ *  SSR-safe: a missing photo simply leaves the gradient in place. */
 export function SmoothieImage({ recipe, className = "", style }: Props) {
-  const [failed, setFailed] = useState(false);
+  const ref = useRef<HTMLImageElement | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
-  if (failed) {
-    return <div className={className} style={{ ...style, background: recipe.gradient }} />;
-  }
+  // Catch images that finished loading before hydration attached onLoad
+  useEffect(() => {
+    const img = ref.current;
+    if (img?.complete && img.naturalWidth > 0) setLoaded(true);
+  }, []);
 
   return (
-    <img
-      src={recipe.image ?? `/images/smoothies/${recipe.id}.jpg`}
-      alt=""
+    <div
       className={className}
-      style={{ ...style, objectFit: "cover" }}
-      onError={() => setFailed(true)}
-    />
+      style={{ ...style, background: recipe.gradient, position: "relative", overflow: "hidden" }}
+    >
+      <img
+        ref={ref}
+        src={recipe.image ?? `/images/smoothies/${recipe.id}.jpg`}
+        alt=""
+        onLoad={() => setLoaded(true)}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.3s ease",
+        }}
+      />
+    </div>
   );
 }
