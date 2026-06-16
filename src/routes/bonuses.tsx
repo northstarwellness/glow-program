@@ -46,11 +46,10 @@ function Bonuses() {
   );
 }
 
-function BonusRecipes() {
-  const bonus = RECIPES.filter((r) => r.bonus);
+function RecipeGrid({ list }: { list: typeof RECIPES }) {
   return (
-    <div className="mt-5 grid grid-cols-2 gap-3">
-      {bonus.map((r) => (
+    <div className="mt-3 grid grid-cols-2 gap-3">
+      {list.map((r) => (
         <Link key={r.id} to="/recipes/$id" params={{ id: r.id }} className="block">
           <div className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm" style={{ background: r.gradient }}>
             <div className="flex h-full flex-col justify-end p-3 text-[var(--ivory)]">
@@ -61,6 +60,30 @@ function BonusRecipes() {
           </div>
         </Link>
       ))}
+    </div>
+  );
+}
+
+function BonusRecipes() {
+  const all = RECIPES.filter((r) => r.bonus);
+  const quick = all.filter((r) => r.benefitTag.startsWith("Quick"));
+  const rituals = all.filter((r) => !r.benefitTag.startsWith("Quick"));
+  return (
+    <div className="mt-5">
+      {quick.length > 0 && (
+        <div>
+          <p className="label-caps text-[var(--gold)]">Quick mornings</p>
+          <p className="font-serif italic text-[13px] text-[var(--plum)]/60">Three minutes or under.</p>
+          <RecipeGrid list={quick} />
+        </div>
+      )}
+      {rituals.length > 0 && (
+        <div className={quick.length > 0 ? "mt-7" : ""}>
+          <p className="label-caps text-[var(--gold)]">Bonus rituals</p>
+          <p className="font-serif italic text-[13px] text-[var(--plum)]/60">A little something extra.</p>
+          <RecipeGrid list={rituals} />
+        </div>
+      )}
     </div>
   );
 }

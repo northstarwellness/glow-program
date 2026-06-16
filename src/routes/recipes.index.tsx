@@ -18,7 +18,7 @@ function Recipes() {
       <TopBar name={s.name} />
       <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">The recipe library.</h1>
       <p className="mt-1 font-serif italic text-[15px] text-[var(--plum)]/60">
-        ✦ {core.length} recipes · 5 bonus in the Bonuses tab
+        ✦ {core.length} recipes · more in the Bonuses tab
       </p>
 
       <Link to="/recipes/$id" params={{ id: "build" }} className="mt-5 block">
