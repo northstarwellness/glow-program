@@ -13,7 +13,7 @@ const FRUITS: Opt[] = [
   { id: "berry", label: "Mixed berries", benefit: "Anthocyanins for daily skin protection and brightness." },
   { id: "pom", label: "Pomegranate", benefit: "Punicalagins and ellagic acid for collagen protection." },
   { id: "peach", label: "Peach or plum", benefit: "Stone-fruit polyphenols for soft, even tone." },
-  { id: "watermelon", label: "Watermelon", benefit: "Lycopene and hydration for clarity and UV defense." },
+  { id: "watermelon", label: "Watermelon", benefit: "Lycopene and hydration for clarity and everyday glow." },
   { id: "fig", label: "Fig", benefit: "Prebiotic fiber for the bacteria your skin depends on." },
 ];
 const FATS: Opt[] = [
@@ -25,13 +25,13 @@ const FATS: Opt[] = [
 const POLYS: Opt[] = [
   { id: "reds", label: "Radiant Reds", benefit: "27 polyphenol sources in one scoop — the centerpiece of your glow." },
   { id: "matcha", label: "Matcha", benefit: "EGCG, one of the most-studied skin-protective polyphenols." },
-  { id: "turmeric", label: "Turmeric + pepper", benefit: "Curcumin for calm, steady inflammation balance." },
+  { id: "turmeric", label: "Turmeric + pepper", benefit: "Curcumin for calm, steady comfort." },
   { id: "cacaopowder", label: "Raw cacao", benefit: "Flavanols for hydration and density." },
 ];
 const TOUCHES: Opt[] = [
   { id: "lime", label: "Lime", benefit: "Vitamin C cofactor for collagen synthesis." },
   { id: "rose", label: "Rose water", benefit: "Calming aromatic — softens the nervous system." },
-  { id: "cinnamon", label: "Cinnamon", benefit: "Blunts morning blood sugar; protects against glycation." },
+  { id: "cinnamon", label: "Cinnamon", benefit: "Helps mornings feel steady and balanced." },
   { id: "honey", label: "Raw honey", benefit: "Trace antioxidants and gentle sweetness." },
   { id: "mint", label: "Fresh mint", benefit: "Cooling and digestion-supportive." },
 ];
