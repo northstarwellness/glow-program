@@ -248,8 +248,10 @@ function DayView() {
   );
 }
 
+const NO_OUTCOMES: string[] = [];
+
 function RitualFeelChips({ day }: { day: number }) {
-  const outcomes = useApp((s) => s.outcomesByDay[day] ?? []);
+  const outcomes = useApp((s) => s.outcomesByDay[day]) ?? NO_OUTCOMES;
   const toggle = useApp((s) => s.toggleOutcomeForDay);
 
   return (
