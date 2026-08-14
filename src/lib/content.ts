@@ -260,7 +260,7 @@ export const RECIPES: Recipe[] = [
     method: ["Muddle 4 strawberries with lime juice.", "Top with sparkling water and 1 tsp rose water.", "Drizzle honey, stir gently."],
     redsBoost: { why: "Radiant Reds completes the collagen support story — vitamin C + polyphenols is the proven duo.", proof: REDS_PROOF.skin } },
   { id: "bonus-green-glow", name: "The Green Glow", gradient: G.sageGold, bonus: true,
-    prep: "4 min", servings: "1", benefitTag: "Bonus · Detox",
+    prep: "4 min", servings: "1", benefitTag: "Bonus · Refresh",
     benefit: "Cucumber, mint, kiwi, lime — a chlorophyll-forward midday reset.",
     ingredients: ["Lime", "Mint", "Banana", "Almond milk"],
     method: ["Blend 1 cucumber, 2 kiwis, handful of mint.", "Add ½ banana and ½ cup almond milk.", "Squeeze in lime."],
@@ -363,7 +363,7 @@ export const INGREDIENTS: Ingredient[] = [
     alsoIn: ["Fig & Almond"] },
   { name: "Beet", tagline: "Nitrates, betalains",
     description: "Nitrates support nitric oxide production and skin oxygenation. Betalains are powerful antioxidants.",
-    gut: "Supports liver detox pathways.", skin: "Oxygenation, glow.",
+    gut: "Supports a calm, well-fed gut environment.", skin: "Oxygenation, glow.",
     alsoIn: ["Beet Glow"] },
   { name: "Hibiscus", tagline: "Anthocyanins, quercetin",
     description: "Vivid red tea high in vascular-supportive polyphenols. Long traditional use for circulation and skin tone.",
@@ -697,7 +697,7 @@ export const GLOW_BOOST_STORIES: Record<string, GlowBoostStory> = {
   },
   "papaya-lime": {
     headline: "Enzymes open the door. Polyphenols walk through.",
-    skinStory: "Papain — papaya's primary enzyme — supports digestion and reduces gut inflammation. A calmer gut is a more permeable membrane for the polyphenols that follow it. Radiant Reds, added alongside papaya, benefits from this enzymatic opening. The polyphenols absorb more efficiently in a gut that's been primed by papain. This is the sequence your microbiome notices.",
+    skinStory: "Papain — papaya's primary enzyme — supports digestion and a settled gut. A calmer gut is a more permeable membrane for the polyphenols that follow it. Radiant Reds, added alongside papaya, benefits from this enzymatic opening. The polyphenols absorb more efficiently in a gut that's been primed by papain. This is the sequence your microbiome notices.",
     moment: "Stir Radiant Reds into the finished glass — don't blend it in. The enzyme stays more active that way.",
   },
   "peach-saffron": {

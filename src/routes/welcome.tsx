@@ -112,7 +112,7 @@ function Welcome() {
           Start Day 1, {name} →
         </button>
         <p className="mt-4 text-center font-serif italic text-[12px] text-[var(--charcoal)]/40">
-          No account. No subscription. Just the ritual.
+          No account. No app subscription. Just the ritual.
         </p>
       </div>
     </div>

@@ -28,6 +28,7 @@ const A_TAUPE = "#B9B1A6";
 
 const FAQS = [
   { q: "Do I need Radiant Reds to use the app?", a: "No. The app works as a complete standalone ritual. Radiant Reds deepens the polyphenol results — most women use both — but the 21-day reset is fully valuable on its own." },
+  { q: "I already subscribe to Radiant Reds — do I still pay $21?", a: "No. Radiant Reds subscribers receive complimentary access to the Ritual App. If you're having trouble accessing it, contact support@nourewellness.com using the email associated with your subscription." },
   { q: "Is this a diet or a detox?", a: "Neither. The Ritual App is a morning ritual guide focused on building consistent gut-skin habits through smoothies, check-ins, and daily reflection. No restriction. No calorie counting." },
   { q: "How do I access the app?", a: "Instantly after purchase — you'll receive a link that opens the web app on any device. No app store download required." },
   { q: "What happens after 21 days?", a: "Most women repeat the reset or use it as their ongoing morning framework. Your access never expires and the journal entries, progress, and streaks stay with you." },
@@ -35,10 +36,10 @@ const FAQS = [
   { q: "Is it mobile-friendly?", a: "Built for mobile-first. The app opens directly in your phone browser — no download, no account, no friction. Just open and begin." },
 ];
 
-const TESTIMONIALS = [
-  { quote: "By week two my skin felt different — calmer, less reactive. The journal made me realize how much stress was showing up on my face.", name: "Sarah M.", detail: "Completed Day 21 · Glow Score 84" },
-  { quote: "I've tried every wellness app. This is the only one I actually looked forward to opening. My gut feels better and it shows in my skin.", name: "Jamie L.", detail: "14-day streak · Berry Bloom every morning" },
-  { quote: "21 days and I can genuinely see a difference. The structure made it feel doable — not like another thing I had to do.", name: "Rachel T.", detail: "Glow Score 91 · Week 3 convert" },
+const WHAT_IT_BUILDS = [
+  { quote: "Three weeks, three phases — Foundation, Build, Glow — each one layering a new habit onto the last, so nothing feels overwhelming on day one.", label: "The structure" },
+  { quote: "One glass, one journal entry, one check-in. The whole practice fits inside the time it takes to make coffee.", label: "The ritual" },
+  { quote: "Every recipe is built around Radiant Reds — 27 polyphenol sources in a single scoop, the same base morning after morning.", label: "The base" },
 ];
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ export default function LandingPage() {
         <DailyLoopSection />
         <WhyDifferentSection />
         <ValueStack />
-        <Testimonials />
+        <WhatItBuilds />
         <FaqSection />
         <FinalCta />
         <Footer />
@@ -124,6 +125,13 @@ function GlobalStyles() {
         .two-col { display: flex; flex-direction: column; gap: 44px; }
         .loop-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .diff-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+      }
+
+      .nav-word { white-space: nowrap; }
+      @media (max-width: 640px) {
+        .nav-word { font-size: 11px; letter-spacing: 0.28em; }
+        .nav-links { display: none; }
+        .nav-right { gap: 0 !important; }
       }
 
       @media (prefers-reduced-motion: reduce) {
@@ -483,12 +491,12 @@ function StickyNav() {
       borderBottom: scrolled ? `1px solid ${BORDER}` : "none",
       transition: "background 0.3s, border 0.3s",
     }}>
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "16px 36px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <p className="serif" style={{ fontSize: 14, letterSpacing: "0.44em", color: CHARCOAL }}>RITUAL APP</p>
-        <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
-          <a href="#features" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY }}>Features</a>
-          <a href="#faq" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY }}>FAQ</a>
-          <a href={CHECKOUT_URL} target="_top" className="lp-cta-btn" style={{ padding: "10px 22px", fontSize: 13 }}>
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "16px 36px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <p className="serif nav-word" style={{ fontSize: 14, letterSpacing: "0.44em", color: CHARCOAL }}>RITUAL APP</p>
+        <div className="nav-right" style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          <a href="#features" className="nav-links" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY }}>Features</a>
+          <a href="#faq" className="nav-links" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY }}>FAQ</a>
+          <a href={CHECKOUT_URL} target="_top" className="lp-cta-btn nav-cta" style={{ padding: "10px 22px", fontSize: 13 }}>
             Get Access — $21
           </a>
         </div>
@@ -545,17 +553,17 @@ function Hero() {
               zIndex: 10, minWidth: 190,
             }}>
               <p style={{ fontSize: 10, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY, marginBottom: 10 }}>
-                Day 7 — When most feel it
+                The Inner Glow Reset
               </p>
               <div style={{ display: "flex", gap: 18 }}>
                 <div>
-                  <p className="serif" style={{ fontSize: 30, lineHeight: 1, color: GOLD }}>72</p>
-                  <p style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: BODY, marginTop: 3 }}>Glow Score</p>
+                  <p className="serif" style={{ fontSize: 30, lineHeight: 1, color: GOLD }}>21</p>
+                  <p style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: BODY, marginTop: 3 }}>Days</p>
                 </div>
                 <div style={{ width: 1, background: BORDER }} />
                 <div>
-                  <p className="serif" style={{ fontSize: 30, lineHeight: 1, color: CHARCOAL }}>7</p>
-                  <p style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: BODY, marginTop: 3 }}>Day Streak</p>
+                  <p className="serif" style={{ fontSize: 30, lineHeight: 1, color: CHARCOAL }}>3</p>
+                  <p style={{ fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase", color: BODY, marginTop: 3 }}>Phases</p>
                 </div>
               </div>
             </div>
@@ -731,7 +739,7 @@ function PersonalizationSection() {
               <p className="serif" style={{ fontSize: 18, fontStyle: "italic", lineHeight: 1.6, color: CHARCOAL }}>
                 "The app doesn't ask me to change everything. It asks me to do one thing every morning. That's the only reason I've kept up with it."
               </p>
-              <p style={{ fontSize: 12, letterSpacing: "0.06em", color: BODY, marginTop: 14 }}>Sarah M. — Day 21 complete</p>
+              <p style={{ fontSize: 11, letterSpacing: "0.18em", textTransform: "uppercase", color: GOLD, marginTop: 14 }}>The philosophy</p>
             </div>
           </div>
         </div>
@@ -903,18 +911,18 @@ function ValueStack() {
 
 // ─── Testimonials ─────────────────────────────────────────────────────────────
 
-function Testimonials() {
+function WhatItBuilds() {
   return (
     <section style={{ padding: "112px 36px", background: BG }}>
       <div style={{ maxWidth: 1040, margin: "0 auto" }}>
         <div style={{ textAlign: "center", marginBottom: 60 }}>
-          <p style={{ fontSize: 11, letterSpacing: "0.24em", textTransform: "uppercase", color: GOLD, marginBottom: 18 }}>21 days later</p>
+          <p style={{ fontSize: 11, letterSpacing: "0.24em", textTransform: "uppercase", color: GOLD, marginBottom: 18 }}>21 days, laid out</p>
           <h2 className="serif" style={{ fontSize: "clamp(34px, 4vw, 52px)", lineHeight: 1.07, color: CHARCOAL }}>
             What 21 mornings builds.
           </h2>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 22 }}>
-          {TESTIMONIALS.map((t, i) => (
+          {WHAT_IT_BUILDS.map((t, i) => (
             <div key={i} style={{
               background: "#FFFFFF",
               border: `1px solid ${BORDER}`,
@@ -924,10 +932,9 @@ function Testimonials() {
             }}>
               <div style={{ height: 1, width: 28, background: GOLD, marginBottom: 22 }} />
               <p className="serif" style={{ fontSize: 17, fontStyle: "italic", lineHeight: 1.7, color: CHARCOAL, marginBottom: 22 }}>
-                "{t.quote}"
+                {t.quote}
               </p>
-              <p style={{ fontSize: 13, color: CHARCOAL, fontWeight: 500 }}>{t.name}</p>
-              <p style={{ fontSize: 11, color: BODY, marginTop: 4, letterSpacing: "0.05em" }}>{t.detail}</p>
+              <p style={{ fontSize: 11, color: GOLD, letterSpacing: "0.18em", textTransform: "uppercase", fontWeight: 500 }}>{t.label}</p>
             </div>
           ))}
         </div>
