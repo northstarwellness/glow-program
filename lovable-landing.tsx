@@ -26,20 +26,34 @@ const A_GOLD  = "#C8A46A";
 const A_BEIGE = "#F1EAE0";
 const A_TAUPE = "#B9B1A6";
 
+// ─── Design tokens ────────────────────────────────────────────────────────────
+// A small, reused scale — not a framework. Radii step up with surface size;
+// shadows stay low-opacity and warm; motion stays quick and non-bouncy.
+const RADIUS_SM = 10;  // small controls — icon buttons, chips
+const RADIUS_MD = 14;  // buttons — refined rounded-rectangle, not a pill
+const RADIUS_LG = 18;  // cards
+const HAIRLINE = `1px solid ${BORDER}B0`;      // resting border — nearly invisible
+const HAIRLINE_STRONG = `1px solid ${BORDER}E0`; // slightly firmer, for open/active states
+const SHADOW_SM = "0 1px 2px rgba(31,27,23,0.03), 0 6px 20px rgba(31,27,23,0.045)";
+const SHADOW_MD = "0 2px 6px rgba(31,27,23,0.05), 0 14px 34px rgba(31,27,23,0.07)";
+const SHADOW_LIFT = "0 -4px 24px rgba(31,27,23,0.05), 0 -1px 2px rgba(31,27,23,0.03)";
+const EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
+const DUR = "220ms";
+
 const FAQS = [
-  { q: "Do I need Radiant Reds to use the app?", a: "No. The app works as a complete standalone ritual. Radiant Reds deepens the polyphenol results — most women use both — but the 21-day reset is fully valuable on its own." },
-  { q: "I already subscribe to Radiant Reds — do I still pay $21?", a: "No. Radiant Reds subscribers receive complimentary access to the Ritual App. If you're having trouble accessing it, contact support@nourewellness.com using the email associated with your subscription." },
+  { q: "Do I need Radiant Reds to use the app?", a: "No. The app works as a complete standalone ritual. Radiant Reds deepens the polyphenol results, and most women use both, but the 21-day reset is fully valuable on its own." },
+  { q: "I already subscribe to Radiant Reds: do I still pay $21?", a: "No. Radiant Reds subscribers receive complimentary access to the Ritual App. If you're having trouble accessing it, contact support@nourewellness.com using the email associated with your subscription." },
   { q: "Is this a diet or a detox?", a: "Neither. The Ritual App is a morning ritual guide focused on building consistent gut-skin habits through smoothies, check-ins, and daily reflection. No restriction. No calorie counting." },
-  { q: "How do I access the app?", a: "Instantly after purchase — you'll receive a link that opens the web app on any device. No app store download required." },
+  { q: "How do I access the app?", a: "Instantly after purchase. You'll receive a link that opens the web app on any device, no app store download required." },
   { q: "What happens after 21 days?", a: "Most women repeat the reset or use it as their ongoing morning framework. Your access never expires and the journal entries, progress, and streaks stay with you." },
-  { q: "Can I use it without the supplement?", a: "Yes. Every smoothie in the library can be made without Radiant Reds. The app labels which ingredients to swap — it's all designed to be flexible." },
-  { q: "Is it mobile-friendly?", a: "Built for mobile-first. The app opens directly in your phone browser — no download, no account, no friction. Just open and begin." },
+  { q: "Can I use it without the supplement?", a: "Yes. Every smoothie in the library can be made without Radiant Reds. The app labels which ingredients to swap, designed to be flexible." },
+  { q: "Is it mobile-friendly?", a: "Built for mobile-first. The app opens directly in your phone browser: no download, no account, no friction. Just open and begin." },
 ];
 
 const WHAT_IT_BUILDS = [
-  { quote: "Three weeks, three phases — Foundation, Build, Glow — each one layering a new habit onto the last, so nothing feels overwhelming on day one.", label: "The structure" },
+  { quote: "Three weeks, three phases: Foundation, Build, Glow, each one layering a new habit onto the last, so nothing feels overwhelming on day one.", label: "The structure" },
   { quote: "One glass, one journal entry, one check-in. The whole practice fits inside the time it takes to make coffee.", label: "The ritual" },
-  { quote: "Every recipe is built around Radiant Reds — 27 polyphenol sources in a single scoop, the same base morning after morning.", label: "The base" },
+  { quote: "Every recipe is built around Radiant Reds: 27 polyphenol sources in a single scoop, the same base morning after morning.", label: "The base" },
 ];
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
@@ -105,6 +119,39 @@ function GlobalStyles() {
       .d3 { animation-delay: 0.34s; opacity: 0; }
       .d4 { animation-delay: 0.48s; opacity: 0; }
 
+      /* ─ Ambient light — one very slow drift, never obvious ─ */
+      @keyframes ambientDrift {
+        0%   { transform: translate(0, 0) scale(1);        opacity: 0.55; }
+        50%  { transform: translate(-3%, 2%) scale(1.05);  opacity: 0.75; }
+        100% { transform: translate(0, 0) scale(1);        opacity: 0.55; }
+      }
+      .ambient-light {
+        position: absolute; inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background:
+          radial-gradient(ellipse 50% 40% at 78% 12%, rgba(230,196,131,0.16) 0%, transparent 68%),
+          radial-gradient(ellipse 42% 36% at 12% 88%, rgba(232,209,184,0.12) 0%, transparent 62%);
+        animation: ambientDrift 26s ease-in-out infinite;
+        will-change: transform, opacity;
+      }
+
+      /* ─ Twinkle — a few quiet points of light, never a field of stars ─ */
+      @keyframes twinkleGlow {
+        0%, 82%  { opacity: 0; transform: scale(0.5); }
+        91%      { opacity: 1; transform: scale(1.1); }
+        100%     { opacity: 0; transform: scale(0.5); }
+      }
+      .twinkle {
+        position: absolute;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 1;
+        animation-name: twinkleGlow;
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+      }
+
       .gold-line {
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(184,148,94,0.35), transparent);
@@ -126,6 +173,10 @@ function GlobalStyles() {
         .loop-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
         .diff-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
       }
+      /* phone widths — feature cards go full width, one per row */
+      @media (max-width: 639px) {
+        .feat-grid { grid-template-columns: 1fr; gap: 14px; }
+      }
 
       .nav-word { white-space: nowrap; }
       @media (max-width: 640px) {
@@ -134,37 +185,119 @@ function GlobalStyles() {
         .nav-right { gap: 0 !important; }
       }
 
+      @media (max-width: 400px) {
+        .sticky-value { display: none; }
+      }
+
       @media (prefers-reduced-motion: reduce) {
         .phone-float, .stat-float { animation: none; }
         .fade-up { animation: none; opacity: 1; }
+        .lp-cta-btn, .lp-cta-gold, .lp-cta-btn::before, .lp-cta-gold::before, .faq-icon, .faq-icon svg, .faq-card, .faq-reveal { transition: none !important; }
+        .ambient-light { animation: none; opacity: 0.5; }
+        .twinkle { animation: none; opacity: 0.3; transform: scale(1); }
       }
 
+      /* ─ CTA language — one shape, one rhythm, used everywhere ─ */
+      .lp-cta-btn, .lp-cta-gold {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        border-radius: ${RADIUS_MD}px;
+        padding: 16px 38px;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 18px;
+        letter-spacing: 0.03em;
+        transition: filter ${DUR} ${EASE}, box-shadow ${DUR} ${EASE}, transform ${DUR} ${EASE};
+      }
+      /* restrained light sweep — plays once on hover-in, never loops */
+      .lp-cta-btn::before, .lp-cta-gold::before {
+        content: "";
+        position: absolute;
+        top: -30%; left: -60%;
+        width: 32%; height: 160%;
+        background: linear-gradient(115deg, transparent 0%, rgba(255,255,255,0.22) 48%, rgba(255,255,255,0.34) 50%, rgba(255,255,255,0.22) 52%, transparent 100%);
+        transform: skewX(-16deg);
+        transition: left 0.75s cubic-bezier(0.4,0,0.2,1);
+        pointer-events: none;
+      }
+      .lp-cta-btn:hover::before, .lp-cta-gold:hover::before { left: 130%; }
+
+      /* smoked ink glass — dark CTA */
       .lp-cta-btn {
-        display: inline-block;
-        background: ${CHARCOAL};
+        background: linear-gradient(180deg, #3E3A34 0%, ${CHARCOAL} 52%, #16140F 100%);
         color: ${IVORY};
-        border-radius: 999px;
-        padding: 17px 40px;
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 18px;
-        letter-spacing: 0.04em;
-        transition: background 0.2s, transform 0.15s;
+        border: 1px solid rgba(255,255,255,0.09);
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.10),
+          inset 0 -1px 0 rgba(0,0,0,0.35),
+          0 1px 2px rgba(20,18,16,0.2),
+          0 10px 26px rgba(20,18,16,0.28);
       }
-      .lp-cta-btn:hover { background: #333; transform: translateY(-1px); }
-      .lp-cta-btn:active { transform: scale(0.98); }
+      .lp-cta-btn:hover {
+        filter: brightness(1.08);
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.15),
+          inset 0 -1px 0 rgba(0,0,0,0.35),
+          0 2px 4px rgba(20,18,16,0.22),
+          0 16px 34px rgba(20,18,16,0.32);
+        transform: translateY(-1px);
+      }
+      .lp-cta-btn:active {
+        filter: brightness(0.92);
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.35), 0 1px 2px rgba(20,18,16,0.2);
+        transform: translateY(0);
+      }
 
+      /* champagne pearl — primary/gold CTA */
       .lp-cta-gold {
-        display: inline-block;
-        background: ${GOLD};
-        color: ${IVORY};
-        border-radius: 999px;
-        padding: 17px 40px;
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 18px;
-        letter-spacing: 0.04em;
-        transition: background 0.2s, transform 0.15s;
+        background: linear-gradient(180deg, #F5E6C3 0%, #E3C083 40%, ${GOLD} 70%, #C7A063 100%);
+        color: #3A2E1C;
+        border: 1px solid rgba(255,250,235,0.6);
+        box-shadow:
+          inset 0 1px 0 rgba(255,253,245,0.75),
+          inset 0 -1px 0 rgba(122,90,45,0.22),
+          0 1px 2px rgba(122,90,45,0.16),
+          0 10px 26px rgba(184,148,94,0.26);
       }
-      .lp-cta-gold:hover { background: #a07840; transform: translateY(-1px); }
+      .lp-cta-gold:hover {
+        filter: brightness(1.05);
+        box-shadow:
+          inset 0 1px 0 rgba(255,253,245,0.9),
+          inset 0 -1px 0 rgba(122,90,45,0.22),
+          0 2px 5px rgba(122,90,45,0.18),
+          0 16px 34px rgba(184,148,94,0.32);
+        transform: translateY(-1px);
+      }
+      .lp-cta-gold:active {
+        filter: brightness(0.95);
+        box-shadow: inset 0 1px 0 rgba(255,253,245,0.7), inset 0 -1px 0 rgba(122,90,45,0.22), 0 1px 2px rgba(122,90,45,0.16);
+        transform: translateY(0);
+      }
+
+      .lp-cta-btn:focus-visible, .lp-cta-gold:focus-visible, .faq-icon:focus-visible {
+        outline: 2px solid ${GOLD};
+        outline-offset: 3px;
+      }
+      a:focus-visible, button:focus-visible {
+        outline: 2px solid ${GOLD};
+        outline-offset: 2px;
+      }
+
+      /* ─ FAQ accordion icon — quiet circular control ─ */
+      .faq-icon {
+        width: 30px; height: 30px; flex-shrink: 0;
+        border-radius: 50%;
+        border: ${HAIRLINE};
+        background: ${CARD};
+        display: flex; align-items: center; justify-content: center;
+        transition: border-color ${DUR} ${EASE}, background ${DUR} ${EASE};
+      }
+      .faq-icon svg { transition: transform ${DUR} ${EASE}; }
+
+      .faq-card { transition: border-color ${DUR} ${EASE}, box-shadow ${DUR} ${EASE}, background ${DUR} ${EASE}; }
+      .faq-reveal { transition: grid-template-rows ${DUR} ${EASE}; }
 
       .feat-card:hover { transform: translateY(-2px); box-shadow: 0 12px 36px rgba(31,31,29,0.08); }
       .feat-card { transition: transform 0.2s, box-shadow 0.2s; }
@@ -176,6 +309,34 @@ function GlobalStyles() {
       .no-scroll::-webkit-scrollbar { display: none; }
       .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
     `}</style>
+  );
+}
+
+// ─── Ambient light + Twinkle ────────────────────────────────────────────────────
+// A single, restrained point of light. Used sparingly, in negative space only.
+
+function Twinkle({
+  top, left, right, bottom,
+  size = 2, variant = "pearl", duration = 11, delay = 0,
+}: {
+  top?: number | string; left?: number | string; right?: number | string; bottom?: number | string;
+  size?: number; variant?: "pearl" | "champagne"; duration?: number; delay?: number;
+}) {
+  const glow = variant === "champagne" ? "rgba(184,148,94,0.5)" : "rgba(255,253,248,0.6)";
+  const core = variant === "champagne" ? GOLD : "#FFFDF8";
+  return (
+    <span
+      className="twinkle"
+      aria-hidden="true"
+      style={{
+        top, left, right, bottom,
+        width: size, height: size,
+        background: core,
+        boxShadow: `0 0 ${size * 2.5}px ${size * 0.8}px ${glow}`,
+        animationDuration: `${duration}s`,
+        animationDelay: `${delay}s`,
+      }}
+    />
   );
 }
 
@@ -449,7 +610,7 @@ function WelcomeScreen({ w }: { w: number }) {
       <div style={{ padding: `0 ${s(14)}px ${s(8)}px` }}>
         <div style={{ background: "#F8EDEA", border: "1px solid rgba(217,184,176,0.3)", borderRadius: s(10), padding: `${s(10)}px` }}>
           <p className="serif" style={{ fontSize: f(9.5), fontStyle: "italic", color: `${A_CHAR}70`, lineHeight: 1.6 }}>
-            "Your serums can't fix what starts underneath. The Inner Glow Reset works at the source — morning by morning."
+            "Your serums can't fix what starts underneath. The Inner Glow Reset works at the source, morning by morning."
           </p>
         </div>
       </div>
@@ -488,8 +649,10 @@ function StickyNav() {
       position: "fixed", top: 0, left: 0, right: 0, zIndex: 100,
       background: scrolled ? "rgba(255,254,251,0.96)" : "transparent",
       backdropFilter: scrolled ? "blur(14px)" : "none",
-      borderBottom: scrolled ? `1px solid ${BORDER}` : "none",
-      transition: "background 0.3s, border 0.3s",
+      WebkitBackdropFilter: scrolled ? "blur(14px)" : "none",
+      borderBottom: scrolled ? HAIRLINE_STRONG : "1px solid transparent",
+      boxShadow: scrolled ? "0 1px 0 rgba(31,27,23,0.02), 0 8px 24px rgba(31,27,23,0.04)" : "none",
+      transition: `background ${DUR} ${EASE}, border-color ${DUR} ${EASE}, box-shadow ${DUR} ${EASE}`,
     }}>
       <div style={{ maxWidth: 1140, margin: "0 auto", padding: "16px 36px", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
         <p className="serif nav-word" style={{ fontSize: 14, letterSpacing: "0.44em", color: CHARCOAL }}>RITUAL APP</p>
@@ -497,7 +660,7 @@ function StickyNav() {
           <a href="#features" className="nav-links" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY }}>Features</a>
           <a href="#faq" className="nav-links" style={{ fontSize: 11, letterSpacing: "0.16em", textTransform: "uppercase", color: BODY }}>FAQ</a>
           <a href={CHECKOUT_URL} target="_top" className="lp-cta-btn nav-cta" style={{ padding: "10px 22px", fontSize: 13 }}>
-            Get Access — $21
+            Get Access · $21
           </a>
         </div>
       </div>
@@ -510,13 +673,17 @@ function StickyNav() {
 function Hero() {
   return (
     <section style={{
+      position: "relative", overflow: "hidden",
       minHeight: "100vh", paddingTop: 80,
       background: `radial-gradient(ellipse 55% 45% at 75% 15%, rgba(184,148,94,0.07) 0%, transparent 65%),
                    radial-gradient(ellipse 40% 35% at 15% 90%, rgba(184,148,94,0.05) 0%, transparent 60%),
                    ${BG}`,
       display: "flex", flexDirection: "column", justifyContent: "center",
     }}>
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "64px 36px", width: "100%" }}>
+      <div className="ambient-light" />
+      <Twinkle top="10%" right="7%" size={2} variant="pearl" duration={12} delay={1} />
+      <Twinkle bottom="14%" left="5%" size={2.5} variant="champagne" duration={15} delay={6} />
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "64px 36px", width: "100%", position: "relative", zIndex: 1 }}>
         <div className="hero-layout">
 
           {/* Left: copy */}
@@ -529,12 +696,13 @@ function Hero() {
               isn't another serum.<br />
               <em style={{ color: GOLD }}>It's a ritual you haven't tried yet.</em>
             </h1>
-            <p className="fade-up d2" style={{ fontSize: 17, lineHeight: 1.85, color: BODY, maxWidth: 430, marginBottom: 44 }}>
-              The Ritual App guides you through 21 days of smoothies, check-ins, grocery prep, and reflections designed to help you build a beauty-from-within routine you'll actually stick with.
+            <p className="fade-up d2" style={{ fontSize: 17, lineHeight: 1.8, color: BODY, maxWidth: 400, marginBottom: 44 }}>
+              <span style={{ color: CHARCOAL, fontWeight: 500 }}>Twenty-one days, beautifully mapped out.</span>{" "}
+              Smoothies, grocery prep, check-ins, and gentle reflections come together in one simple ritual you'll actually want to return to.
             </p>
             <div className="fade-up d3">
               <a href={CHECKOUT_URL} target="_top" className="lp-cta-gold" style={{ fontSize: 19, padding: "18px 48px" }}>
-                Start My Ritual — $21
+                Start My Ritual · $21
               </a>
               <p style={{ marginTop: 14, fontSize: 12, color: `${BODY}80`, letterSpacing: "0.1em", textTransform: "uppercase" }}>
                 Instant digital access · Yours for life
@@ -583,12 +751,17 @@ function Hero() {
 
 function LogoBar() {
   return (
-    <section style={{ padding: "32px 36px", borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}`, background: CARD }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", justifyContent: "center", alignItems: "center", gap: 48, flexWrap: "wrap" }}>
-        <p style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: `${BODY}70` }}>21 days of</p>
+    <section style={{ position: "relative", padding: "44px 36px", borderTop: HAIRLINE, borderBottom: HAIRLINE, background: CARD }}>
+      <Twinkle top="18%" right="4%" size={2} variant="pearl" duration={13} delay={3} />
+      <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", justifyContent: "center", alignItems: "center", gap: 46, flexWrap: "wrap" }}>
+        <p style={{ fontSize: 11, letterSpacing: "0.2em", textTransform: "uppercase", color: `${BODY}80` }}>21 days of</p>
         {["Morning ritual", "Polyphenol smoothies", "Gut-skin education", "Daily reflection", "Progress tracking"].map((item) => (
           <div key={item} style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: GOLD }} />
+            <div style={{
+              width: 6, height: 6, borderRadius: "50%",
+              background: `radial-gradient(circle at 35% 30%, #F5E6C3, ${GOLD} 70%)`,
+              boxShadow: `0 0 4px 0.5px ${GOLD}40`,
+            }} />
             <span style={{ fontSize: 12, letterSpacing: "0.06em", color: BODY }}>{item}</span>
           </div>
         ))}
@@ -603,12 +776,12 @@ function WowSection() {
   const features = [
     {
       label: "Daily Ritual Dashboard",
-      body: "Open the app and know exactly what to do today — your smoothie, check-ins, reflection, and progress all in one place.",
+      body: "Open the app and know exactly what to do today: your smoothie, check-ins, reflection, and progress, all in one place.",
       icon: "○",
     },
     {
       label: "Smoothie Ritual Library",
-      body: "Beauty-from-within recipes organized by glow, energy, digestion, reset, and calm — with colorful smoothie cards that make the ritual feel easy.",
+      body: "Beauty-from-within recipes organized by glow, energy, digestion, reset, and calm, with colorful smoothie cards that make the ritual feel easy.",
       icon: "◇",
     },
     {
@@ -618,7 +791,7 @@ function WowSection() {
     },
     {
       label: "Guided Glow Journal",
-      body: "Simple daily prompts help you notice changes in your skin, digestion, energy, and consistency — in under two minutes.",
+      body: "Simple daily prompts help you notice changes in your skin, digestion, energy, and consistency, in under two minutes.",
       icon: "◁",
     },
   ];
@@ -639,16 +812,21 @@ function WowSection() {
           {features.map((f, i) => (
             <div key={i} className="feat-card" style={{
               background: i % 2 === 0 ? "#FFFFFF" : CARD,
-              border: `1px solid ${BORDER}`,
-              borderRadius: 22,
-              padding: "36px 30px",
-              boxShadow: "0 4px 20px rgba(31,31,29,0.04)",
+              border: HAIRLINE,
+              borderRadius: RADIUS_LG,
+              padding: "32px 28px",
+              boxShadow: SHADOW_SM,
             }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${GOLD}12`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 22 }}>
-                <span style={{ fontSize: 18, color: GOLD }}>{f.icon}</span>
+              <div style={{
+                width: 46, height: 46, borderRadius: "50%",
+                background: `radial-gradient(circle at 32% 28%, ${GOLD}26, ${GOLD}08 70%)`,
+                border: `1px solid ${GOLD}30`,
+                display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20,
+              }}>
+                <span style={{ fontSize: 19, color: GOLD }}>{f.icon}</span>
               </div>
-              <h3 className="serif" style={{ fontSize: 22, color: CHARCOAL, marginBottom: 12 }}>{f.label}</h3>
-              <p style={{ fontSize: 14, lineHeight: 1.75, color: BODY }}>{f.body}</p>
+              <h3 className="serif" style={{ fontSize: 21, color: CHARCOAL, marginBottom: 10 }}>{f.label}</h3>
+              <p style={{ fontSize: 14, lineHeight: 1.7, color: BODY, maxWidth: 360 }}>{f.body}</p>
             </div>
           ))}
         </div>
@@ -717,7 +895,7 @@ function PersonalizationSection() {
               Choose your focus and let the app guide your 21-day ritual with recipes, check-ins, and reflections that feel doable from day one.
             </p>
             <a href={CHECKOUT_URL} target="_top" className="lp-cta-btn">
-              Start My Ritual — $21
+              Start My Ritual · $21
             </a>
           </div>
           <div>
@@ -754,7 +932,7 @@ function DailyLoopSection() {
   const steps = [
     { n: "01", label: "Open today's ritual",    sub: "Your daily guide unlocks each morning at midnight." },
     { n: "02", label: "Make your smoothie",      sub: "Choose from the recipe library or follow the day's suggestion." },
-    { n: "03", label: "Complete your check-ins", sub: "Three taps. Reds, ritual, journal — all tracked." },
+    { n: "03", label: "Complete your check-ins", sub: "Three taps: Reds, ritual, journal, all tracked." },
     { n: "04", label: "Write your reflection",   sub: "One prompt. Under two minutes. Saved automatically." },
     { n: "05", label: "Watch your glow build",   sub: "Streak, Glow Score, and 21-day progress update in real time." },
   ];
@@ -800,10 +978,10 @@ function WhyDifferentSection() {
   const bullets = [
     "Designed for daily consistency, not overwhelm",
     "Smoothie-based beauty-from-within routine",
-    "Grocery prep built in — no guessing at the store",
+    "Grocery prep built in, no guessing at the store",
     "Reflection prompts that take less than two minutes",
     "Progress that feels elegant, not childish",
-    "Premium, calming interface — no loud colors or alerts",
+    "Premium, calming interface, no loud colors or alerts",
   ];
   return (
     <section style={{ padding: "112px 36px", background: BG }}>
@@ -850,7 +1028,7 @@ function ValueStack() {
     { item: "21-Day Guided Ritual Plan",        note: "One daily guide unlocks each morning." },
     { item: "Smoothie Recipe Library",          note: "21 polyphenol recipes built around the gut-skin axis." },
     { item: "Grocery Prep System",              note: "Organized by week and category. No wasted ingredients." },
-    { item: "Daily Check-In Dashboard",         note: "Glow Score, streak, and progress — visible each day." },
+    { item: "Daily Check-In Dashboard",         note: "Glow Score, streak, and progress, visible each day." },
     { item: "Guided Glow Journal",              note: "One prompt per day. Written for where you are in your reset." },
     { item: "Progress + Milestone Tracking",   note: "Day 7, 14, and 21 celebrations. A Glow Score at the end." },
     { item: "Radiant Reds Ritual Integration", note: "Each recipe shows how to include your Radiant Reds blend." },
@@ -898,7 +1076,7 @@ function ValueStack() {
             Yours forever. No subscription. No app store.
           </p>
           <a href={CHECKOUT_URL} target="_top" className="lp-cta-gold" style={{ display: "block", textAlign: "center" }}>
-            Start My Ritual — $21
+            Start My Ritual · $21
           </a>
           <p style={{ marginTop: 16, fontSize: 12, color: `${BODY}70`, letterSpacing: "0.08em", textTransform: "uppercase" }}>
             Instant access · Works on any device
@@ -948,32 +1126,63 @@ function WhatItBuilds() {
 function FaqSection() {
   const [open, setOpen] = useState<number | null>(null);
   return (
-    <section id="faq" style={{ padding: "100px 36px", background: SECTION }}>
+    <section id="faq" style={{ padding: "116px 36px 128px", background: SECTION }}>
       <div style={{ maxWidth: 660, margin: "0 auto" }}>
-        <div style={{ textAlign: "center", marginBottom: 52 }}>
-          <p style={{ fontSize: 11, letterSpacing: "0.24em", textTransform: "uppercase", color: GOLD, marginBottom: 18 }}>Common questions</p>
-          <h2 className="serif" style={{ fontSize: "clamp(32px, 4vw, 50px)", color: CHARCOAL, lineHeight: 1.05 }}>
+        <div style={{ textAlign: "center", marginBottom: 60 }}>
+          <p style={{ fontSize: 11, letterSpacing: "0.22em", textTransform: "uppercase", color: GOLD, opacity: 0.85, marginBottom: 12 }}>Common questions</p>
+          <h2 className="serif" style={{ fontSize: "clamp(32px, 4vw, 50px)", color: CHARCOAL, lineHeight: 1.08 }}>
             Questions.
           </h2>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {FAQS.map((faq, i) => (
-            <div key={i} style={{ background: "#FFFFFF", border: `1px solid ${BORDER}`, borderRadius: 16, overflow: "hidden" }}>
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", padding: "22px 24px", textAlign: "left", cursor: "pointer" }}
+        <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          {FAQS.map((faq, i) => {
+            const isOpen = open === i;
+            return (
+              <div
+                key={i}
+                className="faq-card"
+                style={{
+                  background: isOpen ? "#FFFFFF" : CARD,
+                  border: isOpen ? `1px solid ${GOLD}38` : HAIRLINE,
+                  borderRadius: RADIUS_LG,
+                  boxShadow: isOpen ? SHADOW_MD : SHADOW_SM,
+                  overflow: "hidden",
+                }}
               >
-                <p className="serif" style={{ fontSize: 18, color: CHARCOAL, flex: 1, paddingRight: 18, lineHeight: 1.3 }}>{faq.q}</p>
-                <span style={{ fontSize: 20, color: GOLD, flexShrink: 0, transition: "transform 0.22s", display: "block", transform: open === i ? "rotate(45deg)" : "none", lineHeight: 1 }}>+</span>
-              </button>
-              {open === i && (
-                <div style={{ padding: "0 24px 22px" }}>
-                  <div style={{ height: 1, background: BORDER, marginBottom: 16 }} />
-                  <p style={{ fontSize: 14, lineHeight: 1.76, color: BODY }}>{faq.a}</p>
+                <button
+                  onClick={() => setOpen(isOpen ? null : i)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-panel-${i}`}
+                  id={`faq-button-${i}`}
+                  style={{ width: "100%", display: "flex", justifyContent: "space-between", alignItems: "center", gap: 18, padding: "19px 22px", textAlign: "left" }}
+                >
+                  <p className="serif" style={{ fontSize: 18, color: CHARCOAL, flex: 1, lineHeight: 1.34 }}>{faq.q}</p>
+                  <span className="faq-icon" aria-hidden="true">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ transform: isOpen ? "rotate(45deg)" : "none" }}>
+                      <path d="M12 3v18M3 12h18" stroke={GOLD} strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                </button>
+                <div
+                  className="faq-reveal"
+                  style={{ display: "grid", gridTemplateRows: isOpen ? "1fr" : "0fr" }}
+                >
+                  <div style={{ overflow: "hidden" }}>
+                    <div
+                      id={`faq-panel-${i}`}
+                      role="region"
+                      aria-labelledby={`faq-button-${i}`}
+                      aria-hidden={!isOpen}
+                      style={{ padding: "0 22px 24px" }}
+                    >
+                      <div style={{ height: 1, background: `${BORDER}CC`, marginBottom: 16 }} />
+                      <p style={{ fontSize: 15, lineHeight: 1.75, color: BODY }}>{faq.a}</p>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -984,8 +1193,10 @@ function FaqSection() {
 
 function FinalCta() {
   return (
-    <section style={{ padding: "120px 36px 140px", background: BG, textAlign: "center" }}>
-      <div style={{ maxWidth: 580, margin: "0 auto" }}>
+    <section style={{ position: "relative", padding: "120px 36px 140px", background: BG, textAlign: "center" }}>
+      <Twinkle top="16%" left="10%" size={2} variant="pearl" duration={14} delay={2} />
+      <Twinkle bottom="20%" right="9%" size={2.5} variant="champagne" duration={17} delay={8} />
+      <div style={{ maxWidth: 580, margin: "0 auto", position: "relative", zIndex: 1 }}>
         <p style={{ fontSize: 11, letterSpacing: "0.26em", textTransform: "uppercase", color: GOLD, marginBottom: 24 }}>Begin tonight</p>
         <h2 className="serif" style={{ fontSize: "clamp(40px, 5vw, 66px)", lineHeight: 1.03, color: CHARCOAL, marginBottom: 22 }}>
           Begin your 21-day<br />ritual tonight.
@@ -994,7 +1205,7 @@ function FinalCta() {
           One simple app. Daily smoothies. Gentle check-ins. A routine your skin can build on.
         </p>
         <a href={CHECKOUT_URL} target="_top" className="lp-cta-gold" style={{ fontSize: 20, padding: "20px 58px" }}>
-          Start My Ritual — $21
+          Start My Ritual · $21
         </a>
         <p style={{ marginTop: 18, fontSize: 12, color: `${BODY}70`, letterSpacing: "0.1em", textTransform: "uppercase" }}>
           Instant access · Yours for life · No subscription
@@ -1008,7 +1219,7 @@ function FinalCta() {
 
 function Footer() {
   return (
-    <footer style={{ padding: "40px 36px", borderTop: `1px solid ${BORDER}`, background: CARD, textAlign: "center" }}>
+    <footer style={{ padding: "40px 36px calc(112px + env(safe-area-inset-bottom))", borderTop: `1px solid ${BORDER}`, background: CARD, textAlign: "center" }}>
       <div style={{ maxWidth: 1140, margin: "0 auto" }}>
         <div className="gold-line" style={{ maxWidth: 120, margin: "0 auto 24px" }} />
         <p className="serif" style={{ fontSize: 13, letterSpacing: "0.36em", color: BODY, marginBottom: 8 }}>RITUAL APP</p>
@@ -1031,25 +1242,33 @@ function StickyFooter() {
   return (
     <div style={{
       position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100,
-      background: "rgba(255,254,251,0.97)",
-      backdropFilter: "blur(14px)",
-      borderTop: `1px solid ${BORDER}`,
+      background: "rgba(255,254,251,0.94)",
+      backdropFilter: "blur(16px)",
+      WebkitBackdropFilter: "blur(16px)",
+      borderTop: HAIRLINE_STRONG,
+      boxShadow: SHADOW_LIFT,
     }}>
       <div style={{
         maxWidth: 1140, margin: "0 auto",
-        padding: "14px 28px",
-        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "13px 20px calc(13px + env(safe-area-inset-bottom))",
+        display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10,
       }}>
-        <div>
-          <p className="serif" style={{ fontSize: 15, color: CHARCOAL, lineHeight: 1.2 }}>21-Day Inner Glow Reset</p>
-          <p style={{ fontSize: 12, color: BODY, marginTop: 2 }}>
-            <span style={{ color: CHARCOAL, fontWeight: 500 }}>$21</span>
-            {" · "}
-            <span style={{ textDecoration: "line-through", color: `${BODY}60` }}>$244 value</span>
-            {" · "}Instant access
+        <div style={{ minWidth: 0 }}>
+          <p style={{
+            fontSize: 10.5, letterSpacing: "0.06em", textTransform: "uppercase", color: `${BODY}B0`,
+            marginBottom: 4, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+          }}>
+            21-Day Inner Glow Reset
+          </p>
+          <p style={{ display: "flex", alignItems: "baseline", gap: 8, whiteSpace: "nowrap" }}>
+            <span className="serif" style={{ fontSize: 22, color: CHARCOAL, lineHeight: 1, flexShrink: 0 }}>$21</span>
+            <span className="sticky-value" style={{ fontSize: 11.5, color: `${BODY}95`, whiteSpace: "nowrap" }}>
+              <span style={{ textDecoration: "line-through" }}>$244 value</span>
+              {" · "}Instant access
+            </span>
           </p>
         </div>
-        <a href={CHECKOUT_URL} target="_top" className="lp-cta-gold" style={{ padding: "12px 28px", fontSize: 15 }}>
+        <a href={CHECKOUT_URL} target="_top" className="lp-cta-gold" style={{ padding: "12px 20px", fontSize: 14, flexShrink: 0 }}>
           Get Instant Access
         </a>
       </div>
