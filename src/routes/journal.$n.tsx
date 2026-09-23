@@ -1,16 +1,18 @@
 import { createFileRoute, Link, Navigate, useParams } from "@tanstack/react-router";
 import { useRef, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
-import { useApp, currentDay } from "@/lib/store";
+import { useApp, isDayUnlocked, activeDay } from "@/lib/store";
+import { ProgressSkeleton } from "@/components/ProgressSkeleton";
 import { useHydrated } from "@/lib/use-hydrated";
 import { JOURNAL_PROMPTS, phaseFor, reflectJournal } from "@/lib/content";
 
 export const Route = createFileRoute("/journal/$n")({ component: JournalDay });
 
 // Anthropic direct-browser access — requires VITE_ANTHROPIC_KEY to be set
-const ANTHROPIC_KEY = typeof import.meta !== "undefined"
-  ? (import.meta as { env?: Record<string, string> }).env?.VITE_ANTHROPIC_KEY ?? ""
-  : "";
+const ANTHROPIC_KEY =
+  typeof import.meta !== "undefined"
+    ? ((import.meta as { env?: Record<string, string> }).env?.VITE_ANTHROPIC_KEY ?? "")
+    : "";
 
 async function fetchAIReflection(text: string, name: string, day: number): Promise<string | null> {
   if (!ANTHROPIC_KEY) return null;
@@ -42,9 +44,17 @@ function JournalDay() {
   const hydrated = useHydrated();
   const s = useApp();
 
-  // Compute everything needed for hooks before any conditional returns
+  const validParam = /^\d+$/.test(n) && +n >= 1 && +n <= 21;
   const day = Math.max(1, Math.min(21, parseInt(n, 10) || 1));
-  const today = currentDay(s.startDate);
+  if (!hydrated) return <ProgressSkeleton />;
+  if (!s.name) return <Navigate to="/" />;
+  if (!validParam || !isDayUnlocked(day, s.completedDays)) return <Navigate to="/journal" />;
+  // Mounted only after saved data loads, so an existing entry is never shown as empty.
+  return <JournalEditor key={day} day={day} />;
+}
+
+function JournalEditor({ day }: { day: number }) {
+  const s = useApp();
   const existing = s.journalEntries[day];
   const prompt = JOURNAL_PROMPTS[day]?.(s.name ?? "") ?? "";
   const phase = phaseFor(day);
@@ -56,9 +66,6 @@ function JournalDay() {
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loggedOnce = useRef(!!existing);
 
-  if (hydrated && !s.name) return <Navigate to="/" />;
-  if (day > today) return <Navigate to="/journal" />;
-
   const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -69,9 +76,14 @@ function JournalDay() {
     if (val.trim()) {
       saveTimer.current = setTimeout(() => {
         const r = existing?.response ?? aiResponse ?? "";
-        s.saveJournal(day, { prompt, entry: val, response: r, timestamp: new Date().toISOString() });
+        s.saveJournal(day, {
+          prompt,
+          entry: val,
+          response: r,
+          timestamp: new Date().toISOString(),
+        });
         if (!loggedOnce.current) {
-          s.toggleLog(day, "journal");
+          s.setLog(day, "journal", true);
           if (Object.keys(s.journalEntries).length === 0) s.earnBadge("first-words");
           loggedOnce.current = true;
         }
@@ -86,26 +98,39 @@ function JournalDay() {
     const localResponse = reflectJournal(text, s.name ?? "");
     setAiResponse(localResponse);
     // Save immediately
-    s.saveJournal(day, { prompt, entry: text, response: localResponse, timestamp: new Date().toISOString() });
+    s.saveJournal(day, {
+      prompt,
+      entry: text,
+      response: localResponse,
+      timestamp: new Date().toISOString(),
+    });
     if (!loggedOnce.current) {
-      s.toggleLog(day, "journal");
+      s.setLog(day, "journal", true);
       loggedOnce.current = true;
     }
     // Then try AI
     const aiResult = await fetchAIReflection(text, s.name ?? "", day);
     if (aiResult) {
       setAiResponse(aiResult);
-      s.saveJournal(day, { prompt, entry: text, response: aiResult, timestamp: new Date().toISOString() });
+      s.saveJournal(day, {
+        prompt,
+        entry: text,
+        response: aiResult,
+        timestamp: new Date().toISOString(),
+      });
     }
     setAiLoading(false);
   };
 
+  // Client-only (mounted after hydration), so the phone's local date is used — no server/UTC mismatch.
   const dateLabel = new Date().toLocaleDateString(undefined, { month: "long", day: "numeric" });
 
   return (
     <Frame>
-      <TopBar name={s.name} day={today} />
-      <Link to="/journal" className="text-[12px] text-[var(--charcoal)]/50">← Journal</Link>
+      <TopBar name={s.name} day={activeDay(s.completedDays)} />
+      <Link to="/journal" className="text-[12px] text-[var(--charcoal)]/50">
+        ← Journal
+      </Link>
 
       {/* Phase + day label */}
       <div className="mt-3 flex items-center gap-2">
@@ -124,7 +149,7 @@ function JournalDay() {
       <GoldDivider />
 
       {/* Reflection nudges — tappable secondary prompts */}
-      <ReflectionNudges onSelect={(hint) => setText((prev) => prev ? prev + " " + hint : hint)} />
+      <ReflectionNudges onSelect={(hint) => setText((prev) => (prev ? prev + " " + hint : hint))} />
 
       {/* Luxury textarea — no border, just text on ivory */}
       <div className="relative">
@@ -175,7 +200,10 @@ function JournalDay() {
             <span className="label-caps text-[var(--gold)]">RITUAL APP</span>
             <div className="gold-divider flex-1" />
           </div>
-          <div className="rounded-2xl p-6" style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}>
+          <div
+            className="rounded-2xl p-6"
+            style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
+          >
             <p className="font-serif italic text-[18px] leading-relaxed text-[var(--charcoal)]">
               "{aiResponse}"
             </p>
@@ -187,11 +215,16 @@ function JournalDay() {
               <summary className="cursor-pointer font-serif text-[14px] italic text-[var(--charcoal)]/55">
                 Read what you wrote
               </summary>
-              <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--charcoal)]/70">{text}</p>
+              <p className="mt-3 whitespace-pre-wrap text-[14px] leading-relaxed text-[var(--charcoal)]/70">
+                {text}
+              </p>
             </details>
           )}
 
-          <Link to="/journal" className="mt-4 block rounded-full border border-[var(--taupe)]/30 py-3 text-center font-serif text-[15px] text-[var(--charcoal)]">
+          <Link
+            to="/journal"
+            className="mt-4 block rounded-full border border-[var(--taupe)]/30 py-3 text-center font-serif text-[15px] text-[var(--charcoal)]"
+          >
             Return to journal
           </Link>
         </div>

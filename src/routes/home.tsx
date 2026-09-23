@@ -1,7 +1,9 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { Frame, GoldDivider } from "@/components/Frame";
-import { useApp, unlockedUpTo, glowScore } from "@/lib/store";
+import { useApp, activeDay, glowScore } from "@/lib/store";
+import { ProgressSkeleton } from "@/components/ProgressSkeleton";
+import { recipeLinkSearch } from "@/lib/recipe-entry";
 import { useHydrated } from "@/lib/use-hydrated";
 import { DAYS, JOURNAL_PROMPTS, PHASES, RECIPES, REDS_URL, phaseFor } from "@/lib/content";
 import { SmoothieImage } from "@/components/SmoothieImage";
@@ -31,8 +33,11 @@ function Home() {
 
   if (hydrated && !s.name) return <Navigate to="/" />;
   if (hydrated && s.name && !s.seenWelcome) return <Navigate to="/welcome" />;
+  // Progress lives in localStorage; until it loads, the store holds Day 1 defaults.
+  // Render nothing day-specific so a slow first paint can't show or link to the wrong day.
+  if (!hydrated) return <ProgressSkeleton />;
 
-  const day = unlockedUpTo(s.startDate, s.completedDays);
+  const day = activeDay(s.completedDays);
   const phase = phaseFor(day);
   const today = DAYS[day - 1];
   const recipe = RECIPES.find((r) => r.id === today.recipeId)!;
@@ -47,8 +52,13 @@ function Home() {
     <Frame>
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
-        <Link to="/home" className="font-serif text-base tracking-[0.32em] text-[var(--charcoal)]">RITUAL APP</Link>
-        <Link to="/profile" className="flex items-center gap-1.5 text-[11px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">
+        <Link to="/home" className="font-serif text-base tracking-[0.32em] text-[var(--charcoal)]">
+          RITUAL APP
+        </Link>
+        <Link
+          to="/profile"
+          className="flex items-center gap-1.5 text-[11px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45"
+        >
           <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
           Day {day} of 21
         </Link>
@@ -75,15 +85,23 @@ function Home() {
       <div className="mt-5 grid grid-cols-3 gap-2.5">
         <div className="rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-3 text-center">
           <p className="font-serif text-[26px] leading-none text-[var(--gold)]">{score}</p>
-          <p className="mt-1 text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">Glow Score</p>
+          <p className="mt-1 text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">
+            Glow Score
+          </p>
         </div>
         <div className="rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-3 text-center">
           <p className="font-serif text-[26px] leading-none text-[var(--charcoal)]">{streak}</p>
-          <p className="mt-1 text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">Day Streak</p>
+          <p className="mt-1 text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">
+            Day Streak
+          </p>
         </div>
         <div className="rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-3 text-center">
-          <p className="font-serif text-[26px] leading-none text-[var(--charcoal)]">{21 - day + 1}</p>
-          <p className="mt-1 text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">Days Left</p>
+          <p className="font-serif text-[26px] leading-none text-[var(--charcoal)]">
+            {21 - day + 1}
+          </p>
+          <p className="mt-1 text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45">
+            Days Left
+          </p>
         </div>
       </div>
 
@@ -98,10 +116,18 @@ function Home() {
         >
           {/* Gold accent bar */}
           <div className="mb-4 h-px w-8 bg-[var(--gold)]/60" />
-          <p className="label-caps text-[var(--gold)]">{phase.label} · Week {phase.week}</p>
-          <p className="mt-2 font-serif text-[68px] leading-none text-[var(--charcoal)]">Day {day}</p>
-          <h2 className="mt-1 font-serif text-[22px] leading-tight text-[var(--charcoal)]">{today.title}</h2>
-          <p className="mt-2.5 text-[13.5px] leading-relaxed text-[var(--charcoal)]/55">{today.teaser}</p>
+          <p className="label-caps text-[var(--gold)]">
+            {phase.label} · Week {phase.week}
+          </p>
+          <p className="mt-2 font-serif text-[68px] leading-none text-[var(--charcoal)]">
+            Day {day}
+          </p>
+          <h2 className="mt-1 font-serif text-[22px] leading-tight text-[var(--charcoal)]">
+            {today.title}
+          </h2>
+          <p className="mt-2.5 text-[13.5px] leading-relaxed text-[var(--charcoal)]/55">
+            {today.teaser}
+          </p>
           <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--charcoal)] px-5 py-2.5 font-serif text-[14px] text-[var(--ivory)]">
             Open Today's Ritual →
           </div>
@@ -113,10 +139,27 @@ function Home() {
       {/* Quick log */}
       <div className="mt-5">
         <p className="label-caps text-[var(--charcoal)]/40">Today's check-ins</p>
-        <div className={`mt-2.5 grid grid-cols-3 gap-2 rounded-2xl p-2 transition-all ${allLogged ? "bg-[var(--gold)]/8" : ""}`}>
-          <LogTile label="Radiant Reds" icon="glass" done={!!log.reds} onClick={() => s.toggleLog(day, "reds")} />
-          <LogTile label="Morning ritual" icon="leaf" done={!!log.ritual} onClick={() => s.toggleLog(day, "ritual")} />
-          <LogTile label="Journal" icon="sun" done={!!log.journal} onClick={() => s.toggleLog(day, "journal")} />
+        <div
+          className={`mt-2.5 grid grid-cols-3 gap-2 rounded-2xl p-2 transition-all ${allLogged ? "bg-[var(--gold)]/8" : ""}`}
+        >
+          <LogTile
+            label="Radiant Reds"
+            icon="glass"
+            done={!!log.reds}
+            onClick={() => s.toggleLog(day, "reds")}
+          />
+          <LogTile
+            label="Morning ritual"
+            icon="leaf"
+            done={!!log.ritual}
+            onClick={() => s.toggleLog(day, "ritual")}
+          />
+          <LogTile
+            label="Journal"
+            icon="sun"
+            done={!!log.journal}
+            onClick={() => s.toggleLog(day, "journal")}
+          />
         </div>
         {allLogged && (
           <p className="mt-2.5 text-center font-serif italic text-[14px] text-[var(--charcoal)]/70">
@@ -133,12 +176,17 @@ function Home() {
             const isActive = p.week === phase.week;
             const days = Array.from({ length: 7 }, (_, i) => p.range[0] + i);
             return (
-              <div key={p.week} className={`rounded-2xl p-3 ${
-                isActive
-                  ? "gold-glow-card ring-1 ring-[var(--gold)]/30"
-                  : "bg-white border border-[var(--taupe)]/20"
-              }`}>
-                <p className="text-[9.5px] tracking-[0.16em] uppercase text-[var(--charcoal)]/40">Wk {p.week}</p>
+              <div
+                key={p.week}
+                className={`rounded-2xl p-3 ${
+                  isActive
+                    ? "gold-glow-card ring-1 ring-[var(--gold)]/30"
+                    : "bg-white border border-[var(--taupe)]/20"
+                }`}
+              >
+                <p className="text-[9.5px] tracking-[0.16em] uppercase text-[var(--charcoal)]/40">
+                  Wk {p.week}
+                </p>
                 <p className="font-serif text-[13px] text-[var(--charcoal)] mt-0.5">{p.label}</p>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {days.map((d) => {
@@ -148,7 +196,11 @@ function Home() {
                       <span
                         key={d}
                         className={`h-2 w-2 rounded-full ${
-                          done ? "bg-[var(--gold)]" : isToday ? "bg-[var(--charcoal)]/30 ring-1 ring-[var(--charcoal)]/20" : "bg-[var(--taupe)]/30"
+                          done
+                            ? "bg-[var(--gold)]"
+                            : isToday
+                              ? "bg-[var(--charcoal)]/30 ring-1 ring-[var(--charcoal)]/20"
+                              : "bg-[var(--taupe)]/30"
                         }`}
                       />
                     );
@@ -166,22 +218,33 @@ function Home() {
       {/* Recipe of the day */}
       <div className="mt-5">
         <p className="label-caps text-[var(--charcoal)]/40">Recipe of the day</p>
-        <Link to="/recipes/$id" params={{ id: recipe.id }} className="mt-2.5 flex gap-3 bg-white border border-[var(--taupe)]/20 rounded-2xl overflow-hidden p-3.5 shadow-sm cursor-pointer">
-          <SmoothieImage
-            recipe={recipe}
-            className="h-20 w-20 flex-shrink-0 rounded-xl"
-          />
+        <Link
+          to="/recipes/$id"
+          params={{ id: recipe.id }}
+          search={recipeLinkSearch({ kind: "day", day })}
+          className="mt-2.5 flex gap-3 bg-white border border-[var(--taupe)]/20 rounded-2xl overflow-hidden p-3.5 shadow-sm cursor-pointer"
+        >
+          <SmoothieImage recipe={recipe} className="h-20 w-20 flex-shrink-0 rounded-xl" />
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--gold)]">{recipe.prep} · {recipe.servings}</p>
-            <h4 className="mt-1 font-serif text-[18px] leading-tight text-[var(--charcoal)]">{recipe.name}</h4>
-            <span className="mt-2 inline-block rounded-full bg-[var(--charcoal)]/6 px-2.5 py-0.5 text-[10px] tracking-wide text-[var(--charcoal)]/70">{recipe.benefitTag}</span>
+            <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--gold)]">
+              {recipe.prep} · {recipe.servings}
+            </p>
+            <h4 className="mt-1 font-serif text-[18px] leading-tight text-[var(--charcoal)]">
+              {recipe.name}
+            </h4>
+            <span className="mt-2 inline-block rounded-full bg-[var(--charcoal)]/6 px-2.5 py-0.5 text-[10px] tracking-wide text-[var(--charcoal)]/70">
+              {recipe.benefitTag}
+            </span>
           </div>
         </Link>
       </div>
 
       {/* Quick Glow Mornings — bonus quick smoothies */}
-      <Link to="/recipes" hash="quick-glow"
-        className="mt-5 block rounded-2xl bg-white border border-[var(--taupe)]/20 p-5 shadow-sm cursor-pointer">
+      <Link
+        to="/recipes"
+        hash="quick-glow"
+        className="mt-5 block rounded-2xl bg-white border border-[var(--taupe)]/20 p-5 shadow-sm cursor-pointer"
+      >
         <p className="label-caps text-[var(--gold)]">Bonus</p>
         <p className="mt-1.5 font-serif text-[17px] leading-snug text-[var(--charcoal)]">
           Quick Glow Mornings.
@@ -189,12 +252,22 @@ function Home() {
         <p className="mt-1 font-serif italic text-[13px] text-[var(--charcoal)]/55">
           Seven five-minute smoothies for rushed mornings.
         </p>
-        <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-[var(--gold)]">Open the set →</p>
+        <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-[var(--gold)]">
+          Open the set →
+        </p>
       </Link>
 
       {/* Radiant Reds upsell */}
-      <a href={REDS_URL} target="_top" className="mt-5 block rounded-2xl px-5 py-4 cursor-pointer"
-         style={{ background: "linear-gradient(135deg, oklch(0.970 0.022 68) 0%, oklch(0.985 0.015 72) 100%)", border: "1px solid oklch(0.720 0.082 65 / 0.25)" }}>
+      <a
+        href={REDS_URL}
+        target="_top"
+        className="mt-5 block rounded-2xl px-5 py-4 cursor-pointer"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.970 0.022 68) 0%, oklch(0.985 0.015 72) 100%)",
+          border: "1px solid oklch(0.720 0.082 65 / 0.25)",
+        }}
+      >
         <p className="label-caps text-[var(--gold)]">Your ritual base</p>
         <p className="mt-1.5 font-serif text-[17px] leading-snug text-[var(--charcoal)]">
           Radiant Reds — the polyphenol blend in every morning.
@@ -202,20 +275,30 @@ function Home() {
         <p className="mt-1 font-serif italic text-[13px] text-[var(--charcoal)]/55">
           Add one scoop. Every glass becomes a full ritual.
         </p>
-        <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-[var(--gold)]">Shop Radiant Reds →</p>
+        <p className="mt-3 text-[11px] tracking-[0.2em] uppercase text-[var(--gold)]">
+          Shop Radiant Reds →
+        </p>
       </a>
 
       {/* Journal prompt */}
-      <Link to="/journal/$n" params={{ n: String(day) }}
+      <Link
+        to="/journal/$n"
+        params={{ n: String(day) }}
         className="mt-5 block rounded-2xl p-5 cursor-pointer"
-        style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}>
+        style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
+      >
         <p className="label-caps text-[var(--berry)]/60">Today's prompt</p>
-        <p className="mt-2 font-serif italic text-[19px] leading-snug text-[var(--charcoal)]">"{promptText}"</p>
+        <p className="mt-2 font-serif italic text-[19px] leading-snug text-[var(--charcoal)]">
+          "{promptText}"
+        </p>
         <p className="mt-3 text-[12px] text-[var(--charcoal)]/40">Tap to write →</p>
       </Link>
 
       <GoldDivider />
-      <Link to="/profile" className="block text-center font-serif italic text-[13px] text-[var(--charcoal)]/40">
+      <Link
+        to="/profile"
+        className="block text-center font-serif italic text-[13px] text-[var(--charcoal)]/40"
+      >
         Profile & settings
       </Link>
     </Frame>
@@ -229,23 +312,40 @@ function parseMilestone(id: string): number {
 
 function calcStreak(completedDays: number[], currentDay: number): number {
   let streak = 0;
-  for (let d = currentDay; d >= 1; d--) {
+  // The active day is usually not done yet; count back from the latest finished day.
+  const start = completedDays.includes(currentDay) ? currentDay : currentDay - 1;
+  for (let d = start; d >= 1; d--) {
     if (completedDays.includes(d)) streak++;
     else break;
   }
   return streak;
 }
 
-function LogTile({ label, icon, done, onClick }: { label: string; icon: "glass" | "leaf" | "sun"; done: boolean; onClick: () => void }) {
+function LogTile({
+  label,
+  icon,
+  done,
+  onClick,
+}: {
+  label: string;
+  icon: "glass" | "leaf" | "sun";
+  done: boolean;
+  onClick: () => void;
+}) {
   return (
-    <button onClick={onClick} className={`flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition-all cursor-pointer ${
-      done
-        ? "bg-[var(--gold)]/10 ring-1 ring-[var(--gold)]/40 text-[var(--charcoal)]"
-        : "bg-[var(--beige)] text-[var(--charcoal)] hover:bg-[var(--taupe)]/20"
-    }`}>
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition-all cursor-pointer ${
+        done
+          ? "bg-[var(--gold)]/10 ring-1 ring-[var(--gold)]/40 text-[var(--charcoal)]"
+          : "bg-[var(--beige)] text-[var(--charcoal)] hover:bg-[var(--taupe)]/20"
+      }`}
+    >
       {done ? <CheckIcon /> : <TileIcon name={icon} />}
       <span className="text-[11px] leading-tight">{label}</span>
-      <span className={`text-[9px] tracking-wider uppercase ${done ? "text-[var(--gold)]" : "text-[var(--charcoal)]/40"}`}>
+      <span
+        className={`text-[9px] tracking-wider uppercase ${done ? "text-[var(--gold)]" : "text-[var(--charcoal)]/40"}`}
+      >
         {done ? "Logged" : "Begin"}
       </span>
     </button>
@@ -253,12 +353,59 @@ function LogTile({ label, icon, done, onClick }: { label: string; icon: "glass" 
 }
 
 function CheckIcon() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 13l4 4L20 6" /></svg>;
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M4 13l4 4L20 6" />
+    </svg>
+  );
 }
 function TileIcon({ name }: { name: "glass" | "leaf" | "sun" }) {
-  if (name === "glass") return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M6 3h12l-2 12a4 4 0 01-8 0L6 3z" /></svg>;
-  if (name === "leaf") return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><path d="M5 21c0-9 7-16 16-16-1 9-7 16-16 16z" /></svg>;
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><circle cx="12" cy="12" r="4" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>;
+  if (name === "glass")
+    return (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
+        <path d="M6 3h12l-2 12a4 4 0 01-8 0L6 3z" />
+      </svg>
+    );
+  if (name === "leaf")
+    return (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
+        <path d="M5 21c0-9 7-16 16-16-1 9-7 16-16 16z" />
+      </svg>
+    );
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </svg>
+  );
 }
 
 // Quick-tap outcomes on the home dashboard (maps display label → outcome string stored in store)
@@ -267,7 +414,14 @@ const QUICK_TAPS: { label: string; icon: React.ReactNode; outcome: string }[] = 
     label: "Skin",
     outcome: "Glowy",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
         <circle cx="12" cy="12" r="5" />
         <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
       </svg>
@@ -277,7 +431,14 @@ const QUICK_TAPS: { label: string; icon: React.ReactNode; outcome: string }[] = 
     label: "Digestion",
     outcome: "Calm digestion",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
         <path d="M8 12c1.5-2 6.5-2 8 0" />
       </svg>
@@ -287,7 +448,14 @@ const QUICK_TAPS: { label: string; icon: React.ReactNode; outcome: string }[] = 
     label: "Energy",
     outcome: "Energized",
     icon: (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
         <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
       </svg>
     ),
@@ -328,7 +496,9 @@ function GlowCheckIn({ day }: { day: number }) {
               <span className={active ? "text-[var(--gold)]" : ""}>{qt.icon}</span>
               <span className="text-[11px] leading-tight font-medium">{qt.label}</span>
               {active && (
-                <span className="text-[9px] tracking-wider uppercase text-[var(--gold)]">Felt it</span>
+                <span className="text-[9px] tracking-wider uppercase text-[var(--gold)]">
+                  Felt it
+                </span>
               )}
             </button>
           );

@@ -1,7 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Frame, TopBar } from "@/components/Frame";
-import { useApp, currentDay } from "@/lib/store";
+import { useApp, activeDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 
 export const Route = createFileRoute("/boosts")({ component: Boosts });
@@ -53,7 +53,8 @@ const BOOSTS: Boost[] = [
     category: "skin",
     title: "Cold Water Glow Splash",
     duration: "2 min",
-    teaser: "One of the oldest skin secrets. Cold water closes pores, tightens skin, and wakes circulation.",
+    teaser:
+      "One of the oldest skin secrets. Cold water closes pores, tightens skin, and wakes circulation.",
     tag: "Skin",
     steps: [
       "After cleansing, fill your sink with cold water",
@@ -82,7 +83,8 @@ const BOOSTS: Boost[] = [
     category: "energy",
     title: "Cortisol Reset Breathwork",
     duration: "3 min",
-    teaser: "Chronic stress is one of the most underrated causes of dull skin. This is the 3-minute intervention.",
+    teaser:
+      "Chronic stress is one of the most underrated causes of dull skin. This is the 3-minute intervention.",
     tag: "Energy",
     steps: [
       "Find a quiet seat. Close your eyes.",
@@ -112,7 +114,8 @@ const BOOSTS: Boost[] = [
     category: "energy",
     title: "The Morning Glow Walk",
     duration: "10 min",
-    teaser: "Morning light sets your cortisol rhythm, which directly affects inflammation — which shows up as skin.",
+    teaser:
+      "Morning light sets your cortisol rhythm, which directly affects inflammation — which shows up as skin.",
     tag: "Energy",
     steps: [
       "Within 30 minutes of waking, step outside",
@@ -151,7 +154,7 @@ function Boosts() {
   const s = useApp();
   const [expanded, setExpanded] = useState<string | null>(null);
   if (hydrated && !s.name) return <Navigate to="/" />;
-  const day = currentDay(s.startDate);
+  const day = activeDay(s.completedDays);
 
   return (
     <Frame>
@@ -163,7 +166,8 @@ function Boosts() {
 
       <div className="mt-2 rounded-2xl blush-card p-4 mb-6">
         <p className="text-[13px] leading-relaxed text-[var(--plum)]/75 italic font-serif">
-          "For the woman doing everything right and still not seeing it on her face — these are the missing pieces."
+          "For the woman doing everything right and still not seeing it on her face — these are the
+          missing pieces."
         </p>
       </div>
 
@@ -179,19 +183,32 @@ function Boosts() {
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`rounded-full px-2.5 py-0.5 text-[10px] tracking-[0.14em] uppercase font-medium ${CATEGORY_COLORS[boost.category]}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[10px] tracking-[0.14em] uppercase font-medium ${CATEGORY_COLORS[boost.category]}`}
+                      >
                         {boost.tag}
                       </span>
                       <span className="text-[11px] text-[var(--plum)]/40">{boost.duration}</span>
                     </div>
-                    <h3 className="font-serif text-[19px] leading-tight text-[var(--plum)]">{boost.title}</h3>
-                    <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--plum)]/65">{boost.teaser}</p>
+                    <h3 className="font-serif text-[19px] leading-tight text-[var(--plum)]">
+                      {boost.title}
+                    </h3>
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--plum)]/65">
+                      {boost.teaser}
+                    </p>
                     {boost.polyphenol && (
-                      <p className="mt-2 text-[11px] tracking-wide text-[var(--gold)] label-caps">{boost.polyphenol}</p>
+                      <p className="mt-2 text-[11px] tracking-wide text-[var(--gold)] label-caps">
+                        {boost.polyphenol}
+                      </p>
                     )}
                   </div>
                   <svg
-                    width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
                     className={`flex-shrink-0 mt-1 text-[var(--plum)]/35 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                   >
                     <path d="M6 9l6 6 6-6" />
@@ -208,7 +225,9 @@ function Boosts() {
                         <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[var(--gold)]/15 font-serif text-[11px] text-[var(--gold)]">
                           {i + 1}
                         </span>
-                        <p className="text-[13.5px] leading-relaxed text-[var(--plum)]/80">{step}</p>
+                        <p className="text-[13.5px] leading-relaxed text-[var(--plum)]/80">
+                          {step}
+                        </p>
                       </li>
                     ))}
                   </ol>

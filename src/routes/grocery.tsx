@@ -4,38 +4,40 @@ import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { DAYS, GROCERY_LIST, REDS_URL, RECIPES } from "@/lib/content";
+import { copyText } from "@/lib/share";
+import { ShareStatus } from "@/components/ShareStatus";
 
 export const Route = createFileRoute("/grocery")({ component: Grocery });
 
 // Map recipe ingredient names → grocery item IDs for week generation
 const ING_TO_GROCERY: Record<string, string> = {
-  "Pomegranate": "pomegranate",
-  "Raspberry": "raspberries",
+  Pomegranate: "pomegranate",
+  Raspberry: "raspberries",
   "Oat milk": "oat-milk",
   "Radiant Reds": "reds",
-  "Lime": "lime",
-  "Blueberry": "blueberries",
-  "Strawberry": "strawberries",
-  "Banana": "banana",
+  Lime: "lime",
+  Blueberry: "blueberries",
+  Strawberry: "strawberries",
+  Banana: "banana",
   "Almond milk": "almond-milk",
-  "Chia": "chia",
+  Chia: "chia",
   "Tart cherry": "tart-cherry",
-  "Cacao": "cacao",
+  Cacao: "cacao",
   "Almond butter": "almond-butter",
-  "Cinnamon": "cinnamon",
-  "Plum": "plum",
+  Cinnamon: "cinnamon",
+  Plum: "plum",
   "Rose water": "rose-water",
   "Coconut yogurt": "coconut-yogurt",
-  "Honey": "honey",
-  "Watermelon": "watermelon",
+  Honey: "honey",
+  Watermelon: "watermelon",
   "Hibiscus tea": "hibiscus-tea",
   "Black fig": "black-fig",
-  "Almond": "almonds",
-  "Beet": "beet",
-  "Ginger": "ginger",
-  "Orange": "orange",
-  "Mint": "mint",
-  "Lemon": "lemon",
+  Almond: "almonds",
+  Beet: "beet",
+  Ginger: "ginger",
+  Orange: "orange",
+  Mint: "mint",
+  Lemon: "lemon",
   "Green tea": "green-tea",
 };
 
@@ -59,15 +61,20 @@ function Grocery() {
   const s = useApp();
   const [customInput, setCustomInput] = useState("");
   const [customItems, setCustomItems] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem("noure_grocery_custom") ?? "[]"); }
-    catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem("noure_grocery_custom") ?? "[]");
+    } catch {
+      return [];
+    }
   });
   const [copyLabel, setCopyLabel] = useState("Copy list");
+  const [copyManual, setCopyManual] = useState<string | null>(null);
 
   if (hydrated && !s.name) return <Navigate to="/" />;
 
   const checked = s.groceryChecked;
-  const totalItems = GROCERY_LIST.reduce((sum, cat) => sum + cat.items.length, 0) + customItems.length;
+  const totalItems =
+    GROCERY_LIST.reduce((sum, cat) => sum + cat.items.length, 0) + customItems.length;
   const checkedCount = Object.values(checked).filter(Boolean).length;
 
   const generateWeek = (week: 1 | 2 | 3) => {
@@ -104,9 +111,17 @@ function Grocery() {
       lines.push("\nCUSTOM");
       for (const item of customItems) lines.push(`☐ ${item}`);
     }
-    navigator.clipboard?.writeText(lines.join("\n").trim());
-    setCopyLabel("Copied!");
-    setTimeout(() => setCopyLabel("Copy list"), 2000);
+    const text = lines.join("\n").trim();
+    setCopyManual(null);
+    copyText(text).then((ok) => {
+      if (ok) {
+        setCopyLabel("Copied!");
+        setTimeout(() => setCopyLabel("Copy list"), 2000);
+      } else {
+        setCopyLabel("Copy list");
+        setCopyManual(text);
+      }
+    });
   };
 
   return (
@@ -114,9 +129,16 @@ function Grocery() {
       <TopBar name={s.name} />
 
       {/* Radiant Reds reminder — top */}
-      <a href={REDS_URL} target="_top"
-         className="block rounded-2xl px-5 py-4 mb-5"
-         style={{ background: "linear-gradient(135deg, oklch(0.968 0.028 68) 0%, oklch(0.985 0.016 65) 100%)", border: "1px solid oklch(0.720 0.082 65 / 0.22)" }}>
+      <a
+        href={REDS_URL}
+        target="_top"
+        className="block rounded-2xl px-5 py-4 mb-5"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.968 0.028 68) 0%, oklch(0.985 0.016 65) 100%)",
+          border: "1px solid oklch(0.720 0.082 65 / 0.22)",
+        }}
+      >
         <p className="label-caps text-[var(--gold)]">Don't forget</p>
         <p className="mt-1 font-serif text-[15px] text-[var(--charcoal)]">
           Radiant Reds — the base of every ritual.
@@ -135,7 +157,9 @@ function Grocery() {
         </div>
         <div className="text-right">
           <p className="font-serif text-[26px] text-[var(--gold)]">{checkedCount}</p>
-          <p className="text-[11px] tracking-[0.16em] uppercase text-[var(--charcoal)]/45">of {totalItems}</p>
+          <p className="text-[11px] tracking-[0.16em] uppercase text-[var(--charcoal)]/45">
+            of {totalItems}
+          </p>
         </div>
       </div>
 
@@ -159,7 +183,9 @@ function Grocery() {
                 className="rounded-xl border border-[var(--taupe)]/25 bg-white p-3 text-center transition-all cursor-pointer hover:border-[var(--gold)]/40 hover:bg-[var(--gold)]/5"
               >
                 <p className="label-caps text-[var(--gold)]">Week {week}</p>
-                <p className="font-serif text-[13px] text-[var(--charcoal)] mt-0.5">{labels[week - 1]}</p>
+                <p className="font-serif text-[13px] text-[var(--charcoal)] mt-0.5">
+                  {labels[week - 1]}
+                </p>
               </button>
             );
           })}
@@ -169,6 +195,7 @@ function Grocery() {
       {/* Actions row */}
       <div className="mt-3 flex gap-2">
         <button
+          type="button"
           onClick={copyList}
           className="flex-1 rounded-full border border-[var(--taupe)]/30 py-2.5 font-serif text-[13px] text-[var(--charcoal)] transition-all cursor-pointer hover:border-[var(--gold)]/40"
         >
@@ -183,6 +210,18 @@ function Grocery() {
           </button>
         )}
       </div>
+      {/* Announces the result; the manual-copy box appears only when copying failed. */}
+      <ShareStatus
+        className="mt-2"
+        message={
+          copyManual
+            ? "Couldn't copy automatically. Select the list below to copy it."
+            : copyLabel === "Copied!"
+              ? "List copied"
+              : ""
+        }
+        manualText={copyManual}
+      />
 
       {/* Custom item input */}
       <div className="mt-4">
@@ -211,9 +250,17 @@ function Grocery() {
           <p className="label-caps text-[var(--charcoal)]/40 mb-2">Custom items</p>
           <div className="space-y-1.5">
             {customItems.map((item) => (
-              <div key={item} className="flex items-center justify-between rounded-xl bg-white border border-[var(--taupe)]/20 px-4 py-3">
+              <div
+                key={item}
+                className="flex items-center justify-between rounded-xl bg-white border border-[var(--taupe)]/20 px-4 py-3"
+              >
                 <span className="font-serif text-[15px] text-[var(--charcoal)]">{item}</span>
-                <button onClick={() => removeCustom(item)} className="text-[var(--taupe)] hover:text-[var(--berry)] cursor-pointer text-[12px]">Remove</button>
+                <button
+                  onClick={() => removeCustom(item)}
+                  className="text-[var(--taupe)] hover:text-[var(--berry)] cursor-pointer text-[12px]"
+                >
+                  Remove
+                </button>
               </div>
             ))}
           </div>
@@ -243,28 +290,38 @@ function Grocery() {
                     onClick={() => s.toggleGrocery(item.id)}
                     className="flex w-full items-start gap-4 rounded-2xl bg-white border border-[var(--taupe)]/15 shadow-sm p-4 text-left transition-all cursor-pointer hover:shadow"
                   >
-                    <span className="mt-[2px] flex-shrink-0"><EmptyCircle /></span>
+                    <span className="mt-[2px] flex-shrink-0">
+                      <EmptyCircle />
+                    </span>
                     <div className="min-w-0 flex-1">
-                      <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)]">{item.name}</p>
+                      <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)]">
+                        {item.name}
+                      </p>
                       {item.note && (
-                        <p className="mt-0.5 text-[12px] italic text-[var(--charcoal)]/45">{item.note}</p>
+                        <p className="mt-0.5 text-[12px] italic text-[var(--charcoal)]/45">
+                          {item.note}
+                        </p>
                       )}
                     </div>
                   </button>
                 ))}
                 {/* Checked items */}
-                {cat.items.filter((i) => !!checked[i.id]).map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => s.toggleGrocery(item.id)}
-                    className="flex w-full items-start gap-4 rounded-2xl bg-[var(--gold)]/6 opacity-50 p-4 text-left transition-all cursor-pointer"
-                  >
-                    <span className="mt-[2px] flex-shrink-0"><CheckCircle /></span>
-                    <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)] line-through">
-                      {item.name}
-                    </p>
-                  </button>
-                ))}
+                {cat.items
+                  .filter((i) => !!checked[i.id])
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => s.toggleGrocery(item.id)}
+                      className="flex w-full items-start gap-4 rounded-2xl bg-[var(--gold)]/6 opacity-50 p-4 text-left transition-all cursor-pointer"
+                    >
+                      <span className="mt-[2px] flex-shrink-0">
+                        <CheckCircle />
+                      </span>
+                      <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)] line-through">
+                        {item.name}
+                      </p>
+                    </button>
+                  ))}
               </div>
             </section>
           );
@@ -281,7 +338,13 @@ function CheckCircle() {
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--gold)]">
       <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M7.5 12l3 3 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <path
+        d="M7.5 12l3 3 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }

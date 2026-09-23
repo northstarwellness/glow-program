@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
-import { useApp, currentDay, glowScore } from "@/lib/store";
+import { useApp, activeDay, glowScore } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { PHASES } from "@/lib/content";
 
@@ -11,7 +11,7 @@ function Progress() {
   const s = useApp();
   if (hydrated && !s.name) return <Navigate to="/" />;
 
-  const day = currentDay(s.startDate);
+  const day = activeDay(s.completedDays);
   const score = glowScore(s);
   const pct = Math.round((s.completedDays.length / 21) * 100);
   const redsCount = Object.values(s.dailyLogs).filter((l) => l.reds).length;
@@ -20,10 +20,7 @@ function Progress() {
   const streak = calcStreak(s.completedDays, day);
 
   const scoreLabel =
-    score >= 85 ? "Radiant" :
-    score >= 65 ? "Glowing" :
-    score >= 40 ? "Building" :
-    "Just Starting";
+    score >= 85 ? "Radiant" : score >= 65 ? "Glowing" : score >= 40 ? "Building" : "Just Starting";
 
   // Compute outcome stats
   const allOutcomes = Object.values(s.outcomesByDay ?? {}).flat();
@@ -34,7 +31,9 @@ function Progress() {
   const topOutcomes = Object.entries(outcomeCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5);
-  const daysWithOutcomes = Object.values(s.outcomesByDay ?? {}).filter((arr) => arr.length > 0).length;
+  const daysWithOutcomes = Object.values(s.outcomesByDay ?? {}).filter(
+    (arr) => arr.length > 0,
+  ).length;
 
   return (
     <Frame>
@@ -54,16 +53,24 @@ function Progress() {
         <div className="gold-divider mt-5 mb-4" />
         <div className="grid grid-cols-3 gap-3">
           <div>
-            <p className="font-serif text-[24px] text-[var(--charcoal)]">{s.completedDays.length}</p>
-            <p className="text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45 mt-0.5">Days</p>
+            <p className="font-serif text-[24px] text-[var(--charcoal)]">
+              {s.completedDays.length}
+            </p>
+            <p className="text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45 mt-0.5">
+              Days
+            </p>
           </div>
           <div>
             <p className="font-serif text-[24px] text-[var(--charcoal)]">{streak}</p>
-            <p className="text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45 mt-0.5">Streak</p>
+            <p className="text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45 mt-0.5">
+              Streak
+            </p>
           </div>
           <div>
             <p className="font-serif text-[24px] text-[var(--charcoal)]">{pct}%</p>
-            <p className="text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45 mt-0.5">Complete</p>
+            <p className="text-[9.5px] tracking-[0.14em] uppercase text-[var(--charcoal)]/45 mt-0.5">
+              Complete
+            </p>
           </div>
         </div>
       </div>
@@ -102,19 +109,31 @@ function Progress() {
             const locked = d > day;
             return (
               <div key={d} className="flex flex-col items-center gap-0.5">
-                <div className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-medium transition-all ${
-                  done
-                    ? "bg-[var(--gold)] text-[var(--ivory)] shadow-sm"
-                    : isToday
-                    ? "ring-2 ring-[var(--charcoal)]/30 text-[var(--charcoal)]"
-                    : locked
-                    ? "bg-[var(--taupe)]/15 text-[var(--charcoal)]/25"
-                    : "bg-[var(--taupe)]/25 text-[var(--charcoal)]/50"
-                }`}>
-                  {done
-                    ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M4 13l4 4L20 6"/></svg>
-                    : d
-                  }
+                <div
+                  className={`h-8 w-8 rounded-full flex items-center justify-center text-[11px] font-medium transition-all ${
+                    done
+                      ? "bg-[var(--gold)] text-[var(--ivory)] shadow-sm"
+                      : isToday
+                        ? "ring-2 ring-[var(--charcoal)]/30 text-[var(--charcoal)]"
+                        : locked
+                          ? "bg-[var(--taupe)]/15 text-[var(--charcoal)]/25"
+                          : "bg-[var(--taupe)]/25 text-[var(--charcoal)]/50"
+                  }`}
+                >
+                  {done ? (
+                    <svg
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <path d="M4 13l4 4L20 6" />
+                    </svg>
+                  ) : (
+                    d
+                  )}
                 </div>
               </div>
             );
@@ -161,7 +180,9 @@ function Progress() {
               return (
                 <div key={outcome}>
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className={`font-serif text-[15px] text-[var(--charcoal)] ${idx === 0 ? "font-medium" : ""}`}>
+                    <span
+                      className={`font-serif text-[15px] text-[var(--charcoal)] ${idx === 0 ? "font-medium" : ""}`}
+                    >
                       {outcome}
                       {idx === 0 && (
                         <span className="ml-2 rounded-full bg-[var(--gold)]/15 px-2 py-0.5 text-[9.5px] tracking-[0.12em] uppercase text-[var(--gold)]">
@@ -197,16 +218,31 @@ function Progress() {
   );
 }
 
-function HabitCard({ label, value, max, color }: { label: string; value: number; max: number; color: string }) {
+function HabitCard({
+  label,
+  value,
+  max,
+  color,
+}: {
+  label: string;
+  value: number;
+  max: number;
+  color: string;
+}) {
   const pct = Math.round((value / max) * 100);
   return (
     <div className="glass-card p-3.5 text-center">
       <p className="font-serif text-[26px] leading-none" style={{ color: `var(--${color})` }}>
         {value}
       </p>
-      <p className="mt-0.5 text-[9px] tracking-[0.12em] uppercase text-[var(--charcoal)]/45">{label}</p>
+      <p className="mt-0.5 text-[9px] tracking-[0.12em] uppercase text-[var(--charcoal)]/45">
+        {label}
+      </p>
       <div className="mt-2 h-1 w-full rounded-full bg-[var(--taupe)]/20">
-        <div className="h-full rounded-full" style={{ width: `${pct}%`, background: `var(--${color})` }} />
+        <div
+          className="h-full rounded-full"
+          style={{ width: `${pct}%`, background: `var(--${color})` }}
+        />
       </div>
     </div>
   );
@@ -214,7 +250,9 @@ function HabitCard({ label, value, max, color }: { label: string; value: number;
 
 function calcStreak(completedDays: number[], currentDay: number): number {
   let streak = 0;
-  for (let d = currentDay; d >= 1; d--) {
+  // The active day is usually not done yet; count back from the latest finished day.
+  const start = completedDays.includes(currentDay) ? currentDay : currentDay - 1;
+  for (let d = start; d >= 1; d--) {
     if (completedDays.includes(d)) streak++;
     else break;
   }

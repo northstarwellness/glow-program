@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -74,17 +75,37 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Ritual App — The Inner Glow Reset" },
-      { name: "description", content: "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy." },
+      {
+        name: "description",
+        content:
+          "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy.",
+      },
       { name: "author", content: "NOURÉ Wellness" },
       { property: "og:title", content: "Ritual App — The Inner Glow Reset" },
-      { property: "og:description", content: "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy." },
+      {
+        property: "og:description",
+        content:
+          "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@nourewellness" },
       { name: "twitter:title", content: "Ritual App — The Inner Glow Reset" },
-      { name: "twitter:description", content: "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/957e8fd0-e471-48fc-ba3f-9bba3a0dd344/id-preview-a8da364b--9e060135-e11e-41ce-b21f-b1ce5b3f3052.lovable.app-1778223336423.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/957e8fd0-e471-48fc-ba3f-9bba3a0dd344/id-preview-a8da364b--9e060135-e11e-41ce-b21f-b1ce5b3f3052.lovable.app-1778223336423.png" },
+      {
+        name: "twitter:description",
+        content:
+          "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/957e8fd0-e471-48fc-ba3f-9bba3a0dd344/id-preview-a8da364b--9e060135-e11e-41ce-b21f-b1ce5b3f3052.lovable.app-1778223336423.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/957e8fd0-e471-48fc-ba3f-9bba3a0dd344/id-preview-a8da364b--9e060135-e11e-41ce-b21f-b1ce5b3f3052.lovable.app-1778223336423.png",
+      },
       { name: "theme-color", content: "#FAF6F0" },
       { name: "mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
@@ -124,6 +145,10 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
+  // Readiness marker on every page (the e2e suite waits for it before tapping).
+  useEffect(() => {
+    document.documentElement.dataset.hydrated = "true";
+  }, []);
   const { queryClient } = Route.useRouteContext();
 
   return (

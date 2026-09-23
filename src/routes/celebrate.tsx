@@ -1,18 +1,71 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { useApp, glowScore } from "@/lib/store";
+import { useEffect, useState } from "react";
+import { useApp, glowScore, isProgramComplete, activeDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { REDS_URL } from "@/lib/content";
+import { renderGlowCard } from "@/lib/glow-card";
+import { isAbortError } from "@/lib/share";
+import { ShareStatus } from "@/components/ShareStatus";
 
 export const Route = createFileRoute("/celebrate")({ component: Celebrate });
 
 function Celebrate() {
   const hydrated = useHydrated();
   const s = useApp();
-  useEffect(() => { s.markMilestoneShown("day-21"); s.earnBadge("day-21"); }, []);
-  if (hydrated && !s.name) return <Navigate to="/" />;
+  const markMilestoneShown = useApp((st) => st.markMilestoneShown);
+  const earnBadge = useApp((st) => st.earnBadge);
+  const complete = hydrated && isProgramComplete(s.completedDays);
+  // Record the Day 21 celebration only once the program is really complete (never pre-hydration).
+  useEffect(() => {
+    if (complete) {
+      markMilestoneShown("day-21");
+      earnBadge("day-21");
+    }
+  }, [complete, markMilestoneShown, earnBadge]);
   const score = glowScore(s);
-  const date = new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+  // Server renders in UTC; format the local date only on the client to avoid a hydration mismatch.
+  const date = hydrated
+    ? new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
+    : "";
+  const card = useGlowCardFile(
+    complete && s.name
+      ? JSON.stringify({
+          name: s.name,
+          score,
+          daysDone: s.completedDays.length,
+          entries: Object.keys(s.journalEntries).length,
+          redsDays: Object.values(s.dailyLogs).filter((l) => l.reds).length,
+          date,
+        })
+      : null,
+  );
+  const [saveMsg, setSaveMsg] = useState("");
+  if (!hydrated) return <div className="ivory-frame min-h-screen" aria-busy="true" />;
+  if (!s.name) return <Navigate to="/" />;
+  // Not finished yet (e.g. an early direct link): go to the real active day.
+  if (!complete)
+    return <Navigate to="/day/$n" params={{ n: String(activeDay(s.completedDays)) }} replace />;
+
+  const saveCard = () => {
+    setSaveMsg("");
+    if (!card.file) {
+      setSaveMsg(
+        card.failed
+          ? "We couldn't create your Glow Card image on this device."
+          : "Your Glow Card is still being prepared. Try again in a moment.",
+      );
+      return;
+    }
+    const nav = typeof navigator !== "undefined" ? navigator : undefined;
+    // Share sheet (includes "Save Image" on iPhone) — invoked synchronously from the tap.
+    if (nav?.share && nav.canShare?.({ files: [card.file] })) {
+      nav.share({ files: [card.file], title: "My Glow Card" }).catch((e) => {
+        if (!isAbortError(e)) download(card.file!, setSaveMsg);
+      });
+      return;
+    }
+    download(card.file, setSaveMsg);
+  };
 
   return (
     <div className="ivory-frame relative min-h-screen">
@@ -21,7 +74,8 @@ function Celebrate() {
         <p className="label-caps text-[var(--gold)]">Day 21 · Complete</p>
 
         <h1 className="mt-4 font-serif text-[44px] leading-tight text-[var(--plum)]">
-          You did it,<br />
+          You did it,
+          <br />
           <em className="text-[var(--berry)]">{s.name}.</em>
         </h1>
 
@@ -37,17 +91,25 @@ function Celebrate() {
           <div className="grid grid-cols-3 gap-3 mt-4">
             <div>
               <p className="font-serif text-[28px] text-[var(--plum)]">{s.completedDays.length}</p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">Days Done</p>
+              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">
+                Days Done
+              </p>
             </div>
             <div>
-              <p className="font-serif text-[28px] text-[var(--plum)]">{Object.keys(s.journalEntries).length}</p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">Entries</p>
+              <p className="font-serif text-[28px] text-[var(--plum)]">
+                {Object.keys(s.journalEntries).length}
+              </p>
+              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">
+                Entries
+              </p>
             </div>
             <div>
               <p className="font-serif text-[28px] text-[var(--plum)]">
                 {Object.values(s.dailyLogs).filter((l) => l.reds).length}
               </p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">Reds Days</p>
+              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">
+                Reds Days
+              </p>
             </div>
           </div>
         </div>
@@ -59,12 +121,10 @@ function Celebrate() {
           <p className="mt-1 text-[12px] tracking-wide text-[var(--plum)]/50">Day 21 · {date}</p>
         </div>
 
-        <button
-          onClick={() => window.print()}
-          className="gold-pill-btn mt-8 w-full"
-        >
+        <button type="button" onClick={saveCard} className="gold-pill-btn mt-8 w-full">
           Save My Glow Card
         </button>
+        <ShareStatus className="mt-2" message={saveMsg} />
         <a
           href={REDS_URL}
           target="_blank"
@@ -78,20 +138,73 @@ function Celebrate() {
   );
 }
 
+/**
+ * Pre-renders the card so the tap can open the share sheet without awaiting (iOS gesture rule).
+ * Takes the card data as a JSON string so it re-renders only when the content actually changes.
+ */
+function useGlowCardFile(dataJson: string | null) {
+  const [state, setState] = useState<{ file: File | null; failed: boolean }>({
+    file: null,
+    failed: false,
+  });
+  useEffect(() => {
+    if (!dataJson) return;
+    let live = true;
+    renderGlowCard(JSON.parse(dataJson))
+      .then(
+        (blob) =>
+          live &&
+          setState({
+            file: new File([blob], "noure-glow-card.png", { type: "image/png" }),
+            failed: false,
+          }),
+      )
+      .catch(() => live && setState({ file: null, failed: true }));
+    return () => {
+      live = false;
+    };
+  }, [dataJson]);
+  return state;
+}
+
+function download(file: File, report: (m: string) => void) {
+  try {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    report("Your Glow Card download has started.");
+  } catch {
+    report("We couldn't download your Glow Card on this device.");
+  }
+}
+
 function Confetti() {
   const pieces = Array.from({ length: 60 });
   return (
     <div className="gold-confetti">
       {pieces.map((_, i) => (
-        <span key={i} style={{
-          left: `${Math.random() * 100}%`,
-          animationDuration: `${3 + Math.random() * 4}s`,
-          animationDelay: `${Math.random() * 2}s`,
-          width: `${4 + Math.random() * 7}px`,
-          height: `${4 + Math.random() * 7}px`,
-          borderRadius: i % 4 === 0 ? "2px" : "50%",
-          background: i % 3 === 0 ? "var(--color-berry)" : i % 3 === 1 ? "var(--color-gold)" : "oklch(0.82 0.06 10)",
-        }} />
+        <span
+          key={i}
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDuration: `${3 + Math.random() * 4}s`,
+            animationDelay: `${Math.random() * 2}s`,
+            width: `${4 + Math.random() * 7}px`,
+            height: `${4 + Math.random() * 7}px`,
+            borderRadius: i % 4 === 0 ? "2px" : "50%",
+            background:
+              i % 3 === 0
+                ? "var(--color-berry)"
+                : i % 3 === 1
+                  ? "var(--color-gold)"
+                  : "oklch(0.82 0.06 10)",
+          }}
+        />
       ))}
     </div>
   );
