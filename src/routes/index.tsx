@@ -1,4 +1,4 @@
-import { createFileRoute, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -6,146 +6,88 @@ import { useHydrated } from "@/lib/use-hydrated";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "NOURÉ — Unlock Your Ritual" },
-      { name: "description", content: "Enter the email you used at checkout to begin your 21-day morning ritual." },
+      { title: "Ritual App — The Inner Glow Reset" },
+      { name: "description", content: "A 21-day morning ritual for radiant skin, a calm gut, and steady energy." },
     ],
   }),
-  component: UnlockGate,
+  component: NameCapture,
 });
 
-type Status = "idle" | "loading" | "error";
-
-function UnlockGate() {
+function NameCapture() {
   const hydrated = useHydrated();
-  const { unlocked, seenWelcome } = useApp();
-  const setUnlocked = useApp((s) => s.setUnlocked);
+  const verifiedEmail = useApp((s) => s.verifiedEmail);
+  const name = useApp((s) => s.name);
+  const seenWelcome = useApp((s) => s.seenWelcome);
+  const setName = useApp((s) => s.setName);
   const startReset = useApp((s) => s.startReset);
   const navigate = useNavigate();
+  const [val, setVal] = useState("");
 
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<Status>("idle");
-  const [errorMsg, setErrorMsg] = useState("");
+  if (hydrated && !verifiedEmail) return <Navigate to="/verify" />;
+  if (hydrated && name && seenWelcome) return <Navigate to="/home" />;
+  if (hydrated && name && !seenWelcome) return <Navigate to="/welcome" />;
 
-  if (hydrated && unlocked && seenWelcome) return <Navigate to="/home" />;
-  if (hydrated && unlocked && !seenWelcome) return <Navigate to="/welcome" />;
-
-  const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
-
-  const submit = async (e: React.FormEvent) => {
+  const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid || status === "loading") return;
-    setStatus("loading");
-    setErrorMsg("");
-
-    try {
-      const res = await fetch("/api/verify-purchase", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim().toLowerCase() }),
-      });
-
-      if (!res.ok && res.status !== 400 && res.status !== 404) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-
-      const data = (await res.json()) as { unlocked: boolean; name?: string | null; error?: string };
-
-      if (data.unlocked) {
-        setUnlocked(email.trim().toLowerCase(), data.name ?? null);
-        startReset();
-        navigate({ to: "/welcome" });
-        return;
-      }
-
-      setStatus("error");
-      if (data.error === "no-orders") {
-        setErrorMsg(
-          "We couldn't find a purchase with that email. Please use the exact email from your order confirmation."
-        );
-      } else if (data.error === "wrong-product") {
-        setErrorMsg(
-          "We found your order, but it doesn't include the NOURÉ Ritual App or Radiant Reds. Please use the email from those purchases."
-        );
-      } else if (data.error === "config-missing") {
-        setErrorMsg("Access verification is temporarily unavailable. Please try again shortly.");
-      } else if (data.error === "invalid-email") {
-        setErrorMsg("Please enter a valid email address.");
-      } else {
-        setErrorMsg("Something went wrong. Please check your connection and try again.");
-      }
-    } catch {
-      setStatus("error");
-      setErrorMsg("Something went wrong. Please check your connection and try again.");
-    }
+    const v = val.trim();
+    if (!v) return;
+    setName(v);
+    startReset();
+    navigate({ to: "/welcome" });
   };
 
   return (
     <div className="ivory-frame min-h-screen">
-      <div className="mx-auto flex min-h-screen max-w-[440px] flex-col px-6 pt-10 pb-12">
-        <p className="text-center font-serif text-[13px] tracking-[0.4em] text-[var(--plum)]/60">
-          RITUAL APP
-        </p>
+      <div className="mx-auto flex min-h-screen max-w-[440px] flex-col px-8">
 
-        <div className="mt-10">
-          <h1 className="font-serif text-[46px] leading-[1.05] text-[var(--plum)]">
-            Unlock your<br />ritual.
+        {/* Top wordmark */}
+        <div className="pt-14 pb-0">
+          <p className="font-serif text-[11px] tracking-[0.55em] text-[var(--charcoal)]/40 uppercase">
+            RITUAL APP
+          </p>
+        </div>
+
+        {/* Main content — vertically centered */}
+        <div className="flex flex-1 flex-col justify-center pb-16">
+
+          {/* Thin gold rule */}
+          <div className="mb-10 h-px w-10 bg-[var(--gold)]/50" />
+
+          <h1 className="font-serif text-[46px] leading-[1.05] text-[var(--charcoal)]">
+            Your skin notices<br />everything.
           </h1>
-          <p className="mt-3 font-serif italic text-[18px] leading-relaxed text-[var(--plum)]/70">
-            Your glow begins within.
+
+          <p className="mt-5 font-serif italic text-[16px] leading-relaxed text-[var(--charcoal)]/50 max-w-[30ch]">
+            The Inner Glow Reset is a 21-day morning ritual built for the woman who's doing everything right and still not seeing it on her face.
           </p>
-          <p className="mt-2 text-[14px] leading-relaxed text-[var(--plum)]/60">
-            Enter the email you used at checkout to begin your 21 days.
-          </p>
-        </div>
 
-        <form onSubmit={submit} className="mt-10 w-full">
-          <p className="label-caps text-[var(--plum)]/55">Purchase email</p>
-          <input
-            type="email"
-            inputMode="email"
-            autoComplete="email"
-            autoFocus
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (status === "error") setStatus("idle");
-            }}
-            placeholder="your@email.com"
-            className="mt-2 w-full border-0 border-b border-[var(--plum)]/30 bg-transparent px-1 py-3 font-serif text-[22px] text-[var(--plum)] placeholder:text-[var(--plum)]/30 focus:border-[var(--gold)] focus:outline-none"
-          />
+          <form onSubmit={submit} className="mt-12">
+            <label className="block font-serif text-[11px] tracking-[0.38em] uppercase text-[var(--charcoal)]/40 mb-5">
+              Who's doing this reset?
+            </label>
+            <input
+              autoFocus
+              value={val}
+              onChange={(e) => setVal(e.target.value)}
+              placeholder="Your first name"
+              maxLength={32}
+              className="w-full border-0 border-b border-[var(--taupe)]/40 bg-transparent pb-3 font-serif text-[28px] text-[var(--charcoal)] placeholder:text-[var(--charcoal)]/20 focus:border-[var(--gold)] focus:outline-none transition-colors duration-300"
+            />
+            <button
+              type="submit"
+              disabled={!val.trim()}
+              className="gold-pill-btn mt-10 w-full disabled:opacity-30"
+            >
+              Begin My Reset
+            </button>
+          </form>
 
-          {status === "error" && (
-            <p className="mt-4 rounded-2xl bg-[var(--berry)]/8 px-4 py-3 text-[13px] leading-relaxed text-[var(--berry)]">
-              {errorMsg}
-            </p>
-          )}
-
-          <button
-            type="submit"
-            disabled={!isValid || status === "loading"}
-            className="gold-pill-btn mt-8 w-full disabled:opacity-40"
-          >
-            {status === "loading" ? "Checking..." : "Unlock My Reset"}
-          </button>
-        </form>
-
-        <div className="mt-auto">
-          <div className="warm-divider mt-16" />
-          <p className="mt-8 label-caps text-center text-[var(--plum)]/45">
-            Don't have access yet?
-          </p>
-          <a
-            href="https://nourewellness.com"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 block w-full rounded-full bg-[var(--plum)] px-6 py-4 text-center font-serif text-[17px] text-[var(--ivory)]"
-          >
-            Get The Inner Glow Reset
-          </a>
-          <p className="mt-4 text-center font-serif italic text-[12px] text-[var(--plum)]/45">
-            Use the exact email from your order confirmation.
+          {/* Bottom note */}
+          <p className="mt-8 font-serif italic text-[12px] text-[var(--charcoal)]/30 text-center">
+            21 days. One morning ritual. No shortcuts.
           </p>
         </div>
+
       </div>
     </div>
   );

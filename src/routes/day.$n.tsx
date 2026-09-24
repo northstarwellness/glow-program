@@ -1,10 +1,58 @@
-import { createFileRoute, Link, Navigate, useNavigate, useParams } from "@tanstack/react-router";
-import { Frame, TopBar, GoldDivider } from "@/components/Frame";
-import { useApp, currentDay } from "@/lib/store";
+import {
+  createFileRoute,
+  Link,
+  Navigate,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
+import { Frame, GoldDivider, TopBar } from "@/components/Frame";
+import {
+  useApp,
+  OUTCOMES,
+  routeAfterComplete,
+  isDayPersisted,
+  isDayUnlocked,
+  activeDay,
+} from "@/lib/store";
+import { ProgressSkeleton } from "@/components/ProgressSkeleton";
+import { COMPLETION_ANCHOR, recipeLinkSearch } from "@/lib/recipe-entry";
 import { useHydrated } from "@/lib/use-hydrated";
-import { DAYS, RECIPES, phaseFor } from "@/lib/content";
+import { DAYS, JOURNAL_PROMPTS, RECIPES, REDS_URL, phaseFor } from "@/lib/content";
+import { SmoothieImage } from "@/components/SmoothieImage";
 
-export const Route = createFileRoute("/day/$n")({ component: DayView });
+export const Route = createFileRoute("/day/$n")({ component: DayRoute });
+
+let lastCompletionAt = 0;
+
+/** Remount per day so per-day local state (ingredient checks, save status) never carries over. */
+function DayRoute() {
+  const { n } = useParams({ from: "/day/$n" });
+  return <DayView key={n} />;
+}
+
+function useIngredientChecks(dayNum: number, ingredients: string[]) {
+  const key = `noure_day_ing_${dayNum}`;
+  const [checked, setChecked] = useState<Record<string, boolean>>(() => {
+    try {
+      return JSON.parse(localStorage.getItem(key) ?? "{}");
+    } catch {
+      return {};
+    }
+  });
+  const toggle = (name: string) => {
+    const next = { ...checked, [name]: !checked[name] };
+    setChecked(next);
+    localStorage.setItem(key, JSON.stringify(next));
+  };
+  const reset = () => {
+    setChecked({});
+    localStorage.removeItem(key);
+  };
+  const allChecked = ingredients.every((n) => !!checked[n]);
+  return { checked, toggle, reset, allChecked };
+}
 
 function DayView() {
   const { n } = useParams({ from: "/day/$n" });
@@ -12,73 +60,483 @@ function DayView() {
   const s = useApp();
   const navigate = useNavigate();
 
-  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.unlocked) return <Navigate to="/" />;
-
+  // Compute values needed for hooks before any conditional returns
+  const validParam = /^\d+$/.test(n) && +n >= 1 && +n <= 21;
   const dayNum = Math.max(1, Math.min(21, parseInt(n, 10) || 1));
-  const today = currentDay(s.startDate);
-  const locked = dayNum > today;
-  if (locked) return <Navigate to="/rituals" />;
+  const locked = !validParam || !isDayUnlocked(dayNum, s.completedDays);
   const d = DAYS[dayNum - 1];
-  if (!d) return <Navigate to="/rituals" />;
+  const recipe = RECIPES.find((r) => r.id === d?.recipeId) ?? RECIPES[0];
+
+  // All hooks before conditional returns
+  const { checked, toggle, allChecked } = useIngredientChecks(dayNum, recipe.ingredients);
+  const completing = useRef(false);
+  const completionRef = useRef<HTMLElement>(null);
+  const completeBtnRef = useRef<HTMLButtonElement>(null);
+  const { hash } = useLocation();
+  // One-shot redirect for a locked or invalid day → the customer's active day.
+  const redirectTo = hydrated && s.name && locked ? String(activeDay(s.completedDays)) : null;
+  useEffect(() => {
+    if (redirectTo) navigate({ to: "/day/$n", params: { n: redirectTo }, replace: true });
+  }, [redirectTo, navigate]);
+  // Returning from the guided recipe (#complete): reveal the completion area once
+  // layout is ready, and put focus there for keyboard/VoiceOver. One move, no loop.
+  useEffect(() => {
+    if (!hydrated || hash !== COMPLETION_ANCHOR) return;
+    const id = requestAnimationFrame(() => {
+      const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+      completionRef.current?.scrollIntoView({
+        block: "center",
+        behavior: reduce ? "auto" : "smooth",
+      });
+      completeBtnRef.current?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(id);
+  }, [hydrated, hash, dayNum]);
+  const [saveFailed, setSaveFailed] = useState(false);
+
+  // Until saved progress loads, the store holds Day 1 defaults — show nothing day-specific.
+  if (!hydrated) return <ProgressSkeleton />;
+  if (!s.name) return <Navigate to="/" />;
+  // Locked or invalid day → redirected once by the effect above. Rendering <Navigate>
+  // to this same route re-triggers itself ("Maximum update depth exceeded").
+  if (locked) return <ProgressSkeleton />;
+
   const phase = phaseFor(dayNum);
-  const recipe = RECIPES.find((r) => r.id === d.recipeId) ?? RECIPES[0];
   const done = s.completedDays.includes(dayNum);
+  const log = s.dailyLogs[dayNum] ?? {};
+  const prompt = JOURNAL_PROMPTS[dayNum]?.(s.name ?? "") ?? "";
 
   const complete = () => {
-    s.completeDay(dayNum);
-    s.toggleLog(dayNum, "ritual");
-    if (dayNum === 21) navigate({ to: "/celebrate" });
-    else if ([1, 7, 14].includes(dayNum)) navigate({ to: "/milestone/$id", params: { id: `day-${dayNum}` } });
-    else navigate({ to: "/home" });
+    // A second tap right after a completion (e.g. a double-tap that lands on the next day's
+    // button once it opens) is ignored, so a day can never be completed by accident.
+    if (completing.current || Date.now() - lastCompletionAt < 800) return;
+    completing.current = true;
+    setSaveFailed(false);
+    const wasDone = useApp.getState().completedDays.includes(dayNum);
+    try {
+      const { completeDay, setLog } = useApp.getState();
+      completeDay(dayNum);
+      setLog(dayNum, "ritual", true);
+    } catch {
+      /* storage write threw — verified below */
+    }
+    if (!isDayPersisted(dayNum)) {
+      completing.current = false;
+      setSaveFailed(true);
+      return;
+    }
+    // Guard stays set: this view unmounts on navigation (keyed by day).
+    lastCompletionAt = Date.now();
+    const after = useApp.getState().completedDays;
+    // A re-tap on an already-finished day skips its milestone and goes to the active day.
+    if (wasDone && dayNum < 21)
+      navigate({ to: "/day/$n", params: { n: String(activeDay(after)) }, replace: true });
+    else navigate({ ...routeAfterComplete(dayNum, after), replace: true });
   };
 
   return (
     <Frame>
-      <TopBar name={s.name} day={today} />
-      <Link to="/rituals" className="text-[12px] text-[var(--plum)]/60">← All rituals</Link>
+      <TopBar name={s.name} day={dayNum} />
 
-      <div className="mt-3">
-        <p className="label-caps text-[var(--gold)]">Week {phase.week} · {phase.label}</p>
-        <p className="mt-2 font-serif text-[72px] leading-none text-[var(--plum)]">Day {dayNum}</p>
-        <h1 className="mt-2 font-serif text-[30px] leading-tight text-[var(--plum)]">{d.title}</h1>
+      {/* Phase breadcrumb */}
+      <div className="mb-4 flex items-center gap-2">
+        <Link to="/rituals" className="text-[12px] text-[var(--charcoal)]/45">
+          ← All rituals
+        </Link>
+        <span className="text-[var(--taupe)]/60">·</span>
+        <span className="label-caps text-[var(--gold)]">
+          Week {phase.week} · {phase.label}
+        </span>
+      </div>
+
+      {/* Day hero — editorial light card */}
+      <div
+        className="relative overflow-hidden rounded-3xl px-7 pt-7 pb-8"
+        style={{
+          background: "var(--beige)",
+          border: "1px solid oklch(0.748 0.012 65 / 0.18)",
+        }}
+      >
+        <div className="mb-3 h-px w-8 bg-[var(--gold)]/60" />
+        <p className="label-caps text-[var(--gold)]">
+          Week {phase.week} · {phase.label}
+        </p>
+        <p className="font-serif text-[72px] leading-none text-[var(--charcoal)]">{dayNum}</p>
+        <h1 className="mt-1 font-serif text-[28px] leading-tight text-[var(--charcoal)]">
+          {d.title}
+        </h1>
+        {done && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--gold)] px-4 py-1.5">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="white"
+              strokeWidth="2.5"
+            >
+              <path d="M4 13l4 4L20 6" />
+            </svg>
+            <span className="font-serif text-[13px] text-[var(--ivory)]">Complete</span>
+          </div>
+        )}
+        <div className="pointer-events-none absolute -bottom-12 -right-12 h-48 w-48 rounded-full bg-[var(--gold)]/8 blur-3xl" />
       </div>
 
       <GoldDivider />
 
-      <p className="font-serif italic text-[17px] leading-relaxed text-[var(--plum)]/80 drop-cap">
-        {d.guide}
-      </p>
+      {/* Ritual guide */}
+      <div className="bg-white border border-[var(--taupe)]/20 rounded-2xl p-6 shadow-sm">
+        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Today's ritual</p>
+        <p className="font-serif italic text-[17px] leading-relaxed text-[var(--charcoal)]/80 drop-cap">
+          {d.guide}
+        </p>
+      </div>
 
-      <div className="mt-7">
-        <p className="label-caps text-[var(--plum)]/55">Today's recipe</p>
-        <Link to="/recipes/$id" params={{ id: recipe.id }} className="mt-2 flex gap-3 sand-card p-3">
-          <div className="h-20 w-20 flex-shrink-0 rounded-xl" style={{ background: recipe.gradient }} />
-          <div className="flex-1">
-            <h4 className="font-serif text-[19px] text-[var(--plum)]">{recipe.name}</h4>
-            <p className="text-[12px] text-[var(--plum)]/65">{recipe.prep} · {recipe.benefitTag}</p>
+      <GoldDivider />
+
+      {/* Recipe card with checkable ingredients */}
+      <div>
+        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Today's recipe</p>
+        <div className="overflow-hidden rounded-2xl">
+          {/* Recipe hero — photo with gradient fallback */}
+          <div className="relative overflow-hidden" style={{ minHeight: "140px" }}>
+            <SmoothieImage
+              recipe={recipe}
+              className="absolute inset-0 h-full w-full"
+              style={{ minHeight: "140px" }}
+            />
+            {/* Gradient overlay for text legibility */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(to top, rgba(0,0,0,0.52) 0%, rgba(0,0,0,0.12) 60%, transparent 100%)",
+              }}
+            />
+            <div className="relative p-5 pt-8 text-[var(--ivory)]">
+              <p className="label-caps text-[var(--ivory)]/75">
+                {recipe.prep} · {recipe.benefitTag}
+              </p>
+              <h3 className="mt-1 font-serif text-[26px] leading-tight drop-shadow-sm">
+                {recipe.name}
+              </h3>
+            </div>
           </div>
-        </Link>
+          {/* Checkable ingredient list */}
+          <div className="bg-white border border-[var(--taupe)]/15 border-t-0 rounded-b-2xl">
+            <p className="px-5 pt-4 pb-1 label-caps text-[var(--charcoal)]/40">
+              Gather your ingredients
+            </p>
+            <div className="divide-y divide-[var(--taupe)]/15">
+              {recipe.ingredients.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => toggle(name)}
+                  className="flex w-full items-center gap-4 px-5 py-3 text-left transition-all cursor-pointer hover:bg-[var(--beige)]/60"
+                >
+                  <span
+                    className={`flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition-all ${
+                      checked[name]
+                        ? "border-[var(--gold)] bg-[var(--gold)]"
+                        : "border-[var(--taupe)]/40 bg-transparent"
+                    }`}
+                  >
+                    {checked[name] && (
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="white"
+                        strokeWidth="3"
+                      >
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </span>
+                  <span
+                    className={`font-serif text-[16px] transition-all ${
+                      checked[name]
+                        ? "text-[var(--charcoal)]/30 line-through"
+                        : "text-[var(--charcoal)]"
+                    }`}
+                  >
+                    {name}
+                  </span>
+                </button>
+              ))}
+            </div>
+            {allChecked && (
+              <p className="px-5 py-3 font-serif italic text-[13px] text-[var(--gold)]">
+                All gathered. Ready to blend.
+              </p>
+            )}
+            <div className="px-5 py-4">
+              <Link
+                to="/recipes/$id"
+                params={{ id: recipe.id }}
+                search={recipeLinkSearch({ kind: "day", day: dayNum })}
+                className="block w-full rounded-full border border-[var(--taupe)]/30 py-2.5 text-center font-serif text-[14px] text-[var(--charcoal)]"
+              >
+                Open full recipe &amp; method →
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-4">
-        <p className="label-caps text-[var(--plum)]/55">Sound ritual</p>
-        <Link to="/bonuses" hash="sounds" className="mt-2 block sand-card p-4">
-          <p className="font-serif text-[17px] text-[var(--plum)]">Open morning sound rituals →</p>
-          <p className="text-[12px] text-[var(--plum)]/60">Five ambient sessions for your morning.</p>
-        </Link>
+      {/* Radiant Reds Boost — warm gold card */}
+      <div
+        className="mt-5 rounded-3xl overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.968 0.028 68) 0%, oklch(0.985 0.016 65) 100%)",
+          border: "1px solid oklch(0.720 0.082 65 / 0.25)",
+        }}
+      >
+        <div className="px-6 pt-5 pb-2">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
+            <p className="label-caps text-[var(--gold)]">Radiant Reds Boost</p>
+          </div>
+          <p className="font-serif italic text-[16px] leading-relaxed text-[var(--charcoal)]/75">
+            {recipe.redsBoost.why}
+          </p>
+        </div>
+        <div className="px-6 pb-4 mt-2 space-y-1.5">
+          {recipe.redsBoost.proof.slice(0, 3).map((p, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-[var(--gold)]" />
+              <span className="label-caps text-[var(--charcoal)]/55">{p}</span>
+            </div>
+          ))}
+        </div>
+        <a
+          href={REDS_URL}
+          target="_top"
+          className="flex items-center justify-between border-t border-[var(--gold)]/20 px-6 py-3.5"
+        >
+          <span className="font-serif text-[14px] text-[var(--gold)]">Shop Radiant Reds →</span>
+        </a>
       </div>
 
-      <div className="mt-4">
-        <p className="label-caps text-[var(--plum)]/55">Today's prompt</p>
-        <Link to="/journal/$n" params={{ n: String(dayNum) }} className="mt-2 block rounded-2xl border-l-4 border-[var(--plum)] bg-[var(--card)] p-4 shadow-sm">
-          <p className="font-serif italic text-[16px] text-[var(--plum)]">Open your glow journal →</p>
-        </Link>
+      {/* Check-ins */}
+      <div className="mt-5">
+        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Today's check-ins</p>
+        <div
+          className={`grid grid-cols-3 gap-2 rounded-2xl p-2 transition-all ${
+            log.reds && log.ritual && log.journal ? "bg-[var(--gold)]/8" : ""
+          }`}
+        >
+          <LogTile
+            label="Radiant Reds"
+            icon="glass"
+            done={!!log.reds}
+            onClick={() => s.toggleLog(dayNum, "reds")}
+          />
+          <LogTile
+            label="Morning ritual"
+            icon="leaf"
+            done={!!log.ritual}
+            onClick={() => s.toggleLog(dayNum, "ritual")}
+          />
+          <LogTile
+            label="Journal"
+            icon="sun"
+            done={!!log.journal}
+            onClick={() => s.toggleLog(dayNum, "journal")}
+          />
+        </div>
       </div>
 
-      <button onClick={complete} className="gold-pill-btn mt-8 w-full">
-        {done ? "Marked complete ✓" : "Mark Day " + dayNum + " complete"}
-      </button>
+      {/* Feeling chips — post-ritual check-in */}
+      <RitualFeelChips day={dayNum} />
+
+      {/* Journal prompt */}
+      <Link
+        to="/journal/$n"
+        params={{ n: String(dayNum) }}
+        className="mt-4 flex items-center justify-between rounded-2xl p-5 cursor-pointer"
+        style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
+      >
+        <div className="min-w-0 flex-1 pr-3">
+          <p className="label-caps text-[var(--berry)]/60 mb-2">Today's prompt</p>
+          <p className="font-serif italic text-[18px] leading-snug text-[var(--charcoal)]">
+            "{prompt}"
+          </p>
+          <p className="mt-2 text-[12px] text-[var(--charcoal)]/40">Tap to write →</p>
+        </div>
+        <svg
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          className="text-[var(--taupe)] flex-shrink-0"
+        >
+          <path d="M9 18l6-6-6-6" />
+        </svg>
+      </Link>
+
+      <GoldDivider />
+
+      {/* Completion section — the guided journey returns here by anchor. */}
+      <section
+        id={COMPLETION_ANCHOR}
+        ref={completionRef}
+        tabIndex={-1}
+        className="scroll-mt-6 outline-none"
+      >
+        <p className="label-caps mb-3 text-[var(--charcoal)]/40">Finish today</p>
+        <button
+          type="button"
+          ref={completeBtnRef}
+          onClick={complete}
+          className={`w-full rounded-full px-6 py-4 font-serif text-[18px] transition-all ${
+            done
+              ? "border border-[var(--gold)]/40 bg-transparent text-[var(--gold)]"
+              : "gold-pill-btn"
+          }`}
+        >
+          {done ? `Day ${dayNum} complete` : `Mark Day ${dayNum} Complete →`}
+        </button>
+        <p className="mt-3 text-center font-serif italic text-[12px] text-[var(--charcoal)]/35">
+          {done ? "See you tomorrow morning." : "One tap when your ritual is done."}
+        </p>
+        <p role="alert" className="mt-2 text-center text-[12px] text-[var(--berry)]">
+          {saveFailed ? "We couldn't save your progress on this device. Please try again." : ""}
+        </p>
+      </section>
     </Frame>
+  );
+}
+
+const NO_OUTCOMES: string[] = [];
+
+function RitualFeelChips({ day }: { day: number }) {
+  const outcomes = useApp((s) => s.outcomesByDay[day]) ?? NO_OUTCOMES;
+  const toggle = useApp((s) => s.toggleOutcomeForDay);
+
+  return (
+    <div className="mt-5 rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-5">
+      <p className="label-caps text-[var(--charcoal)]/40 mb-1">
+        How do you feel after today's ritual?
+      </p>
+      <p className="font-serif italic text-[13px] text-[var(--charcoal)]/45 mb-4">
+        Select all that feel true.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {OUTCOMES.map((outcome) => {
+          const active = outcomes.includes(outcome);
+          return (
+            <button
+              key={outcome}
+              onClick={() => toggle(day, outcome)}
+              className={`rounded-full px-4 py-2 font-serif text-[14px] transition-all cursor-pointer ${
+                active
+                  ? "bg-[var(--gold)] text-[var(--ivory)] shadow-sm"
+                  : "bg-[var(--beige)] text-[var(--charcoal)]/65 border border-[var(--taupe)]/25 hover:border-[var(--gold)]/40"
+              }`}
+            >
+              {outcome}
+            </button>
+          );
+        })}
+      </div>
+      {outcomes.length > 0 && (
+        <p className="mt-4 font-serif italic text-[12px] text-[var(--charcoal)]/40">
+          Saved. Your body keeps the record.
+        </p>
+      )}
+    </div>
+  );
+}
+
+function LogTile({
+  label,
+  icon,
+  done,
+  onClick,
+}: {
+  label: string;
+  icon: "glass" | "leaf" | "sun";
+  done: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex flex-col items-center gap-1.5 rounded-xl p-3 text-center transition-all cursor-pointer ${
+        done
+          ? "bg-[var(--gold)]/10 ring-1 ring-[var(--gold)]/40 text-[var(--charcoal)]"
+          : "bg-[var(--beige)] text-[var(--charcoal)] hover:bg-[var(--taupe)]/20"
+      }`}
+    >
+      {done ? <CheckIcon /> : <TileIcon name={icon} />}
+      <span className="text-[11px] leading-tight">{label}</span>
+      <span
+        className={`text-[9px] tracking-wider uppercase ${done ? "text-[var(--gold)]" : "text-[var(--charcoal)]/40"}`}
+      >
+        {done ? "Logged" : "Begin"}
+      </span>
+    </button>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path d="M4 13l4 4L20 6" />
+    </svg>
+  );
+}
+function TileIcon({ name }: { name: "glass" | "leaf" | "sun" }) {
+  if (name === "glass")
+    return (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
+        <path d="M6 3h12l-2 12a4 4 0 01-8 0L6 3z" />
+      </svg>
+    );
+  if (name === "leaf")
+    return (
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      >
+        <path d="M5 21c0-9 7-16 16-16-1 9-7 16-16 16z" />
+      </svg>
+    );
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    </svg>
   );
 }

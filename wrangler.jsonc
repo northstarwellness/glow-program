@@ -1,13 +1,22 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "noure-glow-program",
-  "account_id": "1ff060e51c27a61b9133c2b507d4e423",
   "compatibility_date": "2025-09-24",
   "compatibility_flags": ["nodejs_compat"],
   "main": "src/server.ts",
-  // Shopify purchase verification — set these as secrets in Cloudflare:
-  //   wrangler secret put SHOPIFY_STORE_DOMAIN   (e.g. "nourewellness.myshopify.com")
-  //   wrangler secret put SHOPIFY_ADMIN_TOKEN     (Admin API access token from Shopify > Apps > Private)
-  //   wrangler secret put SHOPIFY_PRODUCT_ID      (numeric product ID for the ritual app; leave unset to allow any paid order)
-  "vars": {}
+  "vars": {
+    "SHOPIFY_STORE": "nourewellness.myshopify.com"
+  },
+  // Secrets (set via wrangler secret put):
+  //   SHOPIFY_WEBHOOK_SECRET  — from Shopify webhook signing secret
+  //   ALLOWED_EMAILS          — comma-separated override list
+  "kv_namespaces": [
+    {
+      "binding": "GLOW_PURCHASERS",
+      "id": "58c832553e10481a92a1ddbe91be708d"
+    }
+  ],
+  "routes": [
+    { "pattern": "glow.nourewellness.com/*", "zone_name": "nourewellness.com" }
+  ]
 }

@@ -1,35 +1,33 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
+import { ProgressSkeleton } from "@/components/ProgressSkeleton";
 
 export const Route = createFileRoute("/profile")({ component: Profile });
 
 function Profile() {
   const hydrated = useHydrated();
+  const name = useApp((s) => s.name);
+  if (!hydrated) return <ProgressSkeleton />;
+  if (!name) return <Navigate to="/" />;
+  // Mounted only after saved data loads, so the fields start from the customer's real values.
+  return <ProfileForm />;
+}
+
+function ProfileForm() {
   const s = useApp();
   const navigate = useNavigate();
-
-  // Hooks must be declared unconditionally before any conditional returns
   const [name, setName] = useState(s.name ?? "");
   const [time, setTime] = useState(s.notificationTime);
   const [confirm, setConfirm] = useState(0);
 
-  // Sync local state after hydration (store values weren't available on first render)
-  useEffect(() => {
-    if (hydrated) {
-      setName(s.name ?? "");
-      setTime(s.notificationTime);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hydrated]);
-
-  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.unlocked) return <Navigate to="/" />;
-
   const reset = () => {
-    if (confirm < 2) { setConfirm(confirm + 1); return; }
+    if (confirm < 2) {
+      setConfirm(confirm + 1);
+      return;
+    }
     s.resetAll();
     navigate({ to: "/" });
   };
@@ -37,41 +35,73 @@ function Profile() {
   return (
     <Frame>
       <TopBar name={s.name} />
-      <Link to="/home" className="text-[12px] text-[var(--plum)]/60">← Home</Link>
-      <h1 className="mt-3 font-serif text-[32px] text-[var(--plum)]">Your profile.</h1>
+      <Link to="/home" className="text-[12px] text-[var(--charcoal)]/50">
+        ← Home
+      </Link>
+      <h1 className="mt-3 font-serif text-[32px] text-[var(--charcoal)]">Your profile.</h1>
 
       <div className="mt-6 space-y-5">
         <Field label="Name">
-          <input value={name} onChange={(e) => setName(e.target.value)} onBlur={() => s.setName(name || s.name || "")}
-            className="w-full border-b border-[var(--plum)]/20 bg-transparent py-2 font-serif text-[20px] text-[var(--plum)] focus:border-[var(--gold)] focus:outline-none" />
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            onBlur={() => s.setName(name || s.name || "")}
+            className="w-full border-b border-[var(--taupe)]/40 bg-transparent py-2 font-serif text-[20px] text-[var(--charcoal)] focus:border-[var(--gold)] focus:outline-none"
+          />
         </Field>
 
         <Field label="Start date">
-          <p className="font-serif text-[16px] text-[var(--plum)]">{s.startDate ? new Date(s.startDate).toLocaleDateString() : "—"}</p>
+          <p className="font-serif text-[16px] text-[var(--charcoal)]">
+            {s.startDate ? new Date(s.startDate).toLocaleDateString() : "—"}
+          </p>
         </Field>
 
         <Field label="Daily reminder">
-          <input type="time" value={time} onChange={(e) => { setTime(e.target.value); s.setNotificationTime(e.target.value); }}
-            className="rounded-lg border border-[var(--plum)]/15 bg-[var(--card)] px-3 py-2 font-serif text-[16px] text-[var(--plum)]" />
+          <input
+            type="time"
+            value={time}
+            onChange={(e) => {
+              setTime(e.target.value);
+              s.setNotificationTime(e.target.value);
+            }}
+            className="rounded-lg border border-[var(--taupe)]/30 bg-white px-3 py-2 font-serif text-[16px] text-[var(--charcoal)]"
+          />
         </Field>
 
         <Field label="Badges earned">
           <div className="flex flex-wrap gap-2">
-            {s.badgesEarned.length === 0 ? <p className="text-[13px] text-[var(--plum)]/50">None yet — keep showing up.</p>
-              : s.badgesEarned.map((b) => <span key={b} className="rounded-full bg-[var(--gold)]/15 px-3 py-1 text-[11px] tracking-wide text-[var(--gold)]">{b}</span>)}
+            {s.badgesEarned.length === 0 ? (
+              <p className="text-[13px] text-[var(--charcoal)]/45">None yet — keep showing up.</p>
+            ) : (
+              s.badgesEarned.map((b) => (
+                <span
+                  key={b}
+                  className="rounded-full bg-[var(--gold)]/15 px-3 py-1 text-[11px] tracking-wide text-[var(--gold)]"
+                >
+                  {b}
+                </span>
+              ))
+            )}
           </div>
         </Field>
       </div>
 
       <GoldDivider />
-      <button onClick={reset} className={`w-full rounded-full border px-4 py-3 font-serif text-[14px] ${
-        confirm === 0 ? "border-[var(--plum)]/20 text-[var(--plum)]/60"
-        : confirm === 1 ? "border-[var(--berry)] text-[var(--berry)]"
-        : "bg-[var(--berry)] text-[var(--ivory)]"
-      }`}>
-        {confirm === 0 ? "Reset my progress"
-          : confirm === 1 ? "Are you sure? This clears all 21 days. Tap again to confirm."
-          : "Tap once more — this can't be undone."}
+      <button
+        onClick={reset}
+        className={`w-full rounded-full border px-4 py-3 font-serif text-[14px] ${
+          confirm === 0
+            ? "border-[var(--taupe)]/30 text-[var(--charcoal)]/50"
+            : confirm === 1
+              ? "border-[var(--berry)] text-[var(--berry)]"
+              : "bg-[var(--berry)] text-[var(--ivory)]"
+        }`}
+      >
+        {confirm === 0
+          ? "Reset my progress"
+          : confirm === 1
+            ? "Are you sure? This clears all 21 days. Tap again to confirm."
+            : "Tap once more — this can't be undone."}
       </button>
     </Frame>
   );

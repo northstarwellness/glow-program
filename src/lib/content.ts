@@ -25,10 +25,10 @@ export const DAYS: Day[] = [
     guide: "Polyphenols absorb best on a relatively empty stomach with hydration. That's why this ritual lives in the morning. Today, layer in tart cherry — one of the highest-anthocyanin foods studied for skin elasticity and recovery." },
   { day: 4, title: "Listening Inward", recipeId: "plum-rose",
     teaser: "Your body has been answering. Today you listen.",
-    guide: "Four mornings in, your body has begun to respond. You may feel a little lighter. Energy may feel a touch steadier. Skin won't show change yet — that's still days away. Today's ritual: drink, then write one sentence about what your body is saying." },
+    guide: "Four mornings in, your body has begun to respond. Bloating may have softened. Energy may feel a touch steadier. Skin won't show change yet — that's still days away. Today's ritual: drink, then write one sentence about what your body is saying." },
   { day: 5, title: "The Skin-Gut Bridge", recipeId: "watermelon-reds",
     teaser: "What you feed your gut, your skin wears.",
-    guide: "The gut-skin connection isn't a metaphor. When your gut is out of balance, it can show up as dullness, breakouts, sensitivity. Polyphenols feed the bacteria that support that lining. Today's recipe is hydration-forward — watermelon and hibiscus to hydrate and feed at once." },
+    guide: "The gut-skin axis isn't a metaphor. Inflammation in the gut lining shows up as dullness, breakouts, sensitivity. Polyphenols feed the bacteria that protect that lining. Today's recipe is hydration-forward — watermelon and hibiscus to flush and feed at once." },
   { day: 6, title: "The Quiet Build", recipeId: "fig-almond",
     teaser: "Day 6. Nothing dramatic. Everything compounding.",
     guide: "Six mornings of polyphenols, fiber, and stillness. Your microbiome has noticed. Your skin hasn't shown the world yet, but it's listening. Today, add fig — a quiet, fiber-rich addition that supports the gut bacteria you've been feeding all week." },
@@ -84,6 +84,10 @@ export type Recipe = {
   benefit: string; benefitTag: string; ingredients: string[]; method: string[];
   redsBoost: { why: string; proof: string[] };
   bonus?: boolean;
+  /** Quick Glow Mornings — bonus five-minute smoothies outside the 21-day rotation */
+  quick?: boolean;
+  /** Optional override path for smoothie photo. Defaults to /images/smoothies/${id}.jpg */
+  image?: string;
 };
 
 // Elegant, feminine, light gradients — NO red. Plum, gold, sand, sage, lavender, dusty rose, cream.
@@ -105,12 +109,12 @@ const G = {
 };
 
 const REDS_PROOF = {
-  skin:    ["Pomegranate punicalagins support collagen", "Hibiscus anthocyanins support even tone", "Açaí flavonoids defend against oxidative stress", "Beet nitrates support circulation to the skin"],
-  glow:    ["27 polyphenol sources in one scoop", "Feeds the gut bacteria your skin depends on", "Compounds with daily ritual use", "A glow that builds with the daily ritual"],
+  skin:    ["Pomegranate punicalagins protect collagen", "Hibiscus anthocyanins support even tone", "Açaí flavonoids defend against oxidative stress", "Beet nitrates oxygenate the skin"],
+  glow:    ["27 polyphenol sources in one scoop", "Feeds the gut bacteria your skin depends on", "Compounds with daily ritual use", "Visible lift around Day 14"],
   energy:  ["Beet nitrates increase cellular oxygen", "Polyphenols stabilize morning energy", "No caffeine spike, no crash", "Pairs with whole-food breakfast"],
-  gut:     ["Polyphenols feed bifidobacteria diversity", "Soluble fibers support a calm gut lining", "Prebiotic fibers that feed your gut", "Supports the gut–skin axis directly"],
+  gut:     ["Polyphenols feed bifidobacteria diversity", "Soluble fibers support a calm gut lining", "Prebiotic action begins within 72 hours", "Supports the gut–skin axis directly"],
   hydration:["Mineral-rich hibiscus and beet", "Supports vascular hydration", "Pairs perfectly with morning water", "Replenishes after sleep"],
-  recovery:["A soothing, calming polyphenol blend", "Tart cherry polyphenols for overnight recovery", "Wake up feeling refreshed", "Restores after late nights"],
+  recovery:["Anti-inflammatory polyphenol matrix", "Tart cherry-style melatonin support", "Calms morning puffiness", "Restores after late nights"],
 };
 
 export const RECIPES: Recipe[] = [
@@ -129,13 +133,13 @@ export const RECIPES: Recipe[] = [
     redsBoost: { why: "Add a scoop of Radiant Reds to fold in 27 additional polyphenol sources your berries can't reach alone.", proof: REDS_PROOF.glow } },
   { id: "cherry-cacao", name: "Cherry Cacao", gradient: G.plumDeep,
     prep: "4 min", servings: "1", benefitTag: "Recovery",
-    benefit: "Tart cherry brings anthocyanins for overnight skin recovery; cacao adds flavanols for circulation.",
+    benefit: "Tart cherry brings melatonin and anthocyanins for skin recovery; cacao adds flavanols for circulation.",
     ingredients: ["Tart cherry", "Cacao", "Almond butter", "Oat milk", "Cinnamon"],
     method: ["Blend 1 cup tart cherries with 1 tbsp cacao.", "Add 1 tbsp almond butter and 1 cup oat milk.", "Pinch of cinnamon. Blend until smooth."],
-    redsBoost: { why: "Radiant Reds amplifies the recovery profile with hibiscus and açaí — soothing and restoring while you sleep it off.", proof: REDS_PROOF.recovery } },
+    redsBoost: { why: "Radiant Reds amplifies the recovery profile with hibiscus and açaí — calming inflammation while you sleep it off.", proof: REDS_PROOF.recovery } },
   { id: "plum-rose", name: "Plum & Rose", gradient: G.roseSand,
     prep: "5 min", servings: "1", benefitTag: "Soothing",
-    benefit: "Plum polyphenols paired with rose water for a calming, soothing ritual.",
+    benefit: "Plum polyphenols paired with rose water for a calming, anti-inflammatory ritual.",
     ingredients: ["Plum", "Rose water", "Coconut yogurt", "Honey"],
     method: ["Pit and slice 2 ripe plums.", "Blend with ½ cup coconut yogurt and 1 tsp rose water.", "Sweeten with a touch of honey."],
     redsBoost: { why: "A small scoop of Radiant Reds turns this gentle bowl into a full polyphenol ritual without changing its softness.", proof: REDS_PROOF.skin } },
@@ -159,7 +163,7 @@ export const RECIPES: Recipe[] = [
     redsBoost: { why: "Radiant Reds doubles the beet nitrate load, deepening circulation and the lit-from-within glow this recipe is built for.", proof: REDS_PROOF.energy } },
   { id: "golden-turmeric", name: "Golden Turmeric Latte", gradient: G.creamGold,
     prep: "5 min", servings: "1", benefitTag: "Calm",
-    benefit: "Curcumin with healthy fat and black pepper — the classic soothing morning warmth.",
+    benefit: "Curcumin with healthy fat and black pepper — the classic anti-inflammatory morning warmth.",
     ingredients: ["Turmeric", "Oat milk", "Cinnamon", "Honey", "Almond"],
     method: ["Warm 1 cup oat milk gently.", "Whisk in ½ tsp turmeric, pinch of cinnamon, pinch of black pepper.", "Sweeten with honey. Top with crushed almond."],
     redsBoost: { why: "A scoop of Radiant Reds stirred into the cooled latte adds polyphenols turmeric can't deliver alone.", proof: REDS_PROOF.gut } },
@@ -177,7 +181,7 @@ export const RECIPES: Recipe[] = [
     redsBoost: { why: "After it cools, stir in a scoop of Radiant Reds — calm becomes a full polyphenol ritual.", proof: REDS_PROOF.recovery } },
   { id: "rose-cardamom", name: "Rose Cardamom Mylk", gradient: G.roseSand,
     prep: "5 min", servings: "1", benefitTag: "Soothing",
-    benefit: "Cardamom and rose with creamy oat milk — feminine, warming, soothing.",
+    benefit: "Cardamom and rose with creamy oat milk — feminine, warming, anti-inflammatory.",
     ingredients: ["Oat milk", "Rose water", "Cinnamon", "Honey"],
     method: ["Warm 1 cup oat milk with a pinch of crushed cardamom and cinnamon.", "Off heat, stir in 1 tsp rose water and honey.", "Sip slowly."],
     redsBoost: { why: "Radiant Reds folds in beautifully once the mylk cools to drinking temperature, adding the polyphenol layer.", proof: REDS_PROOF.skin } },
@@ -254,7 +258,7 @@ export const RECIPES: Recipe[] = [
     benefit: "A delicate collagen-supportive sip — vitamin C, rose, and gold-flecked elegance.",
     ingredients: ["Rose water", "Lime", "Honey", "Strawberry"],
     method: ["Muddle 4 strawberries with lime juice.", "Top with sparkling water and 1 tsp rose water.", "Drizzle honey, stir gently."],
-    redsBoost: { why: "Radiant Reds completes the collagen support story — vitamin C + polyphenols is the classic duo.", proof: REDS_PROOF.skin } },
+    redsBoost: { why: "Radiant Reds completes the collagen support story — vitamin C + polyphenols is the proven duo.", proof: REDS_PROOF.skin } },
   { id: "bonus-green-glow", name: "The Green Glow", gradient: G.sageGold, bonus: true,
     prep: "4 min", servings: "1", benefitTag: "Bonus · Refresh",
     benefit: "Cucumber, mint, kiwi, lime — a chlorophyll-forward midday reset.",
@@ -274,45 +278,49 @@ export const RECIPES: Recipe[] = [
     method: ["Blend 1 frozen banana with ½ cup frozen blueberries.", "Add 2 tbsp coconut yogurt and 1 tbsp almond butter.", "Scoop into a chilled bowl, drizzle honey."],
     redsBoost: { why: "Sprinkle Radiant Reds on top — sorbet becomes a polyphenol ritual without losing the indulgence.", proof: REDS_PROOF.glow } },
 
-  // ——— 6TH BONUS RECIPE ———
-  { id: "bonus-golden-hour", name: "Golden Hour Mylk", gradient: G.creamGold, bonus: true,
-    prep: "5 min", servings: "1", benefitTag: "Bonus · Calm",
-    benefit: "Saffron, turmeric, and warm oat milk for a soft, golden wind-down that feels like a candle being lit.",
-    ingredients: ["Oat milk", "Turmeric", "Saffron", "Honey", "Cinnamon"],
-    method: ["Warm 1 cup oat milk gently with a pinch of saffron and ½ tsp turmeric.", "Add a pinch of cinnamon and a touch of honey.", "Off heat, whisk until frothy and sip slowly."],
-    redsBoost: { why: "Once it cools to drinking temperature, stir in a scoop of Radiant Reds so the golden warmth carries a full polyphenol layer.", proof: REDS_PROOF.recovery } },
-
-  // ——— 5 QUICK GLOW MORNINGS (3 min or under) ———
-  { id: "quick-berry-splash", name: "Two-Minute Berry Splash", gradient: G.plumLavender, bonus: true,
-    prep: "2 min", servings: "1", benefitTag: "Quick · Glow",
-    benefit: "Frozen berries and coconut water blended in one go. The fastest way to feed your skin antioxidants before you are even fully awake.",
-    ingredients: ["Mixed berries", "Coconut water", "Lime"],
-    method: ["Blend 1 cup frozen mixed berries with ¾ cup coconut water.", "Squeeze in a little lime.", "Pour and go."],
-    redsBoost: { why: "A scoop of Radiant Reds folds in instantly and turns a two-minute glass into a full polyphenol ritual.", proof: REDS_PROOF.glow } },
-  { id: "quick-green-start", name: "Three-Minute Green Start", gradient: G.sageIvory, bonus: true,
-    prep: "3 min", servings: "1", benefitTag: "Quick · Gut",
-    benefit: "Spinach, banana, and almond milk for a gentle, gut-friendly start that feeds your morning bacteria without a single complicated step.",
-    ingredients: ["Spinach", "Banana", "Almond milk", "Chia seeds"],
-    method: ["Blend a handful of spinach with ½ banana and ¾ cup almond milk.", "Add 1 tsp chia.", "Blend until smooth."],
-    redsBoost: { why: "Stir in Radiant Reds to layer red-pigment polyphenols on top of the greens, covering the full plant-pigment spectrum.", proof: REDS_PROOF.gut } },
-  { id: "quick-pom-pour", name: "One-Glass Pomegranate Pour", gradient: G.plumGold, bonus: true,
-    prep: "2 min", servings: "1", benefitTag: "Quick · Skin",
-    benefit: "Pomegranate and a squeeze of orange over ice. No blender, no cleanup, just punicalagins that support your skin's natural collagen.",
-    ingredients: ["Pomegranate", "Orange", "Sparkling water"],
-    method: ["Pour ½ cup pomegranate juice over ice.", "Add a squeeze of fresh orange.", "Top with sparkling water and stir."],
-    redsBoost: { why: "A scoop of Radiant Reds stirred in deepens the pomegranate base with beet, hibiscus, and açaí in one pour.", proof: REDS_PROOF.skin } },
-  { id: "quick-cacao-shake", name: "Three-Minute Cacao Shake", gradient: G.plumDeep, bonus: true,
-    prep: "3 min", servings: "1", benefitTag: "Quick · Recovery",
-    benefit: "Raw cacao, almond butter, and oat milk shaken cold. A creamy, grounding glass for mornings after a short night.",
-    ingredients: ["Oat milk", "Cacao", "Almond butter", "Cinnamon"],
-    method: ["Add 1 cup oat milk, 1 tbsp cacao, and ½ tbsp almond butter to a jar.", "Add a pinch of cinnamon.", "Seal and shake hard until smooth."],
-    redsBoost: { why: "Shake in a scoop of Radiant Reds so the cacao flavanols are joined by the recovery polyphenols your skin uses overnight.", proof: REDS_PROOF.recovery } },
-  { id: "quick-watermelon-cooler", name: "Two-Minute Watermelon Cooler", gradient: G.roseGold, bonus: true,
-    prep: "2 min", servings: "1", benefitTag: "Quick · Hydration",
-    benefit: "Blended watermelon and mint for the lightest possible morning. Hydration plus lycopene, ready before your coffee finishes brewing.",
-    ingredients: ["Watermelon", "Mint", "Lime"],
-    method: ["Blend 2 cups cubed watermelon with a few mint leaves.", "Squeeze in lime.", "Pour over ice."],
-    redsBoost: { why: "Radiant Reds adds the polyphenol density watermelon alone cannot reach, without weighing the glass down.", proof: REDS_PROOF.hydration } },
+  // ——— QUICK GLOW MORNINGS — 7 bonus five-minute smoothies (outside the 21-day rotation) ———
+  { id: "berry-reds-yogurt-shake", name: "Berry Reds Yogurt Shake", gradient: G.plumGold, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Steady",
+    benefit: "Creamy, antioxidant-rich, and quietly filling.",
+    ingredients: ["1 cup frozen mixed berries", "1/2 cup Greek yogurt or kefir", "3/4 cup almond milk", "1 tsp chia seeds", "1/2 banana (optional)", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add almond milk, yogurt, berries, chia, and banana to the blender.", "Blend until smooth, about 30 seconds.", "Add your Glow Boost and pulse twice to keep the color bright.", "Pour and sip slowly.", "Texture — thick and spoonable; add a splash more almond milk to drink it.", "Swap — no kefir? Plain Greek yogurt works. Dairy-free: coconut yogurt + oat milk."],
+    redsBoost: { why: "Folded into a berry-and-yogurt base, a scoop of Radiant Reds layers in concentrated polyphenols from red superfruits.", proof: ["Polyphenol-rich pomegranate, açaí, and beetroot", "Supports skin radiance and antioxidant protection"] } },
+  { id: "pomegranate-vanilla-glow", name: "Pomegranate Vanilla Glow", gradient: G.creamGold, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Radiant",
+    benefit: "Bright, polyphenol-rich, and a little luxurious.",
+    ingredients: ["1/2 cup pomegranate juice", "1 cup frozen strawberries", "1/2 cup Greek yogurt", "1/4 tsp vanilla extract", "1/2 cup ice", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Pour pomegranate juice into the blender first.", "Add strawberries, yogurt, vanilla, and ice.", "Blend until silky.", "Stir in your Glow Boost at the end.", "Texture — light and pourable, almost like a drinkable sorbet.", "Swap — use frozen cherries for a deeper, less sweet flavor."],
+    redsBoost: { why: "Pomegranate is already one of the most polyphenol-rich fruits — the Glow Boost concentrates that even further.", proof: ["Concentrated red-fruit polyphenols", "Antioxidant support for everyday radiance"] } },
+  { id: "cucumber-mint-lightness", name: "Cucumber Mint Lightness Smoothie", gradient: G.sageIvory, quick: true,
+    prep: "5 min", servings: "1", benefitTag: "Refreshed",
+    benefit: "Crisp, cooling, and feather-light.",
+    ingredients: ["1/2 cucumber, roughly chopped", "1 cup frozen pineapple", "Juice of 1/2 lime", "4–5 fresh mint leaves", "3/4 cup coconut water", "1 tsp chia seeds", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coconut water, cucumber, and pineapple to the blender.", "Add lime, mint, and chia.", "Blend until smooth and pale green.", "Finish with your Glow Boost and a quick pulse.", "Texture — thin and refreshing; best served over ice.", "Swap — no fresh mint? A drop of mint extract works. Honeydew can stand in for cucumber."],
+    redsBoost: { why: "A scoop of Radiant Reds adds antioxidant depth to an otherwise light, hydrating blend.", proof: ["Polyphenols from red superfruits", "Antioxidant support without heaviness"] } },
+  { id: "cherry-cacao-calm-glow", name: "Cherry Cacao Calm Glow", gradient: G.plumDeep, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Calm",
+    benefit: "Rich, chocolatey, and grounding.",
+    ingredients: ["1 cup frozen cherries", "1 tbsp cacao powder", "1/2 banana", "1/2 cup Greek yogurt", "3/4 cup almond milk", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add almond milk, cherries, banana, and yogurt to the blender.", "Add cacao and blend until smooth.", "Stir in your Glow Boost at the end.", "Texture — velvety and dessert-like; add ice for a thicker, colder finish.", "Swap — frozen blueberries can replace cherries. Oat milk for a creamier dairy-free version."],
+    redsBoost: { why: "Cherries and cacao bring their own polyphenols; the Glow Boost rounds out the antioxidant profile.", proof: ["Polyphenol-rich red superfruits", "Supports antioxidant protection"] } },
+  { id: "peach-ginger-gut-glow", name: "Peach Ginger Gut-Glow", gradient: G.goldSand, quick: true,
+    prep: "5 min", servings: "1", benefitTag: "Balanced",
+    benefit: "Warm-spiced, golden, and gentle.",
+    ingredients: ["1 cup frozen peaches", "1/2 inch fresh ginger (or 1/4 tsp ground)", "1 tbsp ground flax or chia seeds", "1/2 cup Greek yogurt or kefir", "3/4 cup coconut water", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coconut water, peaches, and ginger to the blender.", "Add flax or chia and yogurt.", "Blend until smooth and golden.", "Finish with your Glow Boost.", "Texture — smooth with a little body from the flax; thin with extra coconut water if needed.", "Swap — frozen mango works in place of peaches. Skip the ginger if you prefer it mellow."],
+    redsBoost: { why: "A scoop of Radiant Reds adds concentrated red-fruit polyphenols to this gentle, golden blend.", proof: ["Polyphenols from pomegranate and beetroot", "Antioxidant support from within"] } },
+  { id: "mocha-reds-morning", name: "Mocha Reds Morning Smoothie", gradient: G.sandPlum, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Energized",
+    benefit: "Coffee and breakfast in one glass.",
+    ingredients: ["1/2 cup cold brew or chilled coffee", "1 tbsp cacao powder", "1 scoop vanilla protein or 1/2 cup Greek yogurt", "1 frozen banana", "1/2 cup almond milk", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coffee, almond milk, banana, and protein or yogurt to the blender.", "Add cacao and blend until smooth.", "Stir in your Glow Boost at the end.", "Texture — creamy and frothy; add a few ice cubes if you like it colder.", "Swap — decaf or half-caf works just as well. Oat milk for extra creaminess."],
+    redsBoost: { why: "Folded into coffee and cacao, the Glow Boost adds polyphenols alongside your morning caffeine.", proof: ["Concentrated red-superfruit polyphenols", "Antioxidant support to start the day"] } },
+  { id: "tropical-reds-quickie", name: "Tropical Reds Quickie", gradient: G.sageGold, quick: true,
+    prep: "4 min", servings: "1", benefitTag: "Light",
+    benefit: "Bright, sunny, and effortless.",
+    ingredients: ["1 cup frozen mango", "1/2 cup frozen papaya (or extra mango)", "Juice of 1/2 lime", "3/4 cup coconut water", "1 tsp chia seeds", "1 scoop Radiant Reds (Glow Boost)"],
+    method: ["Add coconut water, mango, and papaya to the blender.", "Add lime and chia.", "Blend until smooth and golden-orange.", "Finish with your Glow Boost and a quick pulse.", "Texture — smooth and tropical; naturally sweet, no added sugar needed.", "Swap — pineapple can replace papaya. Add a handful of spinach for greens; the color stays bright."],
+    redsBoost: { why: "A scoop of Radiant Reds brings red-fruit polyphenols to a bright tropical base.", proof: ["Polyphenol-rich red fruits and roots", "Everyday antioxidant support"] } },
 ];
 
 export type Ingredient = {
@@ -322,7 +330,7 @@ export type Ingredient = {
 
 export const INGREDIENTS: Ingredient[] = [
   { name: "Pomegranate", tagline: "Ellagic acid + punicalagins",
-    description: "Two of the most studied polyphenols for skin health. Supports your skin's natural collagen and helps defend against everyday oxidative stress.",
+    description: "Two of the most studied polyphenols for skin health. Supports collagen protection and reduces UV-related skin damage.",
     gut: "Feeds beneficial bacteria; metabolized into urolithin A.", skin: "Clarity, elasticity, tone.",
     alsoIn: ["The Pomegranate Glow Elixir", "Radiant Reds blend"] },
   { name: "Raspberry", tagline: "Ellagitannins, vitamin C",
@@ -331,11 +339,11 @@ export const INGREDIENTS: Ingredient[] = [
     alsoIn: ["Berry Bloom", "Beet Glow"] },
   { name: "Strawberry", tagline: "Vitamin C, ellagic acid",
     description: "More vitamin C than oranges by weight. Supports the collagen synthesis pathway your skin uses every day.",
-    gut: "Polyphenols that support a calm, comfortable gut.", skin: "Tone, firmness.",
+    gut: "Polyphenols modulate inflammation in the gut lining.", skin: "Tone, firmness.",
     alsoIn: ["Berry Bloom"] },
-  { name: "Tart cherry", tagline: "Anthocyanins, deep color",
-    description: "One of the highest-anthocyanin foods. Loved for skin elasticity, recovery, and rest — all of which show in your face.",
-    gut: "Soothing polyphenols that support gut comfort.", skin: "Recovery, elasticity.",
+  { name: "Tart cherry", tagline: "Anthocyanins, melatonin",
+    description: "One of the highest-anthocyanin foods. Studied for skin elasticity, recovery, and sleep — all of which show in your face.",
+    gut: "Anti-inflammatory effects in the gut lining.", skin: "Recovery, elasticity.",
     alsoIn: ["Cherry Cacao"] },
   { name: "Blueberry", tagline: "Anthocyanins, vitamin K",
     description: "Classic for a reason. The anthocyanins protect skin cells from oxidative damage every day.",
@@ -346,8 +354,8 @@ export const INGREDIENTS: Ingredient[] = [
     gut: "Gentle motility support.", skin: "Tone evenness.",
     alsoIn: ["Plum & Rose"] },
   { name: "Watermelon", tagline: "Lycopene, citrulline",
-    description: "Hydration plus lycopene — a carotenoid that helps skin stand up to everyday environmental stress.",
-    gut: "Hydrates the gut lining.", skin: "Everyday defense, clarity.",
+    description: "Hydration plus lycopene — a carotenoid with skin-protective effects against UV stress.",
+    gut: "Hydrates the gut lining.", skin: "UV defense, clarity.",
     alsoIn: ["Watermelon Reds"] },
   { name: "Black fig", tagline: "Soluble fiber, polyphenols",
     description: "One of the best prebiotic fruits. The fiber feeds the bacteria you spent the morning building up.",
@@ -355,7 +363,7 @@ export const INGREDIENTS: Ingredient[] = [
     alsoIn: ["Fig & Almond"] },
   { name: "Beet", tagline: "Nitrates, betalains",
     description: "Nitrates support nitric oxide production and skin oxygenation. Betalains are powerful antioxidants.",
-    gut: "Supports your body's natural daily rhythm.", skin: "Oxygenation, glow.",
+    gut: "Supports a calm, well-fed gut environment.", skin: "Oxygenation, glow.",
     alsoIn: ["Beet Glow"] },
   { name: "Hibiscus", tagline: "Anthocyanins, quercetin",
     description: "Vivid red tea high in vascular-supportive polyphenols. Long traditional use for circulation and skin tone.",
@@ -381,16 +389,16 @@ export const INGREDIENTS: Ingredient[] = [
     description: "Plant omega-3 ALA and soluble fiber. Both support skin barrier and gut motility.",
     gut: "Forms a soothing gel.", skin: "Barrier, hydration.",
     alsoIn: ["Berry Bloom"] },
-  { name: "Cinnamon", tagline: "Polyphenols, warming spice",
-    description: "A small pinch helps mornings feel steady and balanced, and steady mornings show in your skin.",
-    gut: "Warming and settling.", skin: "Supports a smooth, even look.",
+  { name: "Cinnamon", tagline: "Polyphenols, blood-sugar support",
+    description: "A small pinch helps blunt morning blood sugar — relevant for skin clarity.",
+    gut: "Mild antimicrobial.", skin: "Reduces glycation stress.",
     alsoIn: ["Cherry Cacao", "Fig & Almond"] },
   { name: "Honey", tagline: "Trace polyphenols",
     description: "A small amount of raw honey adds gentle sweetness and trace antioxidants.",
     gut: "Some prebiotic effect.", skin: "Indirect.",
     alsoIn: ["Plum & Rose"] },
   { name: "Rose water", tagline: "Calming aromatic",
-    description: "Soothing and aromatic. A traditional addition to feminine wellness rituals.",
+    description: "Mildly anti-inflammatory and aromatic. A traditional addition to feminine wellness rituals.",
     gut: "Calming.", skin: "Soothing, calming.",
     alsoIn: ["Plum & Rose"] },
   { name: "Coconut yogurt", tagline: "Probiotics, fats",
@@ -410,8 +418,8 @@ export const INGREDIENTS: Ingredient[] = [
     gut: "Prebiotic.", skin: "Indirect.",
     alsoIn: ["Berry Bloom"] },
   { name: "Ginger", tagline: "Gingerols",
-    description: "Warming and settling, with long traditional use in morning rituals.",
-    gut: "Settling for the stomach.", skin: "Calming.",
+    description: "Warming, anti-inflammatory, and motility-supportive. Long traditional use in morning rituals.",
+    gut: "Motility, anti-nausea.", skin: "Anti-inflammatory.",
     alsoIn: ["Beet Glow"] },
   { name: "Lemon", tagline: "Vitamin C, citric acid",
     description: "Warm lemon water is the gentlest way to begin the morning ritual.",
@@ -427,11 +435,11 @@ export const INGREDIENTS: Ingredient[] = [
     alsoIn: ["Radiant Reds"] },
   { name: "Green tea", tagline: "EGCG",
     description: "EGCG is one of the most studied skin-protective polyphenols.",
-    gut: "Microbiome diversity.", skin: "Everyday defense, clarity.",
+    gut: "Microbiome diversity.", skin: "UV defense, clarity.",
     alsoIn: ["Optional afternoon ritual"] },
   { name: "Turmeric", tagline: "Curcumin",
-    description: "Curcumin is prized as a soothing, calming polyphenol; pair with black pepper for absorption.",
-    gut: "Soothing, calming.", skin: "Tone, calmness.",
+    description: "Curcumin is a strong anti-inflammatory; pair with black pepper for absorption.",
+    gut: "Anti-inflammatory.", skin: "Tone, calmness.",
     alsoIn: ["Optional add-in"] },
   { name: "Mint", tagline: "Aromatic herb",
     description: "Cooling, digestion-supportive herb. A small handful elevates any morning blend.",
@@ -449,7 +457,7 @@ export type Polyphenol = {
 
 export const POLYPHENOLS: Polyphenol[] = [
   { id: "pomegranate", name: "Pomegranate", color: "#9B1B3A", topBenefit: "Skin clarity & elasticity",
-    points: ["Highest in punicalagins of any common fruit.", "Metabolized to urolithin A by gut bacteria.", "Supports your skin's natural collagen.", "Studied for everyday skin defense.", "Best drunk in the morning."],
+    points: ["Highest in punicalagins of any common fruit.", "Metabolized to urolithin A by gut bacteria.", "Supports collagen protection.", "Studied for UV-related skin protection.", "Best drunk in the morning."],
     howTo: "One serving daily — fresh seeds, juice, or a scoop of Radiant Reds." },
   { id: "acai", name: "Açaí", color: "#3E1A47", topBenefit: "Antioxidant density",
     points: ["One of the highest ORAC scores of any fruit.", "Rich in anthocyanins.", "Healthy fats support absorption of fat-soluble nutrients.", "Pairs well with banana and almond milk.", "Found in Radiant Reds."],
@@ -458,36 +466,306 @@ export const POLYPHENOLS: Polyphenol[] = [
     points: ["Anthocyanin-rich.", "Studied for cognitive and skin benefits.", "Feeds bifidobacteria diversity.", "Easy daily addition.", "Wild varieties are denser."],
     howTo: "½ cup fresh or frozen, daily." },
   { id: "hibiscus", name: "Hibiscus", color: "#A02447", topBenefit: "Vascular & tone",
-    points: ["Vivid red tea, anthocyanin-rich.", "Traditional use for circulation.", "Naturally rich in minerals.", "Cooling iced or warming hot.", "Pairs with lime and watermelon."],
+    points: ["Vivid red tea, anthocyanin-rich.", "Traditional use for circulation.", "Mild blood-pressure support.", "Cooling iced or warming hot.", "Pairs with lime and watermelon."],
     howTo: "1–2 cups daily, hot or cold." },
   { id: "beet", name: "Beet", color: "#6B1730", topBenefit: "Circulation & oxygenation",
-    points: ["Nitrate-rich, supports nitric oxide.", "Betalains are unique antioxidants.", "Supports circulation to the skin.", "Roast or steam to soften flavor.", "Pairs with raspberry and orange."],
+    points: ["Nitrate-rich, supports nitric oxide.", "Betalains are unique antioxidants.", "Skin oxygenation benefit.", "Roast or steam to soften flavor.", "Pairs with raspberry and orange."],
     howTo: "1 small beet daily during the reset." },
   { id: "green-tea", name: "Green tea", color: "#3E5C3A", topBenefit: "EGCG defense",
     points: ["EGCG is one of the most studied polyphenols.", "Skin-protective in human studies.", "Supports microbiome diversity.", "Best brewed at lower temps to preserve EGCG.", "Skip late afternoon for sleep."],
     howTo: "1–2 cups in the morning or early afternoon." },
-  { id: "turmeric", name: "Turmeric", color: "#C8893A", topBenefit: "Soothing calm",
-    points: ["Curcumin is prized as a soothing polyphenol.", "Pair with black pepper for absorption.", "Best with a fat source.", "Traditional women's wellness use.", "Adds warmth to morning blends."],
+  { id: "turmeric", name: "Turmeric", color: "#C8893A", topBenefit: "Inflammation calm",
+    points: ["Curcumin is anti-inflammatory.", "Pair with black pepper for absorption.", "Best with a fat source.", "Traditional women's wellness use.", "Adds warmth to morning blends."],
     howTo: "½ tsp daily with food and pepper." },
   { id: "cacao", name: "Cacao", color: "#4A2716", topBenefit: "Hydration & density",
-    points: ["Cacao flavanols studied for skin hydration.", "Supports supple, healthy-looking skin over time.", "Magnesium-rich.", "Use raw or minimally processed.", "Pairs with cherry and almond."],
+    points: ["Cacao flavanols studied for skin hydration.", "Supports density of skin over time.", "Magnesium-rich.", "Use raw or minimally processed.", "Pairs with cherry and almond."],
     howTo: "1–2 tbsp raw cacao, several times a week." },
 ];
 
 export const ARTICLES = [
   { id: "polyphenols", title: "What Polyphenols Actually Do for Your Skin",
-    body: `Polyphenols are plant compounds — thousands of them — that act as the plant's defense against stress. When you eat them, they become part of your defense too.\n\nThe ones that matter most for skin are anthocyanins (the deep reds and purples), ellagitannins (pomegranate, raspberry), flavanols (cacao, green tea), and carotenoids (orange and red plants).\n\nThey work in two ways. First, directly: many polyphenols are absorbed and circulate in your skin, where they protect against oxidative stress every minute of the day. Second, indirectly: polyphenols feed the bacteria in your gut. Those bacteria metabolize the polyphenols into smaller, more powerful compounds — like urolithin A — that the body actually uses.\n\nThis is why one polyphenol-rich morning isn't enough. The compounds work in compounding fashion, building both their own circulating concentration and the gut bacteria that produce their active forms. Twenty-one days is the window where the ritual really becomes your own.` },
+    body: `Polyphenols are plant compounds — thousands of them — that act as the plant's defense against stress. When you eat them, they become part of your defense too.\n\nThe ones that matter most for skin are anthocyanins (the deep reds and purples), ellagitannins (pomegranate, raspberry), flavanols (cacao, green tea), and carotenoids (orange and red plants).\n\nThey work in two ways. First, directly: many polyphenols are absorbed and circulate in your skin, where they protect against oxidative stress every minute of the day. Second, indirectly: polyphenols feed the bacteria in your gut. Those bacteria metabolize the polyphenols into smaller, more powerful compounds — like urolithin A — that the body actually uses.\n\nThis is why one polyphenol-rich morning isn't enough. The compounds work in compounding fashion, building both their own circulating concentration and the gut bacteria that produce their active forms. Twenty-one days is the window where both layers reach a noticeable threshold.` },
   { id: "gut-skin", title: "The Gut-Skin Axis Explained Simply",
-    body: `The gut-skin axis is the two-way communication line between your digestive system and your skin. It's not a metaphor. It's a measurable, studied relationship.\n\nHere is the simple version: your gut lining is one cell thick. When that lining is irritated or out of balance, signals can travel into circulation, and skin is one of their loudest expressions. Dullness, breakouts, sensitivity, redness: many of these begin in the gut.\n\nThe inverse is also true. When the gut lining is healthy and the microbiome is diverse, your skin gets a steady supply of calming, balancing signals and the metabolites of the polyphenols you eat. That's the glow.\n\nThe Inner Glow Reset is built around this axis. Every morning ritual feeds it. Every recipe is designed for it. The work happens inside, and the result happens at the surface.` },
+    body: `The gut-skin axis is the two-way communication line between your digestive system and your skin. It's not a metaphor. It's a measurable, studied relationship.\n\nHere is the simple version: your gut lining is one cell thick. When that lining is inflamed, immune signals leak into circulation. Those signals travel — and skin is one of their loudest expressions. Dullness, breakouts, sensitivity, redness: many of these begin in the gut.\n\nThe inverse is also true. When the gut lining is healthy and the microbiome is diverse, your skin gets a steady supply of anti-inflammatory signals and the metabolites of the polyphenols you eat. That's the glow.\n\nThe Inner Glow Reset is built around this axis. Every morning ritual feeds it. Every recipe is designed for it. The work happens inside, and the result happens at the surface.` },
   { id: "morning-timing", title: "Why Your Morning Timing Matters",
-    body: `Polyphenols absorb best on a relatively empty stomach with hydration. That's why this ritual lives in the morning, not in the afternoon.\n\nYour body has just finished its longest fast of the day. Your gut lining is calm, your absorption is high, and your circadian rhythm is most receptive to the compounds you take in.\n\nA polyphenol-dense morning sets a calm, balanced tone for the rest of your day. It's a small lever with a big effect.` },
+    body: `Polyphenols absorb best on a relatively empty stomach with hydration. That's why this ritual lives in the morning, not in the afternoon.\n\nYour body has just finished its longest fast of the day. Your gut lining is calm, your absorption is high, and your circadian rhythm is most receptive to the compounds you take in.\n\nA polyphenol-dense morning sets the tone for the rest of your day's inflammation profile. It's a small lever with a big effect.` },
   { id: "reading-skin", title: "How to Read Your Skin's Changes During a Reset",
-    body: `Your skin renews on roughly a 27-day cycle, but the brightness of the surface changes faster. Here's what to watch for, and when:\n\nDays 1–7: Mostly internal. Energy may shift. You may start to feel a little lighter. Your skin won't show you yet.\n\nDays 8–14: Many women notice dullness start to soften. Sometimes the skin adjusts first, and this is normal and settles.\n\nDays 15–21: This is often when women say they feel most like themselves: rested, even, lit from within.\n\nDay 22 onward: This is when 21 days of work becomes the new baseline. The ritual is now your morning, not your reset.` },
+    body: `Your skin renews on roughly a 27-day cycle, but the brightness of the surface changes faster. Here's what to watch for, and when:\n\nDays 1–7: Mostly internal. Energy may shift. Bloating may soften. Skin won't show you yet.\n\nDays 8–14: First visible signs. Often a softening of dullness. Sometimes an initial breakout as the gut shifts — this is normal and clears.\n\nDays 15–21: Visible glow. Tone evens. Under-eye lifts. Other people notice before you do.\n\nDay 22 onward: This is when 21 days of work becomes the new baseline. The ritual is now your morning, not your reset.` },
   { id: "reds-ingredients", title: "The Radiant Reds Ingredients — And What Each One Does",
-    body: `Radiant Reds is built around one principle: polyphenol density. Each ingredient was chosen for what it contributes to the gut-skin axis.\n\nPomegranate brings ellagic acid and punicalagins — two of the most studied compounds for supporting your skin's natural collagen.\n\nBeet brings nitrates and betalains — for circulation, oxygenation, and a unique class of antioxidants.\n\nHibiscus brings anthocyanins and vascular support — for tone and small-vessel health.\n\nAçaí brings one of the highest antioxidant scores measured in any fruit.\n\nRaspberry and strawberry bring ellagitannins and vitamin C — for the collagen synthesis pathway.\n\nThe scoop is what 21 days of feeding your gut-skin axis looks like — concentrated, every morning.` },
+    body: `Radiant Reds is built around one principle: polyphenol density. Each ingredient was chosen for what it contributes to the gut-skin axis.\n\nPomegranate brings ellagic acid and punicalagins — two of the most studied compounds for collagen protection.\n\nBeet brings nitrates and betalains — for circulation, oxygenation, and a unique class of antioxidants.\n\nHibiscus brings anthocyanins and vascular support — for tone and small-vessel health.\n\nAçaí brings one of the highest antioxidant scores measured in any fruit.\n\nRaspberry and strawberry bring ellagitannins and vitamin C — for the collagen synthesis pathway.\n\nThe scoop is what 21 days of feeding your gut-skin axis looks like — concentrated, every morning.` },
   { id: "after-21", title: "After 21 Days: How to Keep the Ritual",
     body: `Twenty-one days is enough to build a habit. It's not enough to finish a transformation.\n\nThe most common mistake is to treat day 22 as the end. Don't. The ritual that worked for 21 days is the ritual that works for 121.\n\nKeep the morning glass. Keep the slow start. Rotate the recipes. Add a second polyphenol moment in the afternoon if you want to deepen.\n\nThe Inner Glow Reset isn't a 21-day product. It's the entry point to a morning you keep.` },
 ];
+
+export type BlendTip = { thick: string; thin: string; pro: string };
+
+export const BLEND_TIPS: Record<string, BlendTip> = {
+  "pomegranate-elixir": {
+    thick: "Add ½ frozen banana or 2 tbsp coconut yogurt. The fat deepens the texture and makes it feel more like a meal.",
+    thin: "Use ¾ cup oat milk instead of ½, or add a splash of cold hibiscus tea. Strain through a fine mesh for extra silk.",
+    pro: "Chill the glass first. Pour slowly. The color is the ritual — let it land.",
+  },
+  "berry-bloom": {
+    thick: "Add 1 tbsp almond butter or use half a frozen banana. Let it sit 5 minutes after blending — the chia blooms and thickens naturally.",
+    thin: "Use 1¼ cups almond milk and skip the chia. Strain over ice for a bright, clean pour.",
+    pro: "Freeze the berries the night before. Cold blending keeps the anthocyanins from degrading in heat.",
+  },
+  "cherry-cacao": {
+    thick: "Double the almond butter to 2 tbsp and use ¾ cup oat milk. This becomes a proper morning meal.",
+    thin: "Add an extra ¼ cup oat milk and skip the almond butter. Run the blender an extra 30 seconds for a silky finish.",
+    pro: "Use frozen tart cherries straight from the bag — no need to thaw. The cold intensifies the dark flavor.",
+  },
+  "plum-rose": {
+    thick: "Add 3 tbsp coconut yogurt and reduce rose water to ½ tsp. The yogurt rounds the tartness and gives it body.",
+    thin: "Add 2 tbsp cold water and blend until completely smooth. This one is better thinner — let the rose water breathe.",
+    pro: "Use very ripe plums — the skin is where most of the polyphenols live. Don't peel them.",
+  },
+  "watermelon-reds": {
+    thick: "Freeze the watermelon cubes overnight. Blend frozen — it becomes a sorbet-style slush with no extra ingredients.",
+    thin: "Double the hibiscus tea and serve over crushed ice. The palest, most refreshing version.",
+    pro: "Brew the hibiscus tea strong, then chill overnight. Add Radiant Reds after blending, not before — heat degrades some polyphenols.",
+  },
+  "fig-almond": {
+    thick: "Add 1 tbsp almond butter and use ¾ cup oat milk. The fig and almond together become almost caramel-like.",
+    thin: "Use 1¼ cups oat milk and blend longer. Strain if the fig seeds bother you.",
+    pro: "Soak dried figs in warm water for 15 minutes before blending — they open up completely and the texture becomes silky.",
+  },
+  "beet-glow": {
+    thick: "Add 1 small frozen banana to balance the earthiness. The natural starch makes it thick and almost dessert-like.",
+    thin: "Extra orange juice and no banana. Strain through a fine mesh — the result is a clear, jewel-red glass.",
+    pro: "Roast the beet ahead of time and freeze in cubes. Game-changer for texture and sweetness.",
+  },
+  "golden-turmeric": {
+    thick: "Use oat milk and whisk in ½ tsp coconut oil. The fat emulsifies everything and adds body.",
+    thin: "Use almond milk and let it stay warm. Don't blend — just whisk gently.",
+    pro: "Add a crack of black pepper — it increases curcumin absorption by up to 2000%. A pinch is enough.",
+  },
+  "matcha-cloud": {
+    thick: "Add ½ frozen banana and use ¾ cup almond milk. Blend until completely smooth — it becomes thick and pale green.",
+    thin: "Whisk the matcha separately, then pour over ice and top with almond milk. No blending needed.",
+    pro: "Sift the matcha before whisking. Clumps are the enemy. A bamboo whisk in a zig-zag motion, not circular.",
+  },
+  "lavender-honey": {
+    thick: "Stir in 1 tbsp raw honey and 2 tbsp coconut yogurt after steeping. Serve at room temperature.",
+    thin: "Double the water, steep 3 minutes, strain well, serve over ice. The lightest, most delicate version.",
+    pro: "Don't over-steep culinary lavender — 4 minutes maximum or it turns soapy.",
+  },
+  "rose-cardamom": {
+    thick: "Add ¼ tsp coconut cream to the oat milk before warming. The result is luscious and almost dessert-like.",
+    thin: "Reduce to ¾ cup oat milk and add ¼ cup water. Keep it warm, not hot.",
+    pro: "Crush cardamom pods fresh if you have them — the fragrance is completely different from ground.",
+  },
+  "blueberry-basil": {
+    thick: "Use frozen wild blueberries and add ½ banana. The frozen fruit makes it naturally thick without yogurt.",
+    thin: "Add ¼ cup cold water and strain through a fine mesh. Serve very cold.",
+    pro: "Add the basil last — just a few seconds in the blender. Over-blending turns it slightly bitter.",
+  },
+  "papaya-lime": {
+    thick: "Add 2 tbsp coconut yogurt. The enzyme and fat combination is incredibly smooth.",
+    thin: "Blend with ¼ cup cold water and strain. Papaya thins beautifully — it's almost juice-like.",
+    pro: "Let papaya ripen until it's fully yielding. The more ripe, the more enzymes, the more digestive benefit.",
+  },
+  "peach-saffron": {
+    thick: "Use ½ cup almond milk and add 1 tbsp almond butter. Luxurious texture.",
+    thin: "Add ¼ cup extra almond milk. Serve over a single large ice cube.",
+    pro: "Steep the saffron in warm milk — not hot water — for 10 minutes before blending. The milk extraction is richer.",
+  },
+  "fig-vanilla": {
+    thick: "Use ¾ cup oat milk and blend in 2 tbsp almond butter. This is a full meal.",
+    thin: "1¼ cups oat milk and strain. The natural sweetness of fig makes it work as a light drink.",
+    pro: "Use a vanilla bean scraped directly if you can — the flavor depth is worth it.",
+  },
+  "cucumber-mint": {
+    thick: "Don't — this one lives in thin territory. Freeze it in popsicle molds instead.",
+    thin: "Add ¼ cup sparkling water at the end, don't blend the bubbles. Serve immediately.",
+    pro: "Don't peel the cucumber — the skin has more silica and polyphenols than the flesh.",
+  },
+  "apricot-almond": {
+    thick: "Add 1 tbsp almond butter and use ¾ cup oat milk. Let it rest 2 minutes — it thickens as it sits.",
+    thin: "Use 1 cup oat milk and add a splash of cold water. Strain for a delicate, pale gold pour.",
+    pro: "Use ripe apricots that yield to gentle pressure. The carotenoid content doubles at peak ripeness.",
+  },
+  "kiwi-spinach": {
+    thick: "Add ½ frozen banana. The banana smooths the sharpness of kiwi and adds body.",
+    thin: "Skip the banana, add ¼ cup more almond milk. Strain for a completely clear, jewel-green glass.",
+    pro: "Kiwi skin is edible and has 3× the fiber of the flesh. Try blending whole if your blender is powerful.",
+  },
+  "vanilla-chia": {
+    thick: "Add an extra tablespoon of chia and let it sit overnight rather than a few hours.",
+    thin: "Use 1¼ cups oat milk in the mix. The ratio is everything with chia.",
+    pro: "Stir twice during the first 10 minutes of refrigerating — this prevents clumping and gives the smoothest texture.",
+  },
+  "ginger-pear": {
+    thick: "Add ½ banana and blend the ginger fully. Warming and filling.",
+    thin: "Juice instead of blend — press pear and ginger through a juicer for a completely clear, spicy morning shot.",
+    pro: "Freeze the pear first if you want it cold and thick. Fresh pear makes it thinner and more delicate.",
+  },
+  "honey-almond": {
+    thick: "Use 2 tbsp almond butter instead of 1 and reduce oat milk to ¾ cup.",
+    thin: "1¼ cups oat milk and just ½ tbsp almond butter. Warm and silky.",
+    pro: "Warm gently — don't boil. Raw honey loses its enzymes above 40°C.",
+  },
+  "bonus-cacao-tonic": {
+    thick: "Add 1 tbsp almond butter and reduce to ¾ cup oat milk. This becomes a true nightcap.",
+    thin: "Use 1¼ cups oat milk and just whisk — no need to blend.",
+    pro: "Drink this 90 minutes before bed. The magnesium in cacao supports sleep quality.",
+  },
+  "bonus-rose-collagen": {
+    thick: "Add 2 tbsp coconut yogurt and stir gently — don't over-mix.",
+    thin: "More sparkling water, less sparkling. The lighter it is, the more elegant.",
+    pro: "Add the sparkling water last, after everything else is mixed.",
+  },
+  "bonus-green-glow": {
+    thick: "Add ½ frozen banana. It turns completely smooth and green.",
+    thin: "Skip the banana, strain, serve very cold.",
+    pro: "Blend the mint for just 3 seconds — any longer and it can turn bitter.",
+  },
+  "bonus-warm-elixir": {
+    thick: "Muddle the berries hard before adding the tea. Let it steep together for 2 extra minutes.",
+    thin: "Strain and serve hot without muddling — a clean, garnet-colored cup.",
+    pro: "Add Radiant Reds only after the tea cools below 40°C — heat degrades heat-sensitive polyphenols.",
+  },
+  "bonus-glow-sorbet": {
+    thick: "Use less coconut yogurt and blend from frozen — it comes out like ice cream.",
+    thin: "Add 2 tbsp oat milk and blend until completely smooth.",
+    pro: "Pre-freeze your bowl. Cold bowl, cold sorbet, right consistency.",
+  },
+};
+
+export type GlowBoostStory = { headline: string; skinStory: string; moment: string };
+
+export const GLOW_BOOST_STORIES: Record<string, GlowBoostStory> = {
+  "pomegranate-elixir": {
+    headline: "Double the clarity in a single glass.",
+    skinStory: "Pomegranate already delivers punicalagins — the compound your gut converts to urolithin A, which protects collagen. Add Radiant Reds and you're stacking a second pomegranate source with beet nitrates for circulation and hibiscus anthocyanins for tone. The result: the same polyphenol conversation happening at twice the volume, across more of your skin's systems simultaneously.",
+    moment: "Add one scoop to the blender before blending. The color deepens. The flavor stays bright.",
+  },
+  "berry-bloom": {
+    headline: "Your microbiome has been waiting for this combination.",
+    skinStory: "Blueberries and strawberries feed bifidobacteria — a specific family of gut bacteria directly linked to clearer skin. Radiant Reds adds 24 additional polyphenol sources to that same feeding. The result isn't additive — it's multiplicative. Your microbiome diversifies faster, and diverse microbiomes produce the metabolites that show up as tone and brightness.",
+    moment: "Stir in after blending, not before. The blueberry and Reds stay visually separate — swirl once before drinking.",
+  },
+  "cherry-cacao": {
+    headline: "Anti-inflammatory stacking — for the skin that holds onto stress.",
+    skinStory: "Tart cherry anthocyanins calm systemic inflammation. Cacao flavanols support skin density and hydration at the cellular level. Radiant Reds adds hibiscus, açaí, and beet — all with overlapping anti-inflammatory mechanisms. If stress shows on your face first, this combination works on every channel that stress uses. Less puffiness. Less redness. Faster morning recovery.",
+    moment: "Blend Radiant Reds in with everything. The cherry-cacao flavor carries it completely.",
+  },
+  "plum-rose": {
+    headline: "Gentle ritual, maximum polyphenol yield.",
+    skinStory: "Plum delivers chlorogenic acid — the same polyphenol found in green coffee, studied for even skin tone. Rose water is calming to the nervous system, which calms cortisol, which shows up on your skin as less reactivity. Add Radiant Reds and the gentle ritual becomes a full polyphenol event without disturbing its softness. Your skin gets the calming properties and the active compounds.",
+    moment: "Stir Radiant Reds into the finished bowl — it folds into the plum color beautifully.",
+  },
+  "watermelon-reds": {
+    headline: "Hydration meets polyphenol density.",
+    skinStory: "Watermelon is lycopene-rich — a carotenoid that accumulates in skin tissue and acts as internal UV protection. Hibiscus adds anthocyanins for vascular support and micro-circulation. Radiant Reds layers beet nitrates — improving blood flow to the skin — on top of all of that. The result is a glass that hydrates from the inside while feeding every layer of your skin's defense system.",
+    moment: "Stir Radiant Reds in after blending — don't blend it. The watermelon flavor stays pure and the Reds blends smoothly.",
+  },
+  "fig-almond": {
+    headline: "The prebiotic-polyphenol duo your gut notices first.",
+    skinStory: "Fig fiber is prebiotic — it feeds gut bacteria directly. Polyphenols feed a different layer of the same system. Together, they're the combination your microbiome responds to fastest. Radiant Reds brings 27 polyphenol sources to sit alongside the fig's fiber, creating a gut environment where the bacteria that produce skin-clearing metabolites can genuinely thrive.",
+    moment: "Add Radiant Reds to the blender with everything. The creamGold color takes on a richer, warmer tone.",
+  },
+  "beet-glow": {
+    headline: "Circulation, doubled. Glow, accelerated.",
+    skinStory: "Beet nitrates drive nitric oxide — which dilates blood vessels, improving circulation and skin oxygenation. That's what 'lit from within' means biologically. Radiant Reds adds more beet and layers hibiscus for vascular support. The result: your skin gets more oxygen, more nutrient delivery, and better color saturation. This is the recipe that makes other people ask what you're doing differently.",
+    moment: "Add Radiant Reds in the blender — it deepens the jewel color and amplifies the earthy-sweet flavor.",
+  },
+  "golden-turmeric": {
+    headline: "Two anti-inflammatory systems, one warm glass.",
+    skinStory: "Curcumin and polyphenols work on overlapping but distinct anti-inflammatory pathways. Curcumin suppresses specific inflammatory signals; polyphenols calm a broader inflammatory environment and feed the bacteria that regulate it. Adding Radiant Reds after it cools means you're running both systems simultaneously — and the gut-skin axis benefits from both. This is the glass for the woman whose skin reacts to everything.",
+    moment: "Wait until the latte cools to drinking temperature. Stir in Radiant Reds then — heat kills some polyphenols.",
+  },
+  "matcha-cloud": {
+    headline: "EGCG and anthocyanins — two polyphenol families, two skin systems.",
+    skinStory: "EGCG (the primary polyphenol in matcha) works primarily as a UV-protective and anti-oxidative compound in the skin. Anthocyanins (the primary polyphenols in Radiant Reds) work primarily via the gut-skin axis — feeding bacteria that produce the metabolites your skin uses for tone and clarity. These two families don't compete — they work through different mechanisms and cover more of your skin's needs than either could alone.",
+    moment: "Stir Radiant Reds into the finished glass over ice. The matcha green and Reds garnet swirl — drink before it fully blends for the full effect.",
+  },
+  "lavender-honey": {
+    headline: "Calm your nervous system and feed your skin — at the same time.",
+    skinStory: "Lavender calms the nervous system. A calm nervous system produces less cortisol. Cortisol at high levels breaks down collagen, increases oil production, and shows up as dullness and reactivity. Radiant Reds adds the polyphenol layer that actively feeds the gut bacteria regulating inflammation. The combination works on skin from both the top-down (nervous system → skin) and the bottom-up (gut → skin) simultaneously.",
+    moment: "Add Radiant Reds after the tea cools completely. Stir gently — this should stay delicate.",
+  },
+  "rose-cardamom": {
+    headline: "Feminine, warming, and now fully polyphenol-backed.",
+    skinStory: "Cardamom contains essential oils that are mildly anti-inflammatory and digestive-supportive. Rose water calms the nervous system. This glass is already doing quiet, real work. Add Radiant Reds and that quiet work gets amplified — the polyphenols feed the gut that's already been soothed, and the skin downstream gets both the calming signals and the active compounds for brightness and tone.",
+    moment: "Wait until it reaches drinking temperature. Stir in Radiant Reds last. Sip slowly.",
+  },
+  "blueberry-basil": {
+    headline: "Two anthocyanin sources hitting the same skin target from different angles.",
+    skinStory: "Blueberries deliver anthocyanins that your gut converts into the metabolites that show up as skin brightness and protection. Radiant Reds delivers wild blueberry, açaí, and pomegranate — all hitting the same anthocyanin pathway, each with a slightly different molecular profile. Your gut converts all of them. More diversity means more of the metabolites that cross the gut-skin axis and reach your face.",
+    moment: "Blend Radiant Reds in with the fruit. The deep blue-purple color intensifies — striking and saturated.",
+  },
+  "papaya-lime": {
+    headline: "Enzymes open the door. Polyphenols walk through.",
+    skinStory: "Papain — papaya's primary enzyme — supports digestion and a settled gut. A calmer gut is a more permeable membrane for the polyphenols that follow it. Radiant Reds, added alongside papaya, benefits from this enzymatic opening. The polyphenols absorb more efficiently in a gut that's been primed by papain. This is the sequence your microbiome notices.",
+    moment: "Stir Radiant Reds into the finished glass — don't blend it in. The enzyme stays more active that way.",
+  },
+  "peach-saffron": {
+    headline: "The mood-skin connection, fully supported.",
+    skinStory: "Saffron has been studied for mood support — and mood affects skin. Chronic low-grade sadness or anxiety elevates cortisol, which degrades collagen and dulls tone. Radiant Reds layers polyphenols that specifically feed gut bacteria involved in neurotransmitter production — including the same pathways saffron touches. This glass works on your skin through your nervous system, your gut, and your circulation.",
+    moment: "Add Radiant Reds after blending, before topping with cinnamon. Stir once.",
+  },
+  "fig-vanilla": {
+    headline: "Prebiotic fiber meets polyphenol density — the gut's favorite combination.",
+    skinStory: "Fig's soluble fiber is the substrate — it feeds the bacteria. Radiant Reds delivers the polyphenols those bacteria ferment into the compounds that reach your skin. It's the same relationship as soil and seeds: the fiber creates the environment, the polyphenols grow what your skin needs. Fig and Reds together accelerate the microbiome shift that shows up first as clearer digestion, then as clearer skin.",
+    moment: "Add Radiant Reds to the blender. The vanilla and Reds create a complex, warm aroma that makes the morning feel like something.",
+  },
+  "cucumber-mint": {
+    headline: "Hydration unlocks polyphenol absorption.",
+    skinStory: "Polyphenols absorb most efficiently when you're well-hydrated. Cucumber is over 95% water — it actively prepares the gut environment for what comes next. Radiant Reds, added to this glass, arrives in the most receptive gut state possible. The polyphenols move faster, absorb more completely, and reach the gut bacteria that run your skin's glow engine.",
+    moment: "Stir Radiant Reds into the finished cooler after straining. The clear cucumber base takes on a deep garnet color — serve immediately.",
+  },
+  "apricot-almond": {
+    headline: "Two pigment families, one lit-from-within effect.",
+    skinStory: "Apricots are beta-carotene-rich — a carotenoid that the body converts to vitamin A and accumulates in skin tissue, giving a warm, golden tone. Radiant Reds adds anthocyanins — the red and purple pigments that support tone evenness and circulation. Together, the warm gold of carotenoids and the deep red of anthocyanins are what researchers mean when they describe 'glow.' This is the glass for that.",
+    moment: "Add Radiant Reds before blending. The apricot gold and Reds deepen into a stunning warm tone.",
+  },
+  "kiwi-spinach": {
+    headline: "Vitamin C and polyphenols — the collagen connection.",
+    skinStory: "Vitamin C is the rate-limiting factor in collagen synthesis — your body cannot make collagen without it. Kiwi delivers more vitamin C than oranges by weight. Radiant Reds adds anthocyanins that protect the collagen once it's made. The result is a glass that supports collagen at every stage: synthesis (vitamin C), protection from oxidation (polyphenols), and the gut environment where both are regulated.",
+    moment: "Add Radiant Reds before blending. The green and garnet make a deep teal blend — unexpected, beautiful.",
+  },
+  "vanilla-chia": {
+    headline: "Omega-3 and polyphenols for the skin barrier.",
+    skinStory: "Skin barrier function is about fats and inflammation. Chia's ALA omega-3 feeds the lipid layer your barrier needs. Radiant Reds adds polyphenols that calm the inflammation that breaks that barrier down. The gut-skin axis is also at work: omega-3 and polyphenols together shift the microbiome toward bacteria that produce short-chain fatty acids — the compounds that repair the gut lining and, downstream, the skin.",
+    moment: "Sprinkle Radiant Reds on top like a dusting. The crimson on cream is one of the most beautiful presentations in the reset.",
+  },
+  "ginger-pear": {
+    headline: "Motility, microbiome, skin — in that order.",
+    skinStory: "Ginger supports gut motility — the gentle movement that keeps digestion flowing. A moving gut is a healthier gut lining. Pear adds soluble fiber. Radiant Reds adds the polyphenols that feed the bacteria in the now-moving, fiber-supported gut. The chain runs: motility → healthy lining → better microbiome → cleaner skin. This glass supports every link.",
+    moment: "Add Radiant Reds before blending. The ginger warmth and Reds complement each other completely.",
+  },
+  "honey-almond": {
+    headline: "Clean energy that doesn't steal from your skin.",
+    skinStory: "Blood sugar spikes glycate collagen — the process that makes skin look dull and aged. Almond fat and fiber blunt the morning blood sugar response. Radiant Reds adds polyphenols that, separately, slow glucose absorption and feed the bacteria that regulate insulin sensitivity. This glass keeps energy steady, keeps cortisol low, and keeps collagen intact — three skin wins from one morning ritual.",
+    moment: "Stir Radiant Reds in after blending. Add a cinnamon dusting last — this is one of the most grounding morning cups in the reset.",
+  },
+  "bonus-cacao-tonic": {
+    headline: "Evening polyphenols — while your skin does its overnight work.",
+    skinStory: "Skin repair peaks between 11pm and 2am. The polyphenols you take in the evening are available in circulation during that repair window. Radiant Reds adds the polyphenol density cacao doesn't deliver — a quiet evening dose that reaches your skin's nighttime repair process and gives it more to work with while you sleep.",
+    moment: "Wait until fully cooled. Stir in Radiant Reds. Sip slowly one hour before bed.",
+  },
+  "bonus-rose-collagen": {
+    headline: "Vitamin C primes collagen. Polyphenols protect it.",
+    skinStory: "Your body needs vitamin C to make collagen, and polyphenols to stop it from breaking down. Strawberry brings vitamin C. Radiant Reds brings the polyphenol protection layer. Together, they support both ends of the collagen lifecycle in a single glass. This is one of the most complete skin-support combinations in the entire recipe library.",
+    moment: "Stir Radiant Reds into the finished glass before topping with sparkling water. The garnet color through the bubbles is striking.",
+  },
+  "bonus-green-glow": {
+    headline: "Green pigments and red pigments — the full spectrum.",
+    skinStory: "Chlorophyll (from cucumber and kiwi) is a green pigment that supports liver function and, through that, clearer skin. Anthocyanins (from Radiant Reds) are red and purple pigments that support the gut-skin axis directly. Plants use different pigment families to run different biological functions. Adding Radiant Reds to a chlorophyll-forward glass means you're running the full spectrum of plant-pigment skin support simultaneously.",
+    moment: "Stir Radiant Reds into the strained glass, not the blender. The crimson drops through the green — beautiful.",
+  },
+  "bonus-warm-elixir": {
+    headline: "Heat-sensitive ritual, carefully built.",
+    skinStory: "Some polyphenols in Radiant Reds are heat-sensitive — they degrade above 40°C. This warm glass needs to cool before Radiant Reds goes in. Once it does, the hibiscus anthocyanins in the tea and the pomegranate, beet, and açaí in Radiant Reds create one of the deepest polyphenol concentrations in the entire recipe library. A warming cup that delivers a cold-process polyphenol punch.",
+    moment: "Cool to drinking temperature — test with your wrist. Then stir in Radiant Reds and drink immediately.",
+  },
+  "bonus-glow-sorbet": {
+    headline: "Dessert that works like a ritual.",
+    skinStory: "Frozen berries retain their anthocyanins better than fresh during blending — cold processing preserves polyphenols that heat would degrade. Coconut yogurt adds live cultures alongside the fruit. Radiant Reds on top means the polyphenols hit an already-primed gut, where the probiotics and fruit fiber have prepared the environment. This is the most indulgent delivery mechanism in the reset.",
+    moment: "Dust Radiant Reds on top like finishing powder. The crimson on ivory sorbet is the most beautiful thing you'll make in 21 days.",
+  },
+};
 
 export const SOUNDS = [
   { id: "rain", name: "Morning Rain", duration: "8 min", url: "https://cdn.pixabay.com/audio/2022/03/10/audio_a8e603753c.mp3" },
@@ -548,7 +826,7 @@ const SETS = {
     "What you're feeling is what we hoped you'd feel. The work is paying interest now.",
   ],
   E: [
-    "You may feel lighter as the microbiome shifts. The fiber and polyphenols are doing slow, real work.",
+    "Bloating softens as the microbiome shifts. The fiber and polyphenols are doing slow, real work.",
     "The gut-skin axis you're feeling is the most important system in this reset. Trust the discomfort — it's reorganizing.",
     "Digestion changes are the first sign the ritual is reaching the right place.",
     "Your gut is the first organ to notice. Your skin is the second.",
@@ -573,6 +851,87 @@ export function reflectJournal(text: string, name: string): string {
   const pick = pool[Math.floor(Math.random() * pool.length)];
   return pick.replace(/\{name\}/g, name);
 }
+
+export type GroceryItem = { id: string; name: string; note?: string };
+export type GroceryCategory = { name: string; items: GroceryItem[] };
+
+export const GROCERY_LIST: GroceryCategory[] = [
+  {
+    name: "Fresh Produce",
+    items: [
+      { id: "pomegranate", name: "Pomegranate seeds or juice", note: "1 cup per use — frozen works" },
+      { id: "raspberries", name: "Raspberries", note: "Fresh or frozen" },
+      { id: "blueberries", name: "Blueberries", note: "Wild if available" },
+      { id: "strawberries", name: "Strawberries" },
+      { id: "banana", name: "Banana", note: "Slightly green = more prebiotic fiber" },
+      { id: "plum", name: "Plum (2–3)", note: "Ripe, any variety" },
+      { id: "watermelon", name: "Watermelon" },
+      { id: "black-fig", name: "Black figs (4–6)", note: "Fresh or dried" },
+      { id: "beet", name: "Beet (2 small)", note: "Pre-roast for the week" },
+      { id: "tart-cherry", name: "Tart cherries", note: "Frozen or jarred unsweetened" },
+      { id: "peach", name: "Peach or nectarine" },
+      { id: "kiwi", name: "Kiwi (2)" },
+      { id: "orange", name: "Orange" },
+      { id: "lime", name: "Lime (4–5)" },
+      { id: "lemon", name: "Lemon (2)" },
+      { id: "cucumber", name: "Cucumber" },
+      { id: "ginger", name: "Fresh ginger root" },
+      { id: "mint", name: "Fresh mint" },
+    ],
+  },
+  {
+    name: "Bases",
+    items: [
+      { id: "oat-milk", name: "Oat milk (2 cartons)", note: "Unsweetened, barista or plain" },
+      { id: "almond-milk", name: "Almond milk", note: "Unsweetened" },
+      { id: "coconut-yogurt", name: "Coconut yogurt", note: "Plain, live cultures" },
+      { id: "hibiscus-tea", name: "Hibiscus tea (dried or bags)" },
+      { id: "green-tea", name: "Green tea (ceremonial-grade matcha or loose leaf)" },
+    ],
+  },
+  {
+    name: "Pantry",
+    items: [
+      { id: "reds", name: "Radiant Reds", note: "1 bag covers the full 21 days" },
+      { id: "cacao", name: "Raw cacao powder" },
+      { id: "almond-butter", name: "Almond butter", note: "No added sugar" },
+      { id: "chia", name: "Chia seeds" },
+      { id: "cinnamon", name: "Cinnamon (ground)" },
+      { id: "honey", name: "Raw honey" },
+      { id: "rose-water", name: "Rose water", note: "Culinary grade, small bottle" },
+      { id: "vanilla", name: "Vanilla extract" },
+      { id: "almonds", name: "Raw almonds (small bag)" },
+      { id: "turmeric", name: "Turmeric (ground)" },
+      { id: "black-pepper", name: "Black pepper", note: "Pairs with turmeric for absorption" },
+    ],
+  },
+  {
+    name: "Optional Upgrades",
+    items: [
+      { id: "collagen", name: "Collagen peptides (unflavored)", note: "Pairs with any recipe" },
+      { id: "acai-packets", name: "Frozen açaí packets" },
+      { id: "saffron", name: "Saffron (pinch jar)", note: "For the Peach & Saffron ritual" },
+      { id: "cardamom", name: "Cardamom (ground)" },
+    ],
+  },
+  {
+    name: "Quick Glow Mornings",
+    items: [
+      { id: "qg-frozen-berries", name: "Frozen mixed berries", note: "Berry Reds Yogurt Shake" },
+      { id: "qg-frozen-cherries", name: "Frozen cherries", note: "Cherry Cacao Calm Glow" },
+      { id: "qg-frozen-mango", name: "Frozen mango", note: "Tropical Reds Quickie" },
+      { id: "qg-frozen-papaya", name: "Frozen papaya", note: "Or extra mango" },
+      { id: "qg-frozen-pineapple", name: "Frozen pineapple", note: "Cucumber Mint Lightness" },
+      { id: "qg-cucumber", name: "Cucumber", note: "Cucumber Mint Lightness" },
+      { id: "qg-greek-yogurt", name: "Greek yogurt or kefir", note: "Most quick recipes" },
+      { id: "qg-coconut-water", name: "Coconut water", note: "Three quick recipes" },
+      { id: "qg-cold-brew", name: "Cold brew or chilled coffee", note: "Mocha Reds Morning" },
+      { id: "qg-flax", name: "Ground flax", note: "Or use chia seeds" },
+      { id: "qg-vanilla", name: "Vanilla extract", note: "Pomegranate Vanilla Glow" },
+      { id: "qg-protein", name: "Vanilla protein (optional)", note: "Mocha Reds Morning" },
+    ],
+  },
+];
 
 export const NOTIFICATIONS: Record<number, string> = {
   1: "Your reset begins this morning, {name}.",

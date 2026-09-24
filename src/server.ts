@@ -3,49 +3,41 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 
-type ServerEntry = {
-  fetch: (request: Request, env: Env, ctx: unknown) => Promise<Response> | Response;
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+type KVNamespace = {
+  get(key: string): Promise<string | null>;
+  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>;
 };
 
-interface Env {
-  SHOPIFY_STORE_DOMAIN?: string;
-  SHOPIFY_ADMIN_TOKEN?: string;
-  SHOPIFY_PRODUCT_ID?: string;
-}
+type Env = {
+  SHOPIFY_STORE?: string;
+  // Secrets — set via: npx wrangler secret put <NAME>
+  SHOPIFY_WEBHOOK_SECRET?: string; // Shopify webhook signing secret
+  ALLOWED_EMAILS?: string;         // Comma-separated manual override list
+  // KV binding — see wrangler.jsonc
+  GLOW_PURCHASERS?: KVNamespace;
+};
 
-interface ShopifyLineItem {
-  product_id: number | null;
-  title: string;
-}
+// Products whose purchase grants app access.
+// Checked by product_id (most reliable) and title substring (fallback).
+const VALID_PRODUCT_IDS = new Set([
+  9678764441845, // The Inner Glow Reset — 21-Day Beauty Ritual Program
+  9538643656949, // Radiant Reds Polyphenol Glow Blend
+]);
 
-interface ShopifyCustomer {
-  first_name?: string;
-}
-
-interface ShopifyOrder {
-  line_items?: ShopifyLineItem[];
-  customer?: ShopifyCustomer;
-}
-
-// Product names that grant access — case-insensitive substring match on line item title
-const APPROVED_KEYWORDS = [
-  "radiant reds",
+const VALID_PRODUCT_TITLE_FRAGMENTS = [
   "inner glow reset",
-  "ritual app",
-  "glow reset",
-  "21-day",
-  "21 day",
-  "beauty ritual",
-  "smoothie system",
-  "noure",
-  "nourè",
+  "21-day beauty ritual",
+  "21 day beauty ritual",
+  "radiant reds",
 ];
 
-function lineItemApproved(item: ShopifyLineItem, allowedId?: string): boolean {
-  if (allowedId && item.product_id && String(item.product_id) === allowedId) return true;
-  const t = (item.title ?? "").toLowerCase();
-  return APPROVED_KEYWORDS.some((kw) => t.includes(kw));
-}
+// ─── SSR scaffolding ──────────────────────────────────────────────────────────
+
+type ServerEntry = {
+  fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
+};
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
@@ -67,22 +59,11 @@ function brandedErrorResponse(): Response {
 
 function isCatastrophicSsrErrorBody(body: string, responseStatus: number): boolean {
   let payload: unknown;
-  try {
-    payload = JSON.parse(body);
-  } catch {
-    return false;
-  }
-
-  if (!payload || Array.isArray(payload) || typeof payload !== "object") {
-    return false;
-  }
-
+  try { payload = JSON.parse(body); } catch { return false; }
+  if (!payload || Array.isArray(payload) || typeof payload !== "object") return false;
   const fields = payload as Record<string, unknown>;
   const expectedKeys = new Set(["message", "status", "unhandled"]);
-  if (!Object.keys(fields).every((key) => expectedKeys.has(key))) {
-    return false;
-  }
-
+  if (!Object.keys(fields).every((key) => expectedKeys.has(key))) return false;
   return (
     fields.unhandled === true &&
     fields.message === "HTTPError" &&
@@ -94,106 +75,184 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
   if (response.status < 500) return response;
   const contentType = response.headers.get("content-type") ?? "";
   if (!contentType.includes("application/json")) return response;
-
   const body = await response.clone().text();
-  if (!isCatastrophicSsrErrorBody(body, response.status)) {
-    return response;
-  }
-
+  if (!isCatastrophicSsrErrorBody(body, response.status)) return response;
   console.error(consumeLastCapturedError() ?? new Error(`h3 swallowed SSR error: ${body}`));
   return brandedErrorResponse();
 }
 
-const JSON_HEADERS = {
-  "Content-Type": "application/json",
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
+// ─── HMAC verification ────────────────────────────────────────────────────────
 
-async function handleVerifyPurchase(request: Request, env: Env): Promise<Response> {
-  if (request.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: JSON_HEADERS });
-  }
-
+async function verifyShopifyHmac(rawBody: string, hmacHeader: string, secret: string): Promise<boolean> {
   try {
-    const body = await request.json() as { email?: string };
-    const email = (body.email ?? "").trim().toLowerCase();
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return Response.json({ unlocked: false, error: "invalid-email" }, { status: 400, headers: JSON_HEADERS });
-    }
-
-    if (!env.SHOPIFY_STORE_DOMAIN || !env.SHOPIFY_ADMIN_TOKEN) {
-      console.error("Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_TOKEN env vars");
-      return Response.json({ unlocked: false, error: "config-missing" }, { status: 503, headers: JSON_HEADERS });
-    }
-
-    const domain = env.SHOPIFY_STORE_DOMAIN.replace(/^https?:\/\//, "").replace(/\/$/, "");
-    const params = new URLSearchParams({
-      email,
-      financial_status: "paid",
-      status: "any",
-      limit: "10",
-      fields: "id,line_items,customer",
-    });
-
-    const shopifyRes = await fetch(
-      `https://${domain}/admin/api/2024-01/orders.json?${params}`,
-      {
-        headers: {
-          "X-Shopify-Access-Token": env.SHOPIFY_ADMIN_TOKEN,
-          "Content-Type": "application/json",
-        },
-      },
+    const encoder = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(secret),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["sign"],
     );
-
-    if (!shopifyRes.ok) {
-      const errText = await shopifyRes.text();
-      console.error("Shopify API error", shopifyRes.status, errText);
-      return Response.json({ unlocked: false, error: "shopify-error" }, { status: 502, headers: JSON_HEADERS });
-    }
-
-    const data = await shopifyRes.json() as { orders: ShopifyOrder[] };
-    const orders = data.orders ?? [];
-
-    if (orders.length === 0) {
-      console.log("verify-purchase: no paid orders found for email");
-      return Response.json({ unlocked: false, error: "no-orders" }, { headers: JSON_HEADERS });
-    }
-
-    const productId = env.SHOPIFY_PRODUCT_ID;
-    const hasProduct = orders.some((order) =>
-      order.line_items?.some((item) => lineItemApproved(item, productId))
-    );
-
-    if (!hasProduct) {
-      const titles = orders.flatMap((o) => o.line_items?.map((i) => i.title) ?? []);
-      console.log("verify-purchase: orders found but no approved product. Titles:", titles.join(", "));
-      return Response.json({ unlocked: false, error: "wrong-product" }, { headers: JSON_HEADERS });
-    }
-
-    const firstName = orders[0]?.customer?.first_name ?? null;
-    console.log("verify-purchase: access granted, name:", firstName ?? "(none)");
-    return Response.json({ unlocked: true, name: firstName }, { headers: JSON_HEADERS });
-
-  } catch (err) {
-    console.error("verify-purchase handler error:", err);
-    return Response.json({ unlocked: false, error: "server-error" }, { status: 500, headers: JSON_HEADERS });
+    const sig = await crypto.subtle.sign("HMAC", key, encoder.encode(rawBody));
+    const computed = btoa(String.fromCharCode(...new Uint8Array(sig)));
+    return computed === hmacHeader;
+  } catch {
+    return false;
   }
 }
 
+// ─── Shopify orders/paid webhook ──────────────────────────────────────────────
+
+type ShopifyOrder = {
+  id: number;
+  order_number?: number;
+  name?: string;
+  email?: string;
+  contact_email?: string;
+  created_at?: string;
+  customer?: { email?: string };
+  line_items?: Array<{
+    product_id?: number;
+    variant_id?: number;
+    title?: string;
+    product_title?: string;
+    handle?: string;
+  }>;
+};
+
+function extractOrderEmail(order: ShopifyOrder): string | null {
+  const raw = order.email ?? order.contact_email ?? order.customer?.email ?? "";
+  const email = raw.toLowerCase().trim();
+  return email.includes("@") ? email : null;
+}
+
+function orderContainsGlowProduct(order: ShopifyOrder): boolean {
+  const items = order.line_items ?? [];
+  // Test webhook sends empty line_items — approve to confirm setup works
+  if (items.length === 0) return true;
+  for (const item of items) {
+    // Primary check: product_id (never changes even if title is edited)
+    if (item.product_id && VALID_PRODUCT_IDS.has(item.product_id)) return true;
+    // Fallback: title substring match
+    const title = (item.title ?? item.product_title ?? "").toLowerCase();
+    if (VALID_PRODUCT_TITLE_FRAGMENTS.some((f) => title.includes(f))) return true;
+  }
+  return false;
+}
+
+async function handleShopifyWebhook(request: Request, env: Env): Promise<Response> {
+  const cors = { "Content-Type": "application/json" };
+
+  const rawBody = await request.text();
+  const hmacHeader = request.headers.get("x-shopify-hmac-sha256") ?? "";
+
+  // Verify HMAC signature if secret is configured
+  if (env.SHOPIFY_WEBHOOK_SECRET) {
+    const valid = await verifyShopifyHmac(rawBody, hmacHeader, env.SHOPIFY_WEBHOOK_SECRET);
+    if (!valid) {
+      console.error("Shopify webhook HMAC verification failed");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: cors });
+    }
+  }
+
+  let order: ShopifyOrder;
+  try {
+    order = JSON.parse(rawBody) as ShopifyOrder;
+  } catch {
+    return new Response(JSON.stringify({ error: "Invalid JSON" }), { status: 400, headers: cors });
+  }
+
+  const email = extractOrderEmail(order);
+  if (!email) {
+    console.error("Shopify webhook: no email found in order", order.id);
+    return new Response(JSON.stringify({ ok: true, note: "no email" }), { status: 200, headers: cors });
+  }
+
+  if (!orderContainsGlowProduct(order)) {
+    console.log(`Shopify webhook: order ${order.id} does not contain Glow product — skipping`);
+    return new Response(JSON.stringify({ ok: true, note: "product not matched" }), { status: 200, headers: cors });
+  }
+
+  // Store in KV
+  const record = JSON.stringify({
+    email,
+    order_id: order.id,
+    order_name: order.name ?? String(order.order_number ?? order.id),
+    purchased_at: order.created_at ?? new Date().toISOString(),
+    source: "shopify_webhook",
+  });
+
+  if (env.GLOW_PURCHASERS) {
+    await env.GLOW_PURCHASERS.put(`purchaser:${email}`, record);
+    console.log(`Verified purchaser stored: ${email}`);
+  } else {
+    console.error("GLOW_PURCHASERS KV binding not available");
+  }
+
+  return new Response(JSON.stringify({ ok: true }), { status: 200, headers: cors });
+}
+
+// ─── /api/verify — login gate ─────────────────────────────────────────────────
+
+async function handleVerifyApi(request: Request, env: Env): Promise<Response> {
+  const cors = {
+    "Access-Control-Allow-Origin": "*",
+    "Content-Type": "application/json",
+  };
+  if (request.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: cors });
+  }
+
+  try {
+    const body = (await request.json()) as { email?: string };
+    const email = (body.email ?? "").toLowerCase().trim();
+    if (!email || !email.includes("@")) {
+      return Response.json({ verified: false }, { status: 400, headers: cors });
+    }
+
+    // 1. KV — verified via Shopify webhook
+    if (env.GLOW_PURCHASERS) {
+      const record = await env.GLOW_PURCHASERS.get(`purchaser:${email}`);
+      if (record) {
+        return Response.json({ verified: true }, { headers: cors });
+      }
+    }
+
+    // 2. ALLOWED_EMAILS manual override (comma-separated Wrangler secret)
+    if (env.ALLOWED_EMAILS) {
+      const list = env.ALLOWED_EMAILS.split(",").map((e) => e.toLowerCase().trim()).filter(Boolean);
+      if (list.includes(email)) {
+        return Response.json({ verified: true }, { headers: cors });
+      }
+      // Override list is set but email not in it — deny
+      return Response.json({ verified: false }, { headers: cors });
+    }
+
+    // 3. Not in KV and not in the allowlist — deny (default-deny / fail closed).
+    //    Real purchasers are unlocked via the Shopify webhook → KV path above.
+    return Response.json({ verified: false }, { headers: cors });
+  } catch {
+    return Response.json({ verified: false }, { status: 500, headers: cors });
+  }
+}
+
+// ─── Worker entry ─────────────────────────────────────────────────────────────
+
 export default {
-  async fetch(request: Request, env: Env, ctx: unknown) {
+  async fetch(request: Request, env: unknown, ctx: unknown) {
     const url = new URL(request.url);
 
-    if (url.pathname === "/api/verify-purchase") {
-      return handleVerifyPurchase(request, env);
+    if (url.pathname === "/api/verify") {
+      return handleVerifyApi(request, env as Env);
+    }
+
+    if (url.pathname === "/webhooks/shopify/orders-paid" && request.method === "POST") {
+      return handleShopifyWebhook(request, env as Env);
     }
 
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env as unknown, ctx);
+      const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
     } catch (error) {
       console.error(error);

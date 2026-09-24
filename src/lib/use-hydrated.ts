@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
-import { useApp } from "./store";
 
-/** Returns true after first client render and Zustand rehydration from localStorage. */
+/** Returns true after first client render. Use to gate state that depends on localStorage. */
 export function useHydrated() {
   const [h, setH] = useState(false);
-  useEffect(() => {
-    void Promise.resolve(useApp.persist.rehydrate()).then(() => setH(true));
-  }, []);
+  useEffect(() => setH(true), []);
   return h;
 }

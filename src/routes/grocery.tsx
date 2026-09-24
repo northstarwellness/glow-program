@@ -1,193 +1,358 @@
-import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
+import { DAYS, GROCERY_LIST, REDS_URL, RECIPES } from "@/lib/content";
+import { copyText } from "@/lib/share";
+import { ShareStatus } from "@/components/ShareStatus";
 
 export const Route = createFileRoute("/grocery")({ component: Grocery });
 
-type GroceryItem = { id: string; name: string; note?: string };
-type GrocerySection = { label: string; items: GroceryItem[] };
+// Map recipe ingredient names → grocery item IDs for week generation
+const ING_TO_GROCERY: Record<string, string> = {
+  Pomegranate: "pomegranate",
+  Raspberry: "raspberries",
+  "Oat milk": "oat-milk",
+  "Radiant Reds": "reds",
+  Lime: "lime",
+  Blueberry: "blueberries",
+  Strawberry: "strawberries",
+  Banana: "banana",
+  "Almond milk": "almond-milk",
+  Chia: "chia",
+  "Tart cherry": "tart-cherry",
+  Cacao: "cacao",
+  "Almond butter": "almond-butter",
+  Cinnamon: "cinnamon",
+  Plum: "plum",
+  "Rose water": "rose-water",
+  "Coconut yogurt": "coconut-yogurt",
+  Honey: "honey",
+  Watermelon: "watermelon",
+  "Hibiscus tea": "hibiscus-tea",
+  "Black fig": "black-fig",
+  Almond: "almonds",
+  Beet: "beet",
+  Ginger: "ginger",
+  Orange: "orange",
+  Mint: "mint",
+  Lemon: "lemon",
+  "Green tea": "green-tea",
+};
 
-const SECTIONS: GrocerySection[] = [
-  {
-    label: "Fresh Produce",
-    items: [
-      { id: "pomegranate", name: "Pomegranate seeds (or 1 whole pomegranate)", note: "Days 1, 8, 15" },
-      { id: "berries", name: "Mixed berries — blueberry, strawberry, raspberry", note: "Days 2, 9, 16" },
-      { id: "tart-cherry", name: "Tart cherries — fresh or frozen", note: "Days 3, 10, 17" },
-      { id: "plums", name: "Ripe plums (2–3)", note: "Days 4, 11, 18" },
-      { id: "watermelon", name: "Watermelon (small)", note: "Days 5, 12, 19" },
-      { id: "figs", name: "Black figs (4–5)", note: "Days 6, 13, 20" },
-      { id: "beet", name: "Beet (1 small, roastable)", note: "Days 7, 14, 21" },
-      { id: "ginger", name: "Ginger root (thumb-sized)", note: "Beet Glow" },
-      { id: "limes", name: "Limes (4–6)", note: "Several recipes" },
-      { id: "lemon", name: "Lemon (1–2)", note: "Day 1 warm water" },
-      { id: "banana", name: "Banana (ripe)", note: "Berry Bloom, optional" },
-      { id: "mint", name: "Fresh mint", note: "Garnish" },
-    ],
-  },
-  {
-    label: "Pantry",
-    items: [
-      { id: "oat-milk", name: "Oat milk (carton)", note: "Most recipes" },
-      { id: "almond-milk", name: "Almond milk (carton)", note: "Cherry Cacao, Berry Bloom" },
-      { id: "chia", name: "Chia seeds", note: "Berry Bloom" },
-      { id: "almond-butter", name: "Almond butter", note: "Cherry Cacao, Fig & Almond" },
-      { id: "raw-almonds", name: "Raw almonds", note: "Fig & Almond" },
-      { id: "cacao", name: "Raw cacao powder", note: "Cherry Cacao" },
-      { id: "cinnamon", name: "Cinnamon", note: "Several recipes" },
-      { id: "honey", name: "Raw honey", note: "Several recipes" },
-      { id: "hibiscus", name: "Hibiscus tea bags", note: "Watermelon Reds" },
-      { id: "rose-water", name: "Rose water", note: "Plum & Rose" },
-    ],
-  },
-  {
-    label: "Refrigerator",
-    items: [
-      { id: "coconut-yogurt", name: "Coconut yogurt", note: "Plum & Rose; probiotic pair" },
-      { id: "frozen-berries", name: "Frozen berries (backup)", note: "Any week" },
-    ],
-  },
-  {
-    label: "Morning Ritual",
-    items: [
-      { id: "reds", name: "Radiant Reds — NOURE superfood blend", note: "Every morning" },
-    ],
-  },
-];
+function getWeekGroceryIds(week: 1 | 2 | 3): string[] {
+  const phase = week === 1 ? [0, 7] : week === 2 ? [7, 14] : [14, 21];
+  const daySlice = DAYS.slice(phase[0], phase[1]);
+  const ids = new Set<string>(["reds"]); // always include Radiant Reds
+  for (const d of daySlice) {
+    const recipe = RECIPES.find((r) => r.id === d.recipeId);
+    if (!recipe) continue;
+    for (const ing of recipe.ingredients) {
+      const groceryId = ING_TO_GROCERY[ing];
+      if (groceryId) ids.add(groceryId);
+    }
+  }
+  return Array.from(ids);
+}
 
 function Grocery() {
   const hydrated = useHydrated();
   const s = useApp();
-  const [checked, setChecked] = useState<Set<string>>(new Set());
-  const [week, setWeek] = useState<1 | 2 | 3>(1);
+  const [customInput, setCustomInput] = useState("");
+  const [customItems, setCustomItems] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem("noure_grocery_custom") ?? "[]");
+    } catch {
+      return [];
+    }
+  });
+  const [copyLabel, setCopyLabel] = useState("Copy list");
+  const [copyManual, setCopyManual] = useState<string | null>(null);
 
-  if (!hydrated) return <div className="ivory-frame min-h-screen" />;
-  if (!s.unlocked) return <Navigate to="/" />;
+  if (hydrated && !s.name) return <Navigate to="/" />;
 
-  const toggle = (id: string) =>
-    setChecked((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+  const checked = s.groceryChecked;
+  const totalItems =
+    GROCERY_LIST.reduce((sum, cat) => sum + cat.items.length, 0) + customItems.length;
+  const checkedCount = Object.values(checked).filter(Boolean).length;
+
+  const generateWeek = (week: 1 | 2 | 3) => {
+    const ids = getWeekGroceryIds(week);
+    for (const id of ids) {
+      if (!checked[id]) s.toggleGrocery(id);
+    }
+  };
+
+  const addCustom = () => {
+    const val = customInput.trim();
+    if (!val || customItems.includes(val)) return;
+    const next = [...customItems, val];
+    setCustomItems(next);
+    localStorage.setItem("noure_grocery_custom", JSON.stringify(next));
+    setCustomInput("");
+  };
+
+  const removeCustom = (item: string) => {
+    const next = customItems.filter((i) => i !== item);
+    setCustomItems(next);
+    localStorage.setItem("noure_grocery_custom", JSON.stringify(next));
+  };
+
+  const copyList = () => {
+    const lines: string[] = [];
+    for (const cat of GROCERY_LIST) {
+      const catItems = cat.items.filter((i) => !checked[i.id]);
+      if (catItems.length === 0) continue;
+      lines.push(`\n${cat.name.toUpperCase()}`);
+      for (const item of catItems) lines.push(`☐ ${item.name}`);
+    }
+    if (customItems.length > 0) {
+      lines.push("\nCUSTOM");
+      for (const item of customItems) lines.push(`☐ ${item}`);
+    }
+    const text = lines.join("\n").trim();
+    setCopyManual(null);
+    copyText(text).then((ok) => {
+      if (ok) {
+        setCopyLabel("Copied!");
+        setTimeout(() => setCopyLabel("Copy list"), 2000);
+      } else {
+        setCopyLabel("Copy list");
+        setCopyManual(text);
+      }
     });
-
-  const total = SECTIONS.reduce((n, s) => n + s.items.length, 0);
-  const done = checked.size;
+  };
 
   return (
     <Frame>
       <TopBar name={s.name} />
-      <Link to="/home" className="text-[12px] text-[var(--plum)]/60">← Home</Link>
 
-      <h1 className="mt-3 font-serif text-[32px] leading-tight text-[var(--plum)]">Grocery list.</h1>
-      <p className="mt-1 font-serif italic text-[14px] text-[var(--plum)]/60">
-        Everything you need for one week of the reset.
-      </p>
-
-      <div className="mt-4 flex gap-2">
-        {([1, 2, 3] as const).map((w) => (
-          <button
-            key={w}
-            onClick={() => setWeek(w)}
-            className={`flex-1 rounded-full py-2 text-[12px] tracking-wide transition ${
-              week === w
-                ? "bg-[var(--plum)] text-[var(--ivory)]"
-                : "bg-[var(--sand)] text-[var(--plum)]"
-            }`}
-          >
-            Week {w}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-2 rounded-2xl bg-[var(--sand)] px-4 py-3">
-        <p className="text-[12px] text-[var(--plum)]/65">
-          The same 7 recipes cycle each week — your shopping list is identical for all three weeks.
+      {/* Radiant Reds reminder — top */}
+      <a
+        href={REDS_URL}
+        target="_top"
+        className="block rounded-2xl px-5 py-4 mb-5"
+        style={{
+          background:
+            "linear-gradient(135deg, oklch(0.968 0.028 68) 0%, oklch(0.985 0.016 65) 100%)",
+          border: "1px solid oklch(0.720 0.082 65 / 0.22)",
+        }}
+      >
+        <p className="label-caps text-[var(--gold)]">Don't forget</p>
+        <p className="mt-1 font-serif text-[15px] text-[var(--charcoal)]">
+          Radiant Reds — the base of every ritual.
         </p>
+        <p className="mt-0.5 font-serif italic text-[12px] text-[var(--charcoal)]/50">
+          One bag covers the full 21 days. Shop now →
+        </p>
+      </a>
+
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="label-caps text-[var(--charcoal)]/40">Shopping list</p>
+          <h1 className="mt-1 font-serif text-[34px] leading-tight text-[var(--charcoal)]">
+            Your groceries.
+          </h1>
+        </div>
+        <div className="text-right">
+          <p className="font-serif text-[26px] text-[var(--gold)]">{checkedCount}</p>
+          <p className="text-[11px] tracking-[0.16em] uppercase text-[var(--charcoal)]/45">
+            of {totalItems}
+          </p>
+        </div>
       </div>
 
-      {done > 0 && (
-        <div className="mt-4 flex items-center gap-3 rounded-2xl bg-[var(--gold)]/12 px-4 py-3">
-          <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-[var(--gold)]/25">
-            <div
-              className="h-full rounded-full bg-[var(--gold)] transition-all"
-              style={{ width: `${(done / total) * 100}%` }}
-            />
+      <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[var(--taupe)]/25">
+        <div
+          className="h-full rounded-full bg-[var(--gold)] transition-all duration-500"
+          style={{ width: `${totalItems > 0 ? (checkedCount / totalItems) * 100 : 0}%` }}
+        />
+      </div>
+
+      {/* Week generation buttons */}
+      <div className="mt-5">
+        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Generate by week</p>
+        <div className="grid grid-cols-3 gap-2">
+          {([1, 2, 3] as const).map((week) => {
+            const labels = ["Foundation", "Build", "Glow"];
+            return (
+              <button
+                key={week}
+                onClick={() => generateWeek(week)}
+                className="rounded-xl border border-[var(--taupe)]/25 bg-white p-3 text-center transition-all cursor-pointer hover:border-[var(--gold)]/40 hover:bg-[var(--gold)]/5"
+              >
+                <p className="label-caps text-[var(--gold)]">Week {week}</p>
+                <p className="font-serif text-[13px] text-[var(--charcoal)] mt-0.5">
+                  {labels[week - 1]}
+                </p>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Actions row */}
+      <div className="mt-3 flex gap-2">
+        <button
+          type="button"
+          onClick={copyList}
+          className="flex-1 rounded-full border border-[var(--taupe)]/30 py-2.5 font-serif text-[13px] text-[var(--charcoal)] transition-all cursor-pointer hover:border-[var(--gold)]/40"
+        >
+          {copyLabel}
+        </button>
+        {checkedCount > 0 && (
+          <button
+            onClick={s.clearGrocery}
+            className="flex-1 rounded-full border border-[var(--taupe)]/20 py-2.5 font-serif text-[13px] text-[var(--charcoal)]/45 cursor-pointer"
+          >
+            Clear checks
+          </button>
+        )}
+      </div>
+      {/* Announces the result; the manual-copy box appears only when copying failed. */}
+      <ShareStatus
+        className="mt-2"
+        message={
+          copyManual
+            ? "Couldn't copy automatically. Select the list below to copy it."
+            : copyLabel === "Copied!"
+              ? "List copied"
+              : ""
+        }
+        manualText={copyManual}
+      />
+
+      {/* Custom item input */}
+      <div className="mt-4">
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={customInput}
+            onChange={(e) => setCustomInput(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addCustom()}
+            placeholder="Add a custom item…"
+            className="flex-1 rounded-full border border-[var(--taupe)]/30 bg-white px-4 py-2.5 font-serif text-[14px] text-[var(--charcoal)] placeholder:text-[var(--charcoal)]/30 focus:border-[var(--gold)] focus:outline-none"
+          />
+          <button
+            onClick={addCustom}
+            disabled={!customInput.trim()}
+            className="rounded-full bg-[var(--charcoal)] px-5 py-2.5 font-serif text-[13px] text-[var(--ivory)] disabled:opacity-30 cursor-pointer"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+
+      {/* Custom items */}
+      {customItems.length > 0 && (
+        <div className="mt-4">
+          <p className="label-caps text-[var(--charcoal)]/40 mb-2">Custom items</p>
+          <div className="space-y-1.5">
+            {customItems.map((item) => (
+              <div
+                key={item}
+                className="flex items-center justify-between rounded-xl bg-white border border-[var(--taupe)]/20 px-4 py-3"
+              >
+                <span className="font-serif text-[15px] text-[var(--charcoal)]">{item}</span>
+                <button
+                  onClick={() => removeCustom(item)}
+                  className="text-[var(--taupe)] hover:text-[var(--berry)] cursor-pointer text-[12px]"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
           </div>
-          <p className="flex-shrink-0 text-[12px] font-serif text-[var(--gold)]">
-            {done}/{total} checked
-          </p>
         </div>
       )}
 
-      {SECTIONS.map((section) => (
-        <section key={section.label} className="mt-6">
-          <p className="label-caps text-[var(--plum)]/55">{section.label}</p>
-          <div className="mt-2 space-y-2">
-            {section.items.map((item) => {
-              const done = checked.has(item.id);
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => toggle(item.id)}
-                  className={`flex w-full items-start gap-3 rounded-2xl p-4 text-left transition ${
-                    done ? "bg-[var(--gold)]/12" : "bg-[var(--card)]"
-                  }`}
-                >
-                  <div
-                    className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border transition ${
-                      done
-                        ? "border-[var(--gold)] bg-[var(--gold)]"
-                        : "border-[var(--plum)]/25"
-                    }`}
+      {/* Grocery categories */}
+      <div className="mt-6 space-y-6">
+        {GROCERY_LIST.map((cat) => {
+          const unchecked = cat.items.filter((i) => !checked[i.id]);
+          const catChecked = cat.items.length - unchecked.length;
+          return (
+            <section key={cat.name}>
+              <div className="mb-3 flex items-center justify-between">
+                <p className="label-caps text-[var(--charcoal)]/50">{cat.name}</p>
+                {catChecked > 0 && (
+                  <span className="text-[11px] text-[var(--gold)]">
+                    {catChecked}/{cat.items.length}
+                  </span>
+                )}
+              </div>
+              <div className="space-y-2">
+                {/* Unchecked items first */}
+                {unchecked.map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => s.toggleGrocery(item.id)}
+                    className="flex w-full items-start gap-4 rounded-2xl bg-white border border-[var(--taupe)]/15 shadow-sm p-4 text-left transition-all cursor-pointer hover:shadow"
                   >
-                    {done && (
-                      <svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="white" strokeWidth="2">
-                        <path d="M2 6l3 3 5-5" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className={`text-[15px] font-serif leading-snug ${done ? "text-[var(--plum)]/40 line-through" : "text-[var(--plum)]"}`}>
-                      {item.name}
-                    </p>
-                    {item.note && (
-                      <p className="mt-0.5 text-[11px] text-[var(--plum)]/45">{item.note}</p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-      ))}
+                    <span className="mt-[2px] flex-shrink-0">
+                      <EmptyCircle />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)]">
+                        {item.name}
+                      </p>
+                      {item.note && (
+                        <p className="mt-0.5 text-[12px] italic text-[var(--charcoal)]/45">
+                          {item.note}
+                        </p>
+                      )}
+                    </div>
+                  </button>
+                ))}
+                {/* Checked items */}
+                {cat.items
+                  .filter((i) => !!checked[i.id])
+                  .map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => s.toggleGrocery(item.id)}
+                      className="flex w-full items-start gap-4 rounded-2xl bg-[var(--gold)]/6 opacity-50 p-4 text-left transition-all cursor-pointer"
+                    >
+                      <span className="mt-[2px] flex-shrink-0">
+                        <CheckCircle />
+                      </span>
+                      <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)] line-through">
+                        {item.name}
+                      </p>
+                    </button>
+                  ))}
+              </div>
+            </section>
+          );
+        })}
+      </div>
 
       <GoldDivider />
-
-      {done > 0 && (
-        <button
-          onClick={() => setChecked(new Set())}
-          className="w-full rounded-full border border-[var(--plum)]/15 py-3 text-center font-serif text-[13px] text-[var(--plum)]/55"
-        >
-          Clear all checks
-        </button>
-      )}
-
-      <div className="mt-4 rounded-2xl bg-[var(--sand)] p-4 text-center">
-        <p className="font-serif text-[14px] text-[var(--plum)]/70">
-          Don't forget: <span className="text-[var(--gold)]">Radiant Reds</span> is the centerpiece of every morning.
-        </p>
-        <a
-          href="https://nourewellness.com/products/reds-superfood"
-          target="_blank"
-          rel="noreferrer"
-          className="mt-3 block text-[12px] tracking-[0.18em] uppercase text-[var(--gold)]"
-        >
-          Shop Radiant Reds →
-        </a>
-      </div>
     </Frame>
+  );
+}
+
+function CheckCircle() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--gold)]">
+      <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+      <path
+        d="M7.5 12l3 3 6-6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function EmptyCircle() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--taupe)]/50">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+    </svg>
   );
 }

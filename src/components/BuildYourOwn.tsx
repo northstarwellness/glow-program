@@ -13,7 +13,7 @@ const FRUITS: Opt[] = [
   { id: "berry", label: "Mixed berries", benefit: "Anthocyanins for daily skin protection and brightness." },
   { id: "pom", label: "Pomegranate", benefit: "Punicalagins and ellagic acid for collagen protection." },
   { id: "peach", label: "Peach or plum", benefit: "Stone-fruit polyphenols for soft, even tone." },
-  { id: "watermelon", label: "Watermelon", benefit: "Lycopene and hydration for clarity and everyday glow." },
+  { id: "watermelon", label: "Watermelon", benefit: "Lycopene and hydration for clarity and UV defense." },
   { id: "fig", label: "Fig", benefit: "Prebiotic fiber for the bacteria your skin depends on." },
 ];
 const FATS: Opt[] = [
@@ -25,13 +25,13 @@ const FATS: Opt[] = [
 const POLYS: Opt[] = [
   { id: "reds", label: "Radiant Reds", benefit: "27 polyphenol sources in one scoop — the centerpiece of your glow." },
   { id: "matcha", label: "Matcha", benefit: "EGCG, one of the most-studied skin-protective polyphenols." },
-  { id: "turmeric", label: "Turmeric + pepper", benefit: "Curcumin for calm, steady comfort." },
+  { id: "turmeric", label: "Turmeric + pepper", benefit: "Curcumin for calm, steady inflammation balance." },
   { id: "cacaopowder", label: "Raw cacao", benefit: "Flavanols for hydration and density." },
 ];
 const TOUCHES: Opt[] = [
   { id: "lime", label: "Lime", benefit: "Vitamin C cofactor for collagen synthesis." },
   { id: "rose", label: "Rose water", benefit: "Calming aromatic — softens the nervous system." },
-  { id: "cinnamon", label: "Cinnamon", benefit: "Helps mornings feel steady and balanced." },
+  { id: "cinnamon", label: "Cinnamon", benefit: "Blunts morning blood sugar; protects against glycation." },
   { id: "honey", label: "Raw honey", benefit: "Trace antioxidants and gentle sweetness." },
   { id: "mint", label: "Fresh mint", benefit: "Cooling and digestion-supportive." },
 ];
@@ -75,11 +75,11 @@ export function BuildYourOwn() {
         </div>
 
         <div className="sand-card mt-5 p-5">
-          <p className="label-caps text-[var(--gold)]">✦ Your benefits</p>
+          <p className="label-caps text-[var(--gold)]">Your benefits</p>
           <ul className="mt-3 space-y-2.5">
             {benefits.map((b, i) => (
               <li key={i} className="flex items-start gap-2.5 text-[13.5px] leading-relaxed text-[var(--plum)]/85">
-                <span className="mt-[2px] text-[var(--gold)]">✦</span> <span>{b}</span>
+                <span className="mt-[3px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--gold)]" /> <span>{b}</span>
               </li>
             ))}
           </ul>
@@ -88,18 +88,18 @@ export function BuildYourOwn() {
         {!includesReds && (
           <a href={REDS_URL} target="_blank" rel="noreferrer"
              className="mt-5 block overflow-hidden rounded-3xl border border-[var(--gold)]/40 bg-[var(--card)] p-5 text-center shadow-sm">
-            <p className="label-caps text-[var(--gold)]">✦ Make it a glow ritual</p>
+            <p className="label-caps text-[var(--gold)]">Make it a glow ritual</p>
             <p className="mt-2 font-serif text-[20px] text-[var(--plum)]">Add Radiant Reds</p>
             <p className="mt-1 font-serif italic text-[13px] text-[var(--plum)]/65">
               The polyphenol blend that makes any glass a Reset glass.
             </p>
-            <p className="mt-3 font-serif text-[13px] tracking-[0.18em] uppercase text-[var(--gold)]">Shop the blend →</p>
+            <p className="mt-3 font-serif text-[13px] tracking-[0.18em] uppercase text-[var(--gold)]">Shop the blend</p>
           </a>
         )}
 
         <button onClick={() => { setPicks({}); setStep(0); }}
           className="mt-5 w-full rounded-full border border-[var(--plum)]/20 px-4 py-3 font-serif text-[15px] text-[var(--plum)]">
-          ✧ Build another
+          Build another
         </button>
       </div>
     );
