@@ -165,11 +165,11 @@ function IngTab() {
             <p className="mt-3 text-[13px] text-[var(--plum)]/85">{i.description}</p>
             <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
               <p>
-                <span className="text-[var(--gold)]">Gut:</span>{" "}
+                <span className="text-[var(--gold)]">Nutrition note:</span>{" "}
                 <span className="text-[var(--plum)]/75">{i.gut}</span>
               </p>
               <p>
-                <span className="text-[var(--gold)]">Skin:</span>{" "}
+                <span className="text-[var(--gold)]">In the glass:</span>{" "}
                 <span className="text-[var(--plum)]/75">{i.skin}</span>
               </p>
             </div>

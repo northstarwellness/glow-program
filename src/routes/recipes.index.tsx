@@ -138,7 +138,7 @@ function Recipes() {
                 Quick Glow Mornings.
               </h2>
               <p className="mt-1 font-serif italic text-[14px] text-[var(--charcoal)]/55">
-                Five minutes to radiant.
+                Five minutes, start to glass.
               </p>
               <div className="mt-4 grid grid-cols-2 gap-3">
                 {quickGlow.map((r) => (

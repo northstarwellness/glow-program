@@ -163,7 +163,7 @@ function Home() {
         </div>
         {allLogged && (
           <p className="mt-2.5 text-center font-serif italic text-[14px] text-[var(--charcoal)]/70">
-            Today is complete. Your skin noticed.
+            Today is complete. You showed up for yourself.
           </p>
         )}
       </div>

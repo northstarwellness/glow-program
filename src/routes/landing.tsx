@@ -8,7 +8,7 @@ export const Route = createFileRoute("/landing")({
       {
         name: "description",
         content:
-          "A 21-day morning ritual for radiant skin, a calm gut, and steady energy. $21 — yours forever.",
+          "A 21-day beauty-from-within morning ritual of smoothies, check-ins and reflection. $21, yours forever.",
       },
     ],
   }),

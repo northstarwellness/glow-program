@@ -11,6 +11,7 @@ import { Frame, GoldDivider, TopBar } from "@/components/Frame";
 import {
   useApp,
   OUTCOMES,
+  outcomeLabel,
   routeAfterComplete,
   isDayPersisted,
   isDayUnlocked,
@@ -440,14 +441,14 @@ function RitualFeelChips({ day }: { day: number }) {
                   : "bg-[var(--beige)] text-[var(--charcoal)]/65 border border-[var(--taupe)]/25 hover:border-[var(--gold)]/40"
               }`}
             >
-              {outcome}
+              {outcomeLabel(outcome)}
             </button>
           );
         })}
       </div>
       {outcomes.length > 0 && (
         <p className="mt-4 font-serif italic text-[12px] text-[var(--charcoal)]/40">
-          Saved. Your body keeps the record.
+          Saved to your 21-day record.
         </p>
       )}
     </div>

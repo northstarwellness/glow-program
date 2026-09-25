@@ -8,12 +8,42 @@ export const Route = createFileRoute("/welcome")({
 });
 
 const BONUSES = [
-  { n: 1, name: "Polyphenol Power Library", value: "$27", body: "Your complete guide to 40+ polyphenol-rich foods. What they do. How to use them. Which ones matter most for your skin." },
-  { n: 2, name: "The Ingredient Encyclopedia", value: "$19", body: "Tap any ingredient in a recipe to learn what it does for your gut, skin, and energy — in plain language." },
-  { n: 3, name: "Morning Sound Rituals", value: "$17", body: "5 curated ambient sound sessions. Play while you journal or prepare your Radiant Reds." },
-  { n: 4, name: "21 Personalized Ritual Prompts", value: "Priceless", body: "One message per day, written for this stage of your reset. Never generic. Never repeated." },
-  { n: 5, name: "The Glow Photo Timeline", value: "$37", body: "Optional daily skin check-in. At Day 21, compare where you started." },
-  { n: 6, name: "Day 21 Celebration + Glow Score", value: "$47", body: "When you complete Day 21, you unlock your Glow Score, a celebration screen, and a shareable card." },
+  {
+    n: 1,
+    name: "Polyphenol Power Library",
+    value: "$27",
+    body: "Your guide to 30 polyphenol-rich foods and ingredients. What they are, how to use them and how to pair them.",
+  },
+  {
+    n: 2,
+    name: "The Ingredient Encyclopedia",
+    value: "$19",
+    body: "Tap any ingredient in a recipe to learn what it brings to your glass, in plain language.",
+  },
+  {
+    n: 3,
+    name: "Morning Sound Rituals",
+    value: "$17",
+    body: "5 curated ambient sound sessions. Play while you journal or prepare your Radiant Reds.",
+  },
+  {
+    n: 4,
+    name: "21 Personalized Ritual Prompts",
+    value: "Priceless",
+    body: "One message per day, written for this stage of your reset. Never generic. Never repeated.",
+  },
+  {
+    n: 5,
+    name: "Your Glow Reflection",
+    value: "$37",
+    body: "A private place to notice and remember how the ritual felt across your 21 days.",
+  },
+  {
+    n: 6,
+    name: "Day 21 Celebration + Glow Score",
+    value: "$47",
+    body: "When you complete Day 21, you unlock your Glow Score, a celebration screen, and a shareable card.",
+  },
 ];
 
 function Welcome() {
@@ -24,16 +54,22 @@ function Welcome() {
 
   if (hydrated && !name) return <Navigate to="/" />;
 
-  const begin = () => { setSeen(); navigate({ to: "/home" }); };
+  const begin = () => {
+    setSeen();
+    navigate({ to: "/home" });
+  };
 
   return (
     <div className="ivory-frame min-h-screen">
       <div className="mx-auto max-w-[440px] px-5 pt-8 pb-16">
-        <p className="text-center font-serif text-[14px] tracking-[0.45em] text-[var(--charcoal)]/50">RITUAL APP</p>
+        <p className="text-center font-serif text-[14px] tracking-[0.45em] text-[var(--charcoal)]/50">
+          RITUAL APP
+        </p>
 
         <div className="mt-10 fade-rise">
           <h1 className="font-serif text-[42px] leading-[1.05] text-[var(--charcoal)]">
-            Good morning,<br />
+            Good morning,
+            <br />
             <em className="text-[var(--gold)]">{name}.</em>
           </h1>
           <p className="mt-3 font-serif italic text-[18px] text-[var(--charcoal)]/55">
@@ -43,9 +79,13 @@ function Welcome() {
         </div>
 
         {/* Power statement */}
-        <div className="rounded-2xl p-6 mt-2" style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}>
+        <div
+          className="rounded-2xl p-6 mt-2"
+          style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
+        >
           <p className="font-serif text-[17px] leading-relaxed text-[var(--charcoal)]/75 italic">
-            "Your serums can't fix what starts underneath. The Inner Glow Reset works at the source — morning by morning, from the inside out."
+            "Skincare works on the outside. The Inner Glow Reset is the inside half of your routine:
+            one polyphenol-rich glass, every morning for 21 days."
           </p>
         </div>
 
@@ -55,14 +95,15 @@ function Welcome() {
           <h2 className="mt-2 font-serif text-[26px] leading-tight text-[var(--charcoal)]">
             The Inner Glow Reset
           </h2>
-          <p className="mt-0.5 font-serif italic text-[var(--charcoal)]/55">21-Day Beauty Ritual System</p>
+          <p className="mt-0.5 font-serif italic text-[var(--charcoal)]/55">
+            21-Day Beauty Ritual System
+          </p>
           <ul className="mt-5 space-y-2 text-[14px] text-[var(--charcoal)]/70">
             {[
               "21 daily ritual guides — one unlocks each morning",
-              "Gut-skin education — why what you eat shows on your face",
+              "Beauty-from-within education on polyphenols, plants and color",
               "Polyphenol recipe library built around Radiant Reds",
               "Daily glow journal with personalized prompts",
-              "Boosts — targeted practices for skin, energy & gut",
               "Progress tracking, streaks & milestone celebrations",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
@@ -79,7 +120,9 @@ function Welcome() {
 
         {/* Bonus stack */}
         <div className="mt-10">
-          <p className="label-caps text-center text-[var(--charcoal)]/45">Plus six bonuses included</p>
+          <p className="label-caps text-center text-[var(--charcoal)]/45">
+            Plus six bonuses included
+          </p>
           <h3 className="mt-2 text-center font-serif text-[24px] text-[var(--charcoal)]">
             Everything else you receive
           </h3>
@@ -94,8 +137,12 @@ function Welcome() {
                   {b.value}
                 </span>
               </div>
-              <h4 className="mt-2 font-serif text-[19px] leading-tight text-[var(--charcoal)]">{b.name}</h4>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--charcoal)]/60">{b.body}</p>
+              <h4 className="mt-2 font-serif text-[19px] leading-tight text-[var(--charcoal)]">
+                {b.name}
+              </h4>
+              <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--charcoal)]/60">
+                {b.body}
+              </p>
             </div>
           ))}
         </div>

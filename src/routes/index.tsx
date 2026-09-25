@@ -7,7 +7,11 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "Ritual App — The Inner Glow Reset" },
-      { name: "description", content: "A 21-day morning ritual for radiant skin, a calm gut, and steady energy." },
+      {
+        name: "description",
+        content:
+          "A 21-day beauty-from-within morning ritual: polyphenol-rich smoothies, gentle check-ins and daily reflection.",
+      },
     ],
   }),
   component: NameCapture,
@@ -39,7 +43,6 @@ function NameCapture() {
   return (
     <div className="ivory-frame min-h-screen">
       <div className="mx-auto flex min-h-screen max-w-[440px] flex-col px-8">
-
         {/* Top wordmark */}
         <div className="pt-14 pb-0">
           <p className="font-serif text-[11px] tracking-[0.55em] text-[var(--charcoal)]/40 uppercase">
@@ -49,16 +52,18 @@ function NameCapture() {
 
         {/* Main content — vertically centered */}
         <div className="flex flex-1 flex-col justify-center pb-16">
-
           {/* Thin gold rule */}
           <div className="mb-10 h-px w-10 bg-[var(--gold)]/50" />
 
           <h1 className="font-serif text-[46px] leading-[1.05] text-[var(--charcoal)]">
-            Your skin notices<br />everything.
+            Your morning,
+            <br />
+            made a ritual.
           </h1>
 
           <p className="mt-5 font-serif italic text-[16px] leading-relaxed text-[var(--charcoal)]/50 max-w-[30ch]">
-            The Inner Glow Reset is a 21-day morning ritual built for the woman who's doing everything right and still not seeing it on her face.
+            The Inner Glow Reset is a 21-day morning ritual of beautiful glasses, quiet minutes and
+            gentle check-ins, made for the woman who wants her routine to feel like care.
           </p>
 
           <form onSubmit={submit} className="mt-12">
@@ -87,7 +92,6 @@ function NameCapture() {
             21 days. One morning ritual. No shortcuts.
           </p>
         </div>
-
       </div>
     </div>
   );

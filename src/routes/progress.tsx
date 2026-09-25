@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
-import { useApp, activeDay, glowScore } from "@/lib/store";
+import { useApp, activeDay, glowScore, outcomeLabel } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { PHASES } from "@/lib/content";
 
@@ -40,7 +40,7 @@ function Progress() {
       <TopBar name={s.name} day={day} />
       <h1 className="font-serif text-[34px] leading-tight text-[var(--charcoal)]">Progress.</h1>
       <p className="mt-1 font-serif italic text-[15px] text-[var(--charcoal)]/55">
-        Your skin keeps the record.
+        Every morning you've kept.
       </p>
 
       {/* Glow Score hero */}
@@ -183,7 +183,7 @@ function Progress() {
                     <span
                       className={`font-serif text-[15px] text-[var(--charcoal)] ${idx === 0 ? "font-medium" : ""}`}
                     >
-                      {outcome}
+                      {outcomeLabel(outcome)}
                       {idx === 0 && (
                         <span className="ml-2 rounded-full bg-[var(--gold)]/15 px-2 py-0.5 text-[9.5px] tracking-[0.12em] uppercase text-[var(--gold)]">
                           Most felt
@@ -212,7 +212,7 @@ function Progress() {
 
       <GoldDivider />
       <p className="text-center font-serif italic text-[13px] text-[var(--charcoal)]/45">
-        Every day logged is a day your skin remembers.
+        Every day logged adds to your 21-day record.
       </p>
     </Frame>
   );

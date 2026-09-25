@@ -211,7 +211,7 @@ function RecipeView() {
 
       {/* Glow benefit */}
       <div className="mt-4 glass-card p-5">
-        <p className="label-caps text-[var(--gold)] mb-2">Glow benefit</p>
+        <p className="label-caps text-[var(--gold)] mb-2">Why this glass</p>
         <p className="text-[14px] leading-relaxed text-[var(--plum)]/80">{r.benefit}</p>
       </div>
 
@@ -528,11 +528,11 @@ function WhyCard({ id, ing }: { id: string; ing: IngredientInfo }) {
         </p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <div className="rounded-xl bg-[var(--blush)]/60 px-3 py-2.5">
-            <p className="label-caps text-[var(--berry)]/75">Skin</p>
+            <p className="label-caps text-[var(--berry)]/75">In the glass</p>
             <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--plum)]/85">{ing.skin}</p>
           </div>
           <div className="rounded-xl bg-[var(--gold)]/10 px-3 py-2.5">
-            <p className="label-caps text-[var(--gold)]">Gut</p>
+            <p className="label-caps text-[var(--gold)]">Nutrition note</p>
             <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--plum)]/85">{ing.gut}</p>
           </div>
         </div>
@@ -559,7 +559,7 @@ function BuildShell() {
         Compose your morning glass.
       </h1>
       <p className="mt-1 font-serif italic text-[14.5px] text-[var(--plum)]/55">
-        Choose your layers — we'll write the benefits.
+        Choose your layers, and we'll tell you what each one brings.
       </p>
       <BuildYourOwn />
     </Frame>

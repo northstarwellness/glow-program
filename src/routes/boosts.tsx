@@ -21,9 +21,9 @@ const BOOSTS: Boost[] = [
   {
     id: "lymphatic-glow",
     category: "skin",
-    title: "Lymphatic Glow Massage",
+    title: "Morning Glow Massage",
     duration: "4 min",
-    teaser: "Move stagnant fluid, wake your face, reduce morning puffiness before anything else.",
+    teaser: "Gentle strokes to wake up your face before anything else touches your day.",
     tag: "Skin",
     steps: [
       "Start at your collarbone — use gentle downward strokes 5×",
@@ -36,9 +36,9 @@ const BOOSTS: Boost[] = [
   {
     id: "gut-reset-morning",
     category: "gut",
-    title: "Morning Gut Reset",
+    title: "Warm Water Morning Start",
     duration: "5 min",
-    teaser: "Your gut and skin share the same conversation. Start this one before coffee.",
+    teaser: "A warm, slow start to the day. Try this one before coffee.",
     polyphenol: "Pairs with your Radiant Reds",
     tag: "Gut",
     steps: [
@@ -53,8 +53,7 @@ const BOOSTS: Boost[] = [
     category: "skin",
     title: "Cold Water Glow Splash",
     duration: "2 min",
-    teaser:
-      "One of the oldest skin secrets. Cold water closes pores, tightens skin, and wakes circulation.",
+    teaser: "One of the oldest morning habits. A cold splash feels bracing, fresh and wide awake.",
     tag: "Skin",
     steps: [
       "After cleansing, fill your sink with cold water",
@@ -68,23 +67,22 @@ const BOOSTS: Boost[] = [
     category: "gut",
     title: "Antioxidant First Meal",
     duration: "Build as habit",
-    teaser: "The first thing you eat sets the tone for every system that runs your skin.",
+    teaser: "The first thing you eat sets the tone for your morning. Make it colorful.",
     polyphenol: "Polyphenol-forward",
     tag: "Nutrition",
     steps: [
       "Lead with color: berries, dark leafy greens, or beet in your first meal",
-      "Add a fat source — avocado, olive oil, or seeds — for polyphenol absorption",
+      "Add a fat source, like avocado, olive oil or seeds, for richness",
       "Skip the ultra-processed carb as your opener",
-      "Eat within 2 hours of waking for cortisol-aligned digestion",
+      "Eat within a couple of hours of waking, whenever it suits your morning",
     ],
   },
   {
     id: "breathwork-glow",
     category: "energy",
-    title: "Cortisol Reset Breathwork",
+    title: "Three-Minute Breathwork",
     duration: "3 min",
-    teaser:
-      "Chronic stress is one of the most underrated causes of dull skin. This is the 3-minute intervention.",
+    teaser: "Three minutes of slow breathing, and a calmer start to whatever comes next.",
     tag: "Energy",
     steps: [
       "Find a quiet seat. Close your eyes.",
@@ -97,9 +95,9 @@ const BOOSTS: Boost[] = [
   {
     id: "evening-skin-window",
     category: "ritual",
-    title: "Evening Skin Window",
+    title: "Evening Skin Ritual",
     duration: "10 min",
-    teaser: "Your skin repairs itself at night. This 10-minute ritual activates that window.",
+    teaser: "Ten unhurried minutes to close the day and care for your skin.",
     tag: "Ritual",
     steps: [
       "Cleanse gently — never strip",
@@ -114,13 +112,12 @@ const BOOSTS: Boost[] = [
     category: "energy",
     title: "The Morning Glow Walk",
     duration: "10 min",
-    teaser:
-      "Morning light sets your cortisol rhythm, which directly affects inflammation — which shows up as skin.",
+    teaser: "Ten minutes of morning daylight, fresh air and an easy pace.",
     tag: "Energy",
     steps: [
       "Within 30 minutes of waking, step outside",
-      "No sunglasses for the first 5 minutes — you need that light signal",
-      "Walk at a comfortable pace — this isn't exercise, it's calibration",
+      "Leave your sunglasses off for the first few minutes if that's comfortable",
+      "Walk at a comfortable pace. This is a stroll, not a workout.",
       "No phone. Just the walk.",
     ],
   },
@@ -136,7 +133,7 @@ const BOOSTS: Boost[] = [
       "First thing in the morning, before coffee or breakfast",
       "Prepare your Radiant Reds — 1 scoop in 8–10oz cold or room temp water",
       "Drink slowly. Don't rush this.",
-      "This is your skin getting what it needs before anything else.",
+      "This is your moment, before the day asks anything of you.",
       "Track it — every Reds day moves your glow score.",
     ],
   },
@@ -161,13 +158,13 @@ function Boosts() {
       <TopBar name={s.name} day={day} />
       <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Boosts.</h1>
       <p className="mt-1 font-serif italic text-[15px] text-[var(--plum)]/55 max-w-[30ch]">
-        Targeted practices your skin will feel. Stack them with your daily ritual or use them alone.
+        Small, lovely practices for your morning and evening. Stack them with your daily ritual or
+        use them alone.
       </p>
 
       <div className="mt-2 rounded-2xl blush-card p-4 mb-6">
         <p className="text-[13px] leading-relaxed text-[var(--plum)]/75 italic font-serif">
-          "For the woman doing everything right and still not seeing it on her face — these are the
-          missing pieces."
+          "Small practices, kept daily, make the ritual your own."
         </p>
       </div>
 

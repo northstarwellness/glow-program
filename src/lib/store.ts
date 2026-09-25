@@ -17,6 +17,13 @@ export const OUTCOMES = [
 ] as const;
 export type Outcome = (typeof OUTCOMES)[number];
 
+/** Display text only. Stored values in outcomesByDay never change, so saved history stays readable. */
+const OUTCOME_DISPLAY: Record<string, string> = {
+  "Less bloated": "Comfortable",
+  "Calm digestion": "Settled",
+};
+export const outcomeLabel = (outcome: string): string => OUTCOME_DISPLAY[outcome] ?? outcome;
+
 type State = {
   verifiedEmail: string | null;
   name: string | null;

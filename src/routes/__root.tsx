@@ -78,14 +78,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "description",
         content:
-          "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy.",
+          "A 21-day beauty-from-within morning ritual: polyphenol-rich smoothies, gentle check-ins and daily reflection.",
       },
       { name: "author", content: "NOURÉ Wellness" },
       { property: "og:title", content: "Ritual App — The Inner Glow Reset" },
       {
         property: "og:description",
         content:
-          "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy.",
+          "A 21-day beauty-from-within morning ritual: polyphenol-rich smoothies, gentle check-ins and daily reflection.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         name: "twitter:description",
         content:
-          "A 21-day polyphenol morning ritual for radiant skin, a calm gut, and steady energy.",
+          "A 21-day beauty-from-within morning ritual: polyphenol-rich smoothies, gentle check-ins and daily reflection.",
       },
       {
         property: "og:image",

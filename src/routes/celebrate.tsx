@@ -80,7 +80,7 @@ function Celebrate() {
         </h1>
 
         <p className="mt-4 font-serif italic text-[17px] text-[var(--plum)]/65 max-w-[28ch] mx-auto">
-          21 days. One ritual. Your skin kept the record.
+          21 days. One ritual. You kept it.
         </p>
 
         {/* Glow Score */}
