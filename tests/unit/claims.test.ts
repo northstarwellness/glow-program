@@ -26,6 +26,10 @@ const SOURCES = [
   "src/lib/content.ts",
   "src/components/BuildYourOwn.tsx",
   "lovable-landing.tsx",
+  "src/lib/glow-reflection.ts",
+  "src/lib/reflections.ts",
+  "src/lib/glow-card.ts",
+  "src/components/FeelingChips.tsx",
   ...[
     "__root",
     "index",
@@ -46,6 +50,7 @@ const SOURCES = [
     "celebrate",
     "milestone.$id",
     "profile",
+    "reflection",
   ].map((r) => `src/routes/${r}.tsx`),
 ];
 const rendered = (p: string) => {

@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as WelcomeRouteImport } from './routes/welcome'
 import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as RitualsRouteImport } from './routes/rituals'
+import { Route as ReflectionRouteImport } from './routes/reflection'
 import { Route as ProgressRouteImport } from './routes/progress'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as LandingRouteImport } from './routes/landing'
@@ -41,6 +42,11 @@ const VerifyRoute = VerifyRouteImport.update({
 const RitualsRoute = RitualsRouteImport.update({
   id: '/rituals',
   path: '/rituals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReflectionRoute = ReflectionRouteImport.update({
+  id: '/reflection',
+  path: '/reflection',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProgressRoute = ProgressRouteImport.update({
@@ -129,6 +135,7 @@ export interface FileRoutesByFullPath {
   '/landing': typeof LandingRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
+  '/reflection': typeof ReflectionRoute
   '/rituals': typeof RitualsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
@@ -149,6 +156,7 @@ export interface FileRoutesByTo {
   '/landing': typeof LandingRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
+  '/reflection': typeof ReflectionRoute
   '/rituals': typeof RitualsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
@@ -170,6 +178,7 @@ export interface FileRoutesById {
   '/landing': typeof LandingRoute
   '/profile': typeof ProfileRoute
   '/progress': typeof ProgressRoute
+  '/reflection': typeof ReflectionRoute
   '/rituals': typeof RitualsRoute
   '/verify': typeof VerifyRoute
   '/welcome': typeof WelcomeRoute
@@ -192,6 +201,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/profile'
     | '/progress'
+    | '/reflection'
     | '/rituals'
     | '/verify'
     | '/welcome'
@@ -212,6 +222,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/profile'
     | '/progress'
+    | '/reflection'
     | '/rituals'
     | '/verify'
     | '/welcome'
@@ -232,6 +243,7 @@ export interface FileRouteTypes {
     | '/landing'
     | '/profile'
     | '/progress'
+    | '/reflection'
     | '/rituals'
     | '/verify'
     | '/welcome'
@@ -253,6 +265,7 @@ export interface RootRouteChildren {
   LandingRoute: typeof LandingRoute
   ProfileRoute: typeof ProfileRoute
   ProgressRoute: typeof ProgressRoute
+  ReflectionRoute: typeof ReflectionRoute
   RitualsRoute: typeof RitualsRoute
   VerifyRoute: typeof VerifyRoute
   WelcomeRoute: typeof WelcomeRoute
@@ -285,6 +298,13 @@ declare module '@tanstack/react-router' {
       path: '/rituals'
       fullPath: '/rituals'
       preLoaderRoute: typeof RitualsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reflection': {
+      id: '/reflection'
+      path: '/reflection'
+      fullPath: '/reflection'
+      preLoaderRoute: typeof ReflectionRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/progress': {
@@ -405,6 +425,7 @@ const rootRouteChildren: RootRouteChildren = {
   LandingRoute: LandingRoute,
   ProfileRoute: ProfileRoute,
   ProgressRoute: ProgressRoute,
+  ReflectionRoute: ReflectionRoute,
   RitualsRoute: RitualsRoute,
   VerifyRoute: VerifyRoute,
   WelcomeRoute: WelcomeRoute,

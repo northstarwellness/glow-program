@@ -8,20 +8,13 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Frame, GoldDivider, TopBar } from "@/components/Frame";
-import {
-  useApp,
-  OUTCOMES,
-  outcomeLabel,
-  routeAfterComplete,
-  isDayPersisted,
-  isDayUnlocked,
-  activeDay,
-} from "@/lib/store";
+import { useApp, routeAfterComplete, isDayPersisted, isDayUnlocked, activeDay } from "@/lib/store";
 import { ProgressSkeleton } from "@/components/ProgressSkeleton";
 import { COMPLETION_ANCHOR, recipeLinkSearch } from "@/lib/recipe-entry";
 import { useHydrated } from "@/lib/use-hydrated";
 import { DAYS, JOURNAL_PROMPTS, RECIPES, REDS_URL, phaseFor } from "@/lib/content";
 import { SmoothieImage } from "@/components/SmoothieImage";
+import { FeelingChips } from "@/components/FeelingChips";
 
 export const Route = createFileRoute("/day/$n")({ component: DayRoute });
 
@@ -414,43 +407,19 @@ function DayView() {
   );
 }
 
-const NO_OUTCOMES: string[] = [];
-
 function RitualFeelChips({ day }: { day: number }) {
-  const outcomes = useApp((s) => s.outcomesByDay[day]) ?? NO_OUTCOMES;
-  const toggle = useApp((s) => s.toggleOutcomeForDay);
-
   return (
-    <div className="mt-5 rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-5">
+    <div
+      id="feelings"
+      className="mt-5 scroll-mt-6 rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-5"
+    >
       <p className="label-caps text-[var(--charcoal)]/40 mb-1">
         How do you feel after today's ritual?
       </p>
       <p className="font-serif italic text-[13px] text-[var(--charcoal)]/45 mb-4">
         Select all that feel true.
       </p>
-      <div className="flex flex-wrap gap-2">
-        {OUTCOMES.map((outcome) => {
-          const active = outcomes.includes(outcome);
-          return (
-            <button
-              key={outcome}
-              onClick={() => toggle(day, outcome)}
-              className={`rounded-full px-4 py-2 font-serif text-[14px] transition-all cursor-pointer ${
-                active
-                  ? "bg-[var(--gold)] text-[var(--ivory)] shadow-sm"
-                  : "bg-[var(--beige)] text-[var(--charcoal)]/65 border border-[var(--taupe)]/25 hover:border-[var(--gold)]/40"
-              }`}
-            >
-              {outcomeLabel(outcome)}
-            </button>
-          );
-        })}
-      </div>
-      {outcomes.length > 0 && (
-        <p className="mt-4 font-serif italic text-[12px] text-[var(--charcoal)]/40">
-          Saved to your 21-day record.
-        </p>
-      )}
+      <FeelingChips day={day} savedNote="Saved to your 21-day record and your journal." />
     </div>
   );
 }

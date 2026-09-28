@@ -5,6 +5,8 @@ import { useApp, isDayUnlocked, activeDay } from "@/lib/store";
 import { ProgressSkeleton } from "@/components/ProgressSkeleton";
 import { useHydrated } from "@/lib/use-hydrated";
 import { JOURNAL_PROMPTS, phaseFor, reflectJournal } from "@/lib/content";
+import { JOURNAL_NUDGES } from "@/lib/reflections";
+import { FeelingChips } from "@/components/FeelingChips";
 
 export const Route = createFileRoute("/journal/$n")({ component: JournalDay });
 
@@ -174,6 +176,20 @@ function JournalEditor({ day }: { day: number }) {
         <p className="mt-1 text-[11px] italic text-[var(--charcoal)]/25">Autosaving…</p>
       )}
 
+      {/* Daily Reflection — the same choices as the Day page's check-in, editable here */}
+      <section
+        aria-labelledby="daily-reflection-heading"
+        className="mt-6 rounded-2xl border border-[var(--taupe)]/20 bg-white p-5 shadow-sm"
+      >
+        <p id="daily-reflection-heading" className="label-caps text-[var(--charcoal)]/45">
+          Daily Reflection · Day {day}
+        </p>
+        <p className="mt-1 mb-4 font-serif italic text-[13px] text-[var(--charcoal)]/55">
+          How you felt after the ritual. Tap to change.
+        </p>
+        <FeelingChips day={day} savedNote={`Saved to Day ${day} and your Progress.`} />
+      </section>
+
       {/* AI Ritual Companion */}
       {text.length >= 20 && !aiResponse && (
         <div className="mt-6">
@@ -233,15 +249,6 @@ function JournalEditor({ day }: { day: number }) {
   );
 }
 
-const REFLECTION_HINTS = [
-  "What I noticed today.",
-  "My digestion felt",
-  "I felt lighter when",
-  "My energy today was",
-  "What helped me stay consistent:",
-  "Did I feel fuller, lighter, or more energized:",
-];
-
 function ReflectionNudges({ onSelect }: { onSelect: (hint: string) => void }) {
   return (
     <div className="mb-4">
@@ -249,7 +256,7 @@ function ReflectionNudges({ onSelect }: { onSelect: (hint: string) => void }) {
         Start with a nudge
       </p>
       <div className="flex flex-wrap gap-2">
-        {REFLECTION_HINTS.map((h) => (
+        {JOURNAL_NUDGES.map((h) => (
           <button
             key={h}
             onClick={() => onSelect(h)}

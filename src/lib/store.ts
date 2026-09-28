@@ -184,9 +184,13 @@ export const useApp = create<State>()(
           groceryChecked: { ...s.groceryChecked, [id]: !s.groceryChecked[id] },
         })),
       clearGrocery: () => set({ groceryChecked: {} }),
+      // Only this day's list changes. It holds each feeling at most once, however it is tapped,
+      // and any legacy values already stored for the day are kept as they are.
       toggleOutcomeForDay: (day, outcome) =>
         set((s) => {
-          const current = s.outcomesByDay[day] ?? [];
+          if (!isProgramDay(day) || !(OUTCOMES as readonly string[]).includes(outcome)) return s;
+          const stored = s.outcomesByDay[day];
+          const current = dedupeIds(Array.isArray(stored) ? stored : []);
           const next = current.includes(outcome)
             ? current.filter((o) => o !== outcome)
             : [...current, outcome];

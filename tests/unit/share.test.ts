@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { copyText, shareOrCopy, shareText } from "@/lib/share";
+import { copyText, downloadFile, shareOrCopy, shareOrDownloadFile, shareText } from "@/lib/share";
 
 const data = {
   title: "T",
@@ -79,4 +79,52 @@ describe("copyText", () => {
     expect(await copyText("list")).toBe(false);
   });
   it("false for empty text", async () => expect(await copyText("")).toBe(false));
+});
+
+describe("shareOrDownloadFile", () => {
+  const file = () => new File(["x"], "card.png", { type: "image/png" });
+  const stubDownload = (ok: boolean) => {
+    // jsdom has no object URLs; define them so they can be stubbed.
+    const u = URL as unknown as Record<string, unknown>;
+    u.createObjectURL ??= () => "";
+    u.revokeObjectURL ??= () => {};
+    const create = vi.spyOn(URL, "createObjectURL");
+    if (ok) create.mockReturnValue("blob:x");
+    else
+      create.mockImplementation(() => {
+        throw new Error("no");
+      });
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    return create;
+  };
+
+  it("reports shared only after the share sheet completes", async () => {
+    setNav({ share: vi.fn().mockResolvedValue(undefined), canShare: () => true });
+    expect(await shareOrDownloadFile(file(), "t")).toBe("shared");
+  });
+  it("cancelling the share sheet is not a success and does not download", async () => {
+    const create = stubDownload(true);
+    setNav({
+      share: vi.fn().mockRejectedValue(new DOMException("x", "AbortError")),
+      canShare: () => true,
+    });
+    expect(await shareOrDownloadFile(file(), "t")).toBe("cancelled");
+    expect(create).not.toHaveBeenCalled();
+  });
+  it("a failed share falls back to a download", async () => {
+    stubDownload(true);
+    setNav({
+      share: vi.fn().mockRejectedValue(new DOMException("x", "NotAllowedError")),
+      canShare: () => true,
+    });
+    expect(await shareOrDownloadFile(file(), "t")).toBe("downloaded");
+  });
+  it("reports failure when neither share nor download works", async () => {
+    stubDownload(false);
+    setNav({ share: vi.fn().mockRejectedValue(new TypeError("x")), canShare: () => true });
+    expect(await shareOrDownloadFile(file(), "t")).toBe("failed");
+    setNav({ share: undefined, canShare: undefined });
+    expect(await shareOrDownloadFile(file(), "t")).toBe("failed");
+    expect(downloadFile(file())).toBe(false);
+  });
 });

@@ -1,10 +1,10 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useApp, glowScore, isProgramComplete, activeDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { REDS_URL } from "@/lib/content";
 import { renderGlowCard } from "@/lib/glow-card";
-import { isAbortError } from "@/lib/share";
+import { shareOrDownloadFile } from "@/lib/share";
 import { ShareStatus } from "@/components/ShareStatus";
 
 export const Route = createFileRoute("/celebrate")({ component: Celebrate });
@@ -56,15 +56,11 @@ function Celebrate() {
       );
       return;
     }
-    const nav = typeof navigator !== "undefined" ? navigator : undefined;
     // Share sheet (includes "Save Image" on iPhone) — invoked synchronously from the tap.
-    if (nav?.share && nav.canShare?.({ files: [card.file] })) {
-      nav.share({ files: [card.file], title: "My Glow Card" }).catch((e) => {
-        if (!isAbortError(e)) download(card.file!, setSaveMsg);
-      });
-      return;
-    }
-    download(card.file, setSaveMsg);
+    void shareOrDownloadFile(card.file, "My Glow Card").then((outcome) => {
+      if (outcome === "downloaded") setSaveMsg("Your Glow Card download has started.");
+      if (outcome === "failed") setSaveMsg("We couldn't download your Glow Card on this device.");
+    });
   };
 
   return (
@@ -125,6 +121,12 @@ function Celebrate() {
           Save My Glow Card
         </button>
         <ShareStatus className="mt-2" message={saveMsg} />
+        <Link
+          to="/reflection"
+          className="mt-3 block w-full rounded-full border border-[var(--gold)]/50 bg-[var(--blush)] px-6 py-3 font-serif text-[16px] text-[var(--plum)] text-center"
+        >
+          Read Your Glow Reflection →
+        </Link>
         <a
           href={REDS_URL}
           target="_blank"
@@ -165,22 +167,6 @@ function useGlowCardFile(dataJson: string | null) {
     };
   }, [dataJson]);
   return state;
-}
-
-function download(file: File, report: (m: string) => void) {
-  try {
-    const url = URL.createObjectURL(file);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    report("Your Glow Card download has started.");
-  } catch {
-    report("We couldn't download your Glow Card on this device.");
-  }
 }
 
 function Confetti() {

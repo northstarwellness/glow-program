@@ -1,6 +1,7 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
-import { useApp, activeDay, glowScore, outcomeLabel } from "@/lib/store";
+import { useApp, activeDay, glowScore, isProgramComplete, outcomeLabel } from "@/lib/store";
+import { daysWithFeelings, feelingCounts } from "@/lib/reflections";
 import { useHydrated } from "@/lib/use-hydrated";
 import { PHASES } from "@/lib/content";
 
@@ -22,18 +23,11 @@ function Progress() {
   const scoreLabel =
     score >= 85 ? "Radiant" : score >= 65 ? "Glowing" : score >= 40 ? "Building" : "Just Starting";
 
-  // Compute outcome stats
-  const allOutcomes = Object.values(s.outcomesByDay ?? {}).flat();
-  const outcomeCounts: Record<string, number> = {};
-  for (const o of allOutcomes) {
-    outcomeCounts[o] = (outcomeCounts[o] ?? 0) + 1;
-  }
-  const topOutcomes = Object.entries(outcomeCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  const daysWithOutcomes = Object.values(s.outcomesByDay ?? {}).filter(
-    (arr) => arr.length > 0,
-  ).length;
+  // Same reader as the Day page and Journal: each feeling counts once per day.
+  const topOutcomes = feelingCounts(s.outcomesByDay)
+    .slice(0, 5)
+    .map((c) => [c.outcome, c.days] as const);
+  const daysWithOutcomes = daysWithFeelings(s.outcomesByDay).length;
 
   return (
     <Frame>
@@ -42,6 +36,24 @@ function Progress() {
       <p className="mt-1 font-serif italic text-[15px] text-[var(--charcoal)]/55">
         Every morning you've kept.
       </p>
+
+      {hydrated && isProgramComplete(s.completedDays) && (
+        <Link
+          to="/reflection"
+          className="mt-5 flex items-center justify-between rounded-2xl p-5"
+          style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
+        >
+          <div>
+            <p className="label-caps text-[var(--berry)]/70">Day 21 · Complete</p>
+            <p className="mt-1 font-serif text-[19px] text-[var(--charcoal)]">
+              Your Glow Reflection
+            </p>
+          </div>
+          <span aria-hidden="true" className="font-serif text-[18px] text-[var(--charcoal)]/50">
+            →
+          </span>
+        </Link>
+      )}
 
       {/* Glow Score hero */}
       <div className="mt-5 gold-glow-card p-6 text-center">
@@ -178,7 +190,7 @@ function Progress() {
               const maxCount = topOutcomes[0]?.[1] ?? 1;
               const barPct = Math.round((count / maxCount) * 100);
               return (
-                <div key={outcome}>
+                <div key={outcome} data-testid="outcome-row" data-label={outcomeLabel(outcome)}>
                   <div className="flex items-center justify-between mb-1.5">
                     <span
                       className={`font-serif text-[15px] text-[var(--charcoal)] ${idx === 0 ? "font-medium" : ""}`}

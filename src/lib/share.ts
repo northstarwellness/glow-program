@@ -87,3 +87,38 @@ export async function shareOrCopy(data: ShareData): Promise<ShareOutcome> {
   const text = shareText(data);
   return (await copyText(text)) ? { status: "copied" } : { status: "manual", text };
 }
+
+export type FileSaveOutcome = "shared" | "cancelled" | "downloaded" | "failed";
+
+/** Starts a browser download of `file`. True only if the download could be started. */
+export function downloadFile(file: File): boolean {
+  try {
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Share sheet for an image (includes "Save Image" on iPhone), else a download.
+ * Call straight from the tap handler: the share sheet is opened before any await.
+ * Cancelling resolves "cancelled"; only a finished share resolves "shared".
+ */
+export function shareOrDownloadFile(file: File, title: string): Promise<FileSaveOutcome> {
+  const n = nav();
+  if (typeof n?.share === "function" && n.canShare?.({ files: [file] })) {
+    return n.share({ files: [file], title }).then(
+      () => "shared" as const,
+      (e) => (isAbortError(e) ? "cancelled" : downloadFile(file) ? "downloaded" : "failed"),
+    );
+  }
+  return Promise.resolve(downloadFile(file) ? "downloaded" : "failed");
+}
