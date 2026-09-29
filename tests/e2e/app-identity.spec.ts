@@ -1,15 +1,16 @@
 import { test, expect, customer, seed, stored, range } from "./fixtures";
 
-// Installed Home Screen identity: "Ritual App" with the RA icon; the website keeps descriptive text.
+// Installed Home Screen identity: "RITUAL APP" (all caps, as installed) with the RA icon; the
+// website keeps descriptive text.
 
 const pngSize = (buf: Buffer) => [buf.readUInt32BE(16), buf.readUInt32BE(20)];
 
-test("the manifest installs as exactly “Ritual App” with the new RA icons", async ({ request }) => {
+test("the manifest installs as exactly “RITUAL APP” with the new RA icons", async ({ request }) => {
   const res = await request.get("/manifest.webmanifest");
   expect(res.status()).toBe(200);
   const m = await res.json();
-  expect(m.name).toBe("Ritual App");
-  expect(m.short_name).toBe("Ritual App");
+  expect(m.name).toBe("RITUAL APP");
+  expect(m.short_name).toBe("RITUAL APP");
   // Identity unchanged, so Android treats it as the same installed app.
   expect(m.start_url).toBe("/");
   expect(m.scope).toBe("/");
@@ -25,7 +26,7 @@ test("the manifest installs as exactly “Ritual App” with the new RA icons", 
   expect(JSON.stringify(m)).not.toMatch(/Inner Glow|NOURÉ/);
 });
 
-test("iPhone tags: Home Screen title “Ritual App”, new 180px touch icon; website title stays descriptive", async ({
+test("iPhone tags: Home Screen title “RITUAL APP”, new 180px touch icon; website title stays descriptive", async ({
   page,
   request,
 }) => {
@@ -34,7 +35,7 @@ test("iPhone tags: Home Screen title “Ritual App”, new 180px touch icon; web
   const head = page.locator("head");
   await expect(head.locator('meta[name="apple-mobile-web-app-title"]')).toHaveAttribute(
     "content",
-    "Ritual App",
+    "RITUAL APP",
   );
   const touch = head.locator('link[rel="apple-touch-icon"]');
   await expect(touch).toHaveAttribute("href", "/icons/ritual-app/icon-180.png");
