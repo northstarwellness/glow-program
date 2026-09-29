@@ -1,6 +1,6 @@
 {
-  "name": "NOURÉ — Inner Glow Reset",
-  "short_name": "Inner Glow Reset",
+  "name": "Ritual App",
+  "short_name": "Ritual App",
   "description": "Your 21-day beauty ritual, from within.",
   "start_url": "/",
   "scope": "/",
@@ -9,8 +9,23 @@
   "background_color": "#FAF6F0",
   "theme_color": "#FAF6F0",
   "icons": [
-    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/icons/ritual-app/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/ritual-app/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/ritual-app/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
