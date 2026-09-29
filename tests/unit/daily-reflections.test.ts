@@ -128,3 +128,34 @@ describe("legacy data", () => {
     );
   });
 });
+
+describe("check-in options stay backward compatible", () => {
+  const ORIGINAL = [
+    "Lighter",
+    "Less bloated",
+    "Full but light",
+    "Energized",
+    "Calm digestion",
+    "Satisfied",
+    "Glowy",
+    "Clearer mood",
+  ];
+  it("keeps the original eight stored values, spelling and order at the start", () => {
+    expect(OUTCOMES.slice(0, 8)).toEqual(ORIGINAL);
+  });
+  it("adds only new, non-duplicate neutral options", () => {
+    const added = OUTCOMES.slice(8);
+    expect(added).toEqual(["Rested", "Focused", "Just okay", "Tired"]);
+    expect(new Set(OUTCOMES.map((o) => o.toLowerCase())).size).toBe(OUTCOMES.length);
+  });
+  it("reads legacy selections exactly as before", () => {
+    const legacy = { 3: ["Glowy", "Less bloated"], 9: ["Clearer mood"] };
+    expect(feelingsForDay(legacy, 3)).toEqual(["Less bloated", "Glowy"]);
+    expect(feelingsForDay(legacy, 9)).toEqual(["Clearer mood"]);
+    expect(feelingCounts(legacy)).toEqual([
+      { outcome: "Less bloated", days: 1 },
+      { outcome: "Glowy", days: 1 },
+      { outcome: "Clearer mood", days: 1 },
+    ]);
+  });
+});

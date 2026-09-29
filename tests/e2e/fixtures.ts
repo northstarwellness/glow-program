@@ -91,9 +91,13 @@ export const test = base.extend<{ errors: string[] }>({
 });
 export { expect };
 
+/** Home's primary Reset action: "Begin Day 1" before starting, "Continue Day N" after. */
+export const homePrimary = (page: Page) =>
+  page.getByRole("link", { name: /^(Begin|Continue) Day \d+/ });
+
 export async function openTodaysRitual(page: Page) {
   await page.goto("/home");
-  await page.getByText("Open Today's Ritual").click();
+  await homePrimary(page).click();
 }
 
 /**

@@ -144,6 +144,47 @@ function Reflection() {
         </div>
       </section>
 
+      {/* 4b. In your own words — private, verbatim, dated. Never on the card. */}
+      {r.words && (
+        <section
+          aria-labelledby="own-words"
+          data-testid="own-words"
+          className="mt-6 rounded-2xl border border-[var(--taupe)]/20 bg-white p-5 shadow-sm"
+        >
+          <h2 id="own-words" className="label-caps mb-1 text-[var(--charcoal)]/70">
+            In Your Own Words
+          </h2>
+          <p className="mb-4 text-[12px] text-[var(--charcoal)]/70">
+            Private to this screen. Not included on your Glow Reflection card.
+          </p>
+          {r.words.lines.map((l) => (
+            <p key={l} className="mb-2 text-[14px] leading-relaxed text-[var(--charcoal)]/80">
+              {l}
+            </p>
+          ))}
+          {r.words.excerpts.length > 0 && (
+            <ul className="mt-3 space-y-3">
+              {r.words.excerpts.map((e) => (
+                <li
+                  key={`${e.day}-${e.text}`}
+                  className="rounded-xl border-l-2 border-[var(--taupe)]/60 bg-[var(--ivory)] px-4 py-3"
+                >
+                  <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-[var(--charcoal)]/70">
+                    Day {e.day} · Week {e.week}
+                  </p>
+                  <blockquote className="mt-1 font-serif text-[17px] leading-snug text-[var(--charcoal)]">
+                    “{e.text}”
+                  </blockquote>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-4 font-serif text-[16px] leading-snug text-[var(--charcoal)]">
+            {r.words.question}
+          </p>
+        </section>
+      )}
+
       {/* 5. Carry it forward */}
       <Section title="Carry It Forward">
         <ol className="space-y-3">

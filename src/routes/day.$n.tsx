@@ -14,6 +14,7 @@ import { COMPLETION_ANCHOR, recipeLinkSearch } from "@/lib/recipe-entry";
 import { useHydrated } from "@/lib/use-hydrated";
 import { DAYS, JOURNAL_PROMPTS, RECIPES, REDS_URL, phaseFor } from "@/lib/content";
 import { SmoothieImage } from "@/components/SmoothieImage";
+import { dayButtonStyle } from "@/lib/recipe-button";
 import { FeelingChips } from "@/components/FeelingChips";
 
 export const Route = createFileRoute("/day/$n")({ component: DayRoute });
@@ -271,7 +272,9 @@ function DayView() {
                 to="/recipes/$id"
                 params={{ id: recipe.id }}
                 search={recipeLinkSearch({ kind: "day", day: dayNum })}
-                className="block w-full rounded-full border border-[var(--taupe)]/30 py-2.5 text-center font-serif text-[14px] text-[var(--charcoal)]"
+                className="btn-day-quiet"
+                style={dayButtonStyle(recipe.gradient) as React.CSSProperties}
+                data-testid="open-recipe"
               >
                 Open full recipe &amp; method →
               </Link>
@@ -351,15 +354,15 @@ function DayView() {
       <Link
         to="/journal/$n"
         params={{ n: String(dayNum) }}
-        className="mt-4 flex items-center justify-between rounded-2xl p-5 cursor-pointer"
-        style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
+        className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--taupe)]/25 bg-white p-5 shadow-sm cursor-pointer"
       >
         <div className="min-w-0 flex-1 pr-3">
-          <p className="label-caps text-[var(--berry)]/60 mb-2">Today's prompt</p>
+          <span aria-hidden="true" className="mb-2.5 block h-px w-7 bg-[var(--berry)]/50" />
+          <p className="label-caps text-[var(--berry)] mb-2">Today's prompt</p>
           <p className="font-serif italic text-[18px] leading-snug text-[var(--charcoal)]">
             "{prompt}"
           </p>
-          <p className="mt-2 text-[12px] text-[var(--charcoal)]/40">Tap to write →</p>
+          <p className="mt-2 text-[12px] text-[var(--charcoal)]/70">Tap to write →</p>
         </div>
         <svg
           width="18"
@@ -388,12 +391,25 @@ function DayView() {
           type="button"
           ref={completeBtnRef}
           onClick={complete}
-          className={`w-full rounded-full px-6 py-4 font-serif text-[18px] transition-all ${
-            done
-              ? "border border-[var(--gold)]/40 bg-transparent text-[var(--gold)]"
-              : "gold-pill-btn"
-          }`}
+          className={done ? "btn-done" : "btn-day"}
+          style={dayButtonStyle(recipe.gradient) as React.CSSProperties}
+          data-testid="complete-day"
         >
+          {done && (
+            <svg
+              aria-hidden="true"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12.5l4.5 4.5L19 7.5" />
+            </svg>
+          )}
           {done ? `Day ${dayNum} complete` : `Mark Day ${dayNum} Complete →`}
         </button>
         <p className="mt-3 text-center font-serif italic text-[12px] text-[var(--charcoal)]/35">

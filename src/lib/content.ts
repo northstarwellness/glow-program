@@ -1,5 +1,5 @@
 export const REDS_URL = "https://nourewellness.com/products/reds-superfood";
-/** Radiant Reds Supplement Facts panel: 1 scoop (4 g), 30 servings per container (canonical label record, 2026-08-19). Backs the grocery line "covers the full 21 days". */
+/** Radiant Reds Supplement Facts panel: 1 scoop (4 g), 30 servings per container (canonical label record, 2026-08-19; live listing: one scoop once daily). At one scoop a morning the 21 Reset days use 21 servings, leaving 9. */
 export const REDS_SERVINGS_PER_BAG = 30;
 
 export type Phase = { week: 1 | 2 | 3; label: string; range: [number, number] };
@@ -1893,7 +1893,11 @@ export const GROCERY_LIST: GroceryCategory[] = [
   {
     name: "Pantry",
     items: [
-      { id: "reds", name: "Radiant Reds", note: "1 bag covers the full 21 days" },
+      {
+        id: "reds",
+        name: "Radiant Reds",
+        note: "30 servings. One scoop a morning covers all 21 Reset days, with 9 left over",
+      },
       { id: "cacao", name: "Raw cacao powder" },
       { id: "almond-butter", name: "Almond butter", note: "No added sugar" },
       { id: "chia", name: "Chia seeds" },

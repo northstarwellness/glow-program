@@ -26,6 +26,7 @@ const SOURCES = [
   "src/lib/content.ts",
   "src/components/BuildYourOwn.tsx",
   "lovable-landing.tsx",
+  "src/lib/swaps.ts",
   "src/lib/glow-reflection.ts",
   "src/lib/reflections.ts",
   "src/lib/glow-card.ts",

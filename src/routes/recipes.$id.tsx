@@ -8,6 +8,7 @@ import { findIngredient } from "@/lib/ingredients";
 import { shareOrCopy, PRODUCT_URL } from "@/lib/share";
 import { ShareStatus } from "@/components/ShareStatus";
 import { SaveRecipeButton } from "@/components/SaveRecipeButton";
+import { dayButtonStyle } from "@/lib/recipe-button";
 import { BuildYourOwn } from "@/components/BuildYourOwn";
 import { SmoothieImage } from "@/components/SmoothieImage";
 import {
@@ -450,7 +451,8 @@ function RecipeView() {
           to="/day/$n"
           params={back.params}
           hash={back.hash}
-          className="gold-pill-btn mt-6 block w-full text-center"
+          className="btn-day mt-6"
+          style={dayButtonStyle(r.gradient) as React.CSSProperties}
         >
           {entry.continueLabel} →
         </Link>

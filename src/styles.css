@@ -183,26 +183,222 @@
       oklch(0.32 0.09 354) 100%
     );
   }
-  .gold-pill-btn {
-    display: block;
-    background: linear-gradient(135deg, var(--color-gold) 0%, var(--gold-deep) 100%);
-    color: var(--color-ivory);
+  /* ---------- Buttons ----------
+     One shape for every primary action: generously rounded, 52px tall, a soft edge and a
+     quiet shadow. No dark fill, no glint, no motion beyond a 1px press.
+     - .btn-day: an action that belongs to a day or smoothie. Colors come from that recipe
+       (dayButtonStyle in src/lib/recipe-button.ts): a light wash of its gradient, a matching
+       edge and a deep ink from the same palette.
+     - .gold-pill-btn / .ink-btn / .btn-primary: general actions, pearl with a fine border.
+     - .btn-day-quiet / .ink-btn-outline: secondary, no fill and no shadow. */
+  .btn-day,
+  .btn-day-quiet,
+  .btn-primary,
+  .gold-pill-btn,
+  .ink-btn,
+  .ink-btn-outline {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 52px;
+    width: 100%;
+    padding: 0 22px;
     border-radius: 999px;
-    padding: 14px 24px;
     font-family: var(--font-serif);
-    font-size: 17px;
-    letter-spacing: 0.02em;
+    font-size: 19px;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    font-variant-numeric: lining-nums;
     text-align: center;
-    transition: all 0.2s;
-    box-shadow: 0 6px 20px oklch(0.732 0.082 65 / 0.4);
+    cursor: pointer;
+    transition:
+      box-shadow 0.2s,
+      transform 0.12s,
+      background-color 0.2s,
+      border-color 0.2s;
   }
-  .gold-pill-btn:hover {
-    background: linear-gradient(135deg, var(--gold-deep) 0%, oklch(0.6 0.095 58) 100%);
-    box-shadow: 0 8px 28px oklch(0.732 0.082 65 / 0.5);
-    transform: translateY(-1px);
+  .btn-day {
+    background: var(--btn-wash);
+    color: var(--btn-ink);
+    border: 1px solid var(--btn-edge);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.75),
+      0 1px 2px color-mix(in srgb, var(--btn-shadow) 18%, transparent),
+      0 8px 18px -12px color-mix(in srgb, var(--btn-shadow) 45%, transparent);
   }
-  .gold-pill-btn:active {
-    transform: scale(0.98);
+  .btn-primary,
+  .gold-pill-btn,
+  .ink-btn {
+    background: linear-gradient(180deg, #ffffff 0%, #f7f3ee 100%);
+    color: var(--charcoal);
+    border: 1px solid oklch(0.748 0.012 65 / 0.55);
+    box-shadow:
+      inset 0 1px 0 oklch(1 0 0 / 0.9),
+      0 1px 2px oklch(0.205 0 0 / 0.06),
+      0 8px 18px -12px oklch(0.205 0 0 / 0.22);
+  }
+  .btn-day-quiet {
+    background: transparent;
+    color: var(--btn-ink);
+    border: 1px solid var(--btn-edge);
+    font-size: 16px;
+    min-height: 48px;
+  }
+  .ink-btn-outline {
+    background: transparent;
+    color: var(--charcoal);
+    border: 1px solid oklch(0.748 0.012 65 / 0.7);
+    font-size: 16px;
+    min-height: 48px;
+  }
+  @media (hover: hover) {
+    .btn-day:hover,
+    .btn-primary:hover,
+    .gold-pill-btn:hover,
+    .ink-btn:hover {
+      box-shadow:
+        inset 0 1px 0 oklch(1 0 0 / 0.8),
+        0 2px 4px oklch(0.205 0 0 / 0.07),
+        0 12px 22px -12px oklch(0.205 0 0 / 0.26);
+    }
+    .btn-day-quiet:hover,
+    .ink-btn-outline:hover {
+      background: oklch(1 0 0 / 0.6);
+    }
+  }
+  .btn-day:active,
+  .btn-primary:active,
+  .gold-pill-btn:active,
+  .ink-btn:active,
+  .btn-day-quiet:active,
+  .ink-btn-outline:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 1px 2px oklch(0.205 0 0 / 0.1);
+  }
+  .btn-day:focus-visible,
+  .btn-day-quiet:focus-visible {
+    outline: 2px solid var(--btn-ink);
+    outline-offset: 3px;
+  }
+  .btn-primary:focus-visible,
+  .gold-pill-btn:focus-visible,
+  .ink-btn:focus-visible,
+  .ink-btn-outline:focus-visible,
+  .home-focus:focus-visible {
+    outline: 2px solid var(--charcoal);
+    outline-offset: 3px;
+  }
+  /* Disabled: clearly inactive — flat, lighter, no shadow — but not broken-looking. */
+  .btn-day:disabled,
+  .btn-primary:disabled,
+  .gold-pill-btn:disabled,
+  .ink-btn:disabled {
+    cursor: default;
+    box-shadow: none;
+    transform: none;
+    background: #f4f0ea;
+    border-style: dashed;
+  }
+  /* Completed day: no fill, a check mark and the recipe edge, clearly "done". */
+  .btn-done {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 52px;
+    width: 100%;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--btn-ink, var(--charcoal));
+    border: 1px solid var(--btn-edge, oklch(0.748 0.012 65 / 0.7));
+    font-family: var(--font-serif);
+    font-size: 18px;
+    font-variant-numeric: lining-nums;
+    cursor: pointer;
+  }
+  .btn-done:focus-visible {
+    outline: 2px solid var(--btn-ink, var(--charcoal));
+    outline-offset: 3px;
+  }
+  .home-row:focus-visible {
+    outline: 2px solid var(--charcoal);
+    outline-offset: -3px;
+  }
+  /* Foundation · Build · Glow: soft cards and small "pearl" dots.
+     Done = filled bead, today = ring with a blush halo, upcoming = small recessed dot. */
+  .week-card {
+    border-radius: 1rem;
+    background: oklch(0.985 0.006 75);
+    border: 1px solid oklch(0.748 0.012 65 / 0.25);
+  }
+  .week-card[data-current="true"] {
+    background: #fff;
+    border-color: oklch(0.205 0 0 / 0.28);
+    box-shadow:
+      0 1px 2px oklch(0.205 0 0 / 0.05),
+      0 8px 18px -12px oklch(0.205 0 0 / 0.3);
+  }
+  .dot {
+    flex: none;
+    border-radius: 999px;
+  }
+  .dot-done {
+    width: 8px;
+    height: 8px;
+    background: var(--charcoal);
+    box-shadow:
+      inset 0 1px 1px oklch(1 0 0 / 0.25),
+      0 1px 1.5px oklch(0.205 0 0 / 0.3);
+  }
+  .dot-today {
+    width: 10px;
+    height: 10px;
+    background: #fff;
+    border: 2px solid var(--charcoal);
+    box-shadow: 0 0 0 3px var(--blush);
+  }
+  .dot-upcoming {
+    width: 6px;
+    height: 6px;
+    background: oklch(0.955 0.01 70);
+    border: 1px solid oklch(0.205 0 0 / 0.38);
+    box-shadow: inset 0 1px 1px oklch(0.205 0 0 / 0.12);
+  }
+  @media (max-width: 359px) {
+    .dot-done {
+      width: 6px;
+      height: 6px;
+    }
+    .dot-today {
+      width: 8px;
+      height: 8px;
+      border-width: 1.5px;
+      box-shadow: 0 0 0 2px var(--blush);
+    }
+    .dot-upcoming {
+      width: 4.5px;
+      height: 4.5px;
+    }
+  }
+  /* Grouped link rows: quiet press and an inset focus ring that stays inside the group. */
+  .home-row {
+    transition: background-color 0.15s;
+  }
+  .home-row:active {
+    background: oklch(0.938 0.022 70 / 0.55);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-day,
+    .btn-day-quiet,
+    .btn-primary,
+    .gold-pill-btn,
+    .ink-btn,
+    .ink-btn-outline {
+      transition: none;
+      transform: none;
+    }
   }
   .ivory-pill-btn {
     background: var(--color-ivory);

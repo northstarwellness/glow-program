@@ -5,6 +5,7 @@ import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { DAYS, GROCERY_LIST, REDS_URL, RECIPES } from "@/lib/content";
 import { copyText } from "@/lib/share";
+import { SWAPS } from "@/lib/swaps";
 import { ShareStatus } from "@/components/ShareStatus";
 
 export const Route = createFileRoute("/grocery")({ component: Grocery });
@@ -139,12 +140,13 @@ function Grocery() {
           border: "1px solid oklch(0.720 0.082 65 / 0.22)",
         }}
       >
-        <p className="label-caps text-[var(--gold)]">Don't forget</p>
+        <p className="label-caps text-[var(--charcoal)]/70">Don't forget</p>
         <p className="mt-1 font-serif text-[15px] text-[var(--charcoal)]">
           Radiant Reds — the base of every ritual.
         </p>
-        <p className="mt-0.5 font-serif italic text-[12px] text-[var(--charcoal)]/50">
-          One bag covers the full 21 days. Shop now →
+        <p className="mt-1 text-[12.5px] leading-snug text-[var(--charcoal)]/75">
+          30 servings: one scoop a morning covers all 21 Reset days, with 9 left to enjoy afterward.
+          Shop now →
         </p>
       </a>
 
@@ -298,7 +300,7 @@ function Grocery() {
                         {item.name}
                       </p>
                       {item.note && (
-                        <p className="mt-0.5 text-[12px] italic text-[var(--charcoal)]/45">
+                        <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--charcoal)]/70">
                           {item.note}
                         </p>
                       )}
@@ -328,8 +330,50 @@ function Grocery() {
         })}
       </div>
 
+      <SimpleSwaps />
+
       <GoldDivider />
     </Frame>
+  );
+}
+
+/** Easy-to-shop alternatives. Reference only: it never edits the list or a recipe. */
+function SimpleSwaps() {
+  const names = (ids: string[]) =>
+    ids
+      .map((id) => RECIPES.find((r) => r.id === id)?.name)
+      .filter(Boolean)
+      .join(", ");
+  return (
+    <section aria-labelledby="simple-swaps" className="mt-8" data-testid="simple-swaps">
+      <h2 id="simple-swaps" className="font-serif text-[24px] leading-tight text-[var(--charcoal)]">
+        Simple swaps
+      </h2>
+      <p className="mt-1 text-[13px] leading-relaxed text-[var(--charcoal)]/70">
+        Can’t find something, or prefer another option? These work in the recipes listed. A swap
+        changes taste or texture; it isn’t a nutritional match, and your list stays as it is.
+      </p>
+      <ul className="mt-4 space-y-2.5">
+        {SWAPS.map((sw) => (
+          <li
+            key={sw.id}
+            className="rounded-2xl border border-[var(--taupe)]/20 bg-white px-4 py-3.5 shadow-sm"
+          >
+            <p className="font-serif text-[17px] leading-snug text-[var(--charcoal)]">
+              {sw.ingredient}
+            </p>
+            <p className="mt-1 text-[14px] leading-snug text-[var(--charcoal)]">
+              <span className="text-[var(--charcoal)]/70">Swap: </span>
+              {sw.swap}
+            </p>
+            <p className="mt-1 text-[12.5px] leading-snug text-[var(--charcoal)]/70">{sw.note}</p>
+            <p className="mt-1.5 text-[11.5px] leading-snug text-[var(--charcoal)]/70">
+              Used in: {names(sw.recipes)}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 

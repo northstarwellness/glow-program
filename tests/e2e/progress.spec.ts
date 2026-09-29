@@ -9,6 +9,7 @@ import {
   markComplete,
   ready,
   rawGoto,
+  homePrimary,
 } from "./fixtures";
 
 // Real routing + real localStorage throughout — nothing about progression is mocked.
@@ -45,8 +46,13 @@ async function expectNotBlank(page: Page) {
 async function expectDerivedState(page: Page, active: number, completedUpTo: number) {
   await page.goto("/home");
   await expect(page.getByText(`Day ${active} of 21`)).toBeVisible();
-  await expect(page.getByText(`${Math.round((completedUpTo / 21) * 100)}% complete`)).toBeVisible();
-  await expect(page.locator(`a[href="/day/${active}"]`).first()).toBeVisible();
+  if (completedUpTo === 21) {
+    await expect(page.getByText("Complete · 21 of 21")).toBeVisible();
+    await expect(page.locator('a[href="/reflection"]')).toBeVisible();
+  } else {
+    await expect(page.getByText(`${completedUpTo} of 21 complete`)).toBeVisible();
+    await expect(page.locator(`a[href="/day/${active}"]`).first()).toBeVisible();
+  }
 
   await page.goto("/rituals");
   const openDays = await page
@@ -86,7 +92,7 @@ test.describe("every day, Day 1 → Day 21 (table-driven)", () => {
       // Owner path: Home → Open Today's Ritual → Mark complete
       await page.goto("/home");
       await expect(page.getByText(`Day ${n} of 21`)).toBeVisible();
-      await page.getByText("Open Today's Ritual").click();
+      await homePrimary(page).click();
       await expect(page).toHaveURL(new RegExp(`/day/${n}$`));
       await expectUncovered(page, new RegExp(`^Mark Day ${n} Complete`));
       await markComplete(page, n);
@@ -148,7 +154,7 @@ test("uninterrupted journey: fresh customer completes Days 1 → 21", async ({ p
   test.setTimeout(300_000);
   await seed(page, customer());
   await page.goto("/home");
-  await page.getByText("Open Today's Ritual").click();
+  await homePrimary(page).click();
   for (let n = 1; n <= 21; n++) {
     await expect(page).toHaveURL(new RegExp(`/day/${n}$`));
     await markComplete(page, n);
@@ -169,7 +175,7 @@ test("journey with a reload between every day", async ({ page }) => {
   for (let n = 1; n <= 21; n++) {
     await page.reload();
     await expect(page.getByText(`Day ${n} of 21`)).toBeVisible();
-    await page.getByText("Open Today's Ritual").click();
+    await homePrimary(page).click();
     await expect(page).toHaveURL(new RegExp(`/day/${n}$`));
     await markComplete(page, n);
     if (MILESTONES.includes(n)) {
@@ -222,7 +228,7 @@ test.describe("legacy and non-sequential saved states", () => {
       );
       await page.goto("/home");
       await expect(page.getByText(`Day ${active} of 21`)).toBeVisible();
-      await page.getByText("Open Today's Ritual").click();
+      await homePrimary(page).click();
       await expect(page).toHaveURL(new RegExp(`/day/${active}$`));
     });
   }
@@ -249,7 +255,7 @@ test.describe("legacy and non-sequential saved states", () => {
     await seed(page, customer({ completedDays: [1, 2, 3, 4, 6], shownMilestones: ["day-1"] }));
     await page.goto("/home");
     await expect(page.getByText("Day 5 of 21")).toBeVisible();
-    await page.getByText("Open Today's Ritual").click();
+    await homePrimary(page).click();
     await markComplete(page, 5);
     await expect(page).toHaveURL(/\/day\/7$/);
     expect((await stored(page)).completedDays).toEqual(range(1, 6));

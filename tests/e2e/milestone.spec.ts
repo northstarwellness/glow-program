@@ -91,7 +91,7 @@ test("after all 21 days, Home sends the customer to Celebrate once, then stays o
   await expect(page).toHaveURL(/\/celebrate$/);
   await page.goto("/home");
   await expect(page).toHaveURL(/\/home$/);
-  await expect(page.getByText("100% complete")).toBeVisible();
+  await expect(page.getByText("Complete · 21 of 21")).toBeVisible();
 });
 
 test("bonuses are available (no unlock point exists in the product)", async ({ page }) => {

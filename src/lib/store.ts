@@ -14,6 +14,12 @@ export const OUTCOMES = [
   "Satisfied",
   "Glowy",
   "Clearer mood",
+  // Added 2026-09-29 (after the original eight, which never change): neutral and
+  // lower-energy mornings can be recorded honestly, not only good ones.
+  "Rested",
+  "Focused",
+  "Just okay",
+  "Tired",
 ] as const;
 export type Outcome = (typeof OUTCOMES)[number];
 

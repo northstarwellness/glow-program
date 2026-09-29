@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { test, expect, customer, seed, stored, range } from "./fixtures";
+import { test, expect, customer, seed, stored, range, homePrimary } from "./fixtures";
 import { DAYS, RECIPES } from "../../src/lib/content";
 
 /**
@@ -9,7 +9,7 @@ import { DAYS, RECIPES } from "../../src/lib/content";
 
 const MILESTONES = [1, 7, 14];
 const recipeFor = (day: number) => DAYS[day - 1].recipeId;
-const openRitual = (page: Page) => page.getByText("Open Today's Ritual").click();
+const openRitual = (page: Page) => homePrimary(page).click();
 const openFullRecipe = (page: Page) =>
   page.getByRole("link", { name: /Open full recipe/i }).click();
 const markComplete = async (page: Page, n: number) => {

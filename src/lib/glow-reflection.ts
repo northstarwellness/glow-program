@@ -3,14 +3,14 @@
  * saved activity. Deterministic rules only: no AI service, no randomness, no network.
  *
  * Rules the copy follows:
- * - Everything reported is something she recorded (a completed day, a chosen feeling,
+ * - Everything reported is something the customer recorded (a completed day, a chosen feeling,
  *   a written entry, a logged check-in). Nothing is inferred about her health.
- * - Feelings are reported as her own choices ("You chose …"), never as results the
+ * - Feelings are reported as the customer's own choices ("You chose …"), never as results the
  *   ritual or any product caused, and never compared with other people.
  * - Sparse participation is described neutrally, never as falling short.
- * - Journal text is only scanned locally for a few everyday topics; the words
- *   themselves never leave this function, and the shareable card carries counts
- *   and feeling labels only.
+ * - Journal text is read on-device only. A few sentences may be quoted verbatim, with
+ *   their day, on the private reflection screen (see journal-excerpts.ts); the shareable
+ *   card carries counts and feeling labels only.
  */
 import { normalizeCompletedDays, outcomeLabel } from "./store";
 import {
@@ -20,6 +20,7 @@ import {
   journalTextForDay,
   JOURNAL_NUDGES,
 } from "./reflections";
+import { latestIntention, selectExcerpts, type JournalExcerpt } from "./journal-excerpts";
 
 export type ReflectionInput = {
   name: string | null;
@@ -65,6 +66,12 @@ export type GlowReflection = {
   closing: string;
   /** Private, in-app only. Never put on the card. */
   themes: string[];
+  /** Private, in-app only: verbatim sentences from the customer's entries. Never on the card. */
+  words: {
+    excerpts: JournalExcerpt[];
+    lines: string[];
+    question: string;
+  } | null;
   card: GlowReflectionCardData;
 };
 
@@ -363,10 +370,48 @@ export function buildGlowReflection(input: ReflectionInput): GlowReflection {
       body: "Next time you blend, choose one word for how the morning felt. A few taps build a record of your own.",
     },
   ];
-  const carryForward = ideas
-    .filter((i) => i.when)
-    .slice(0, 3)
-    .map(({ id, title, body }) => ({ id, title, body }));
+  const intention = latestIntention(input.journalEntries);
+  const carryForward = [
+    ...(intention
+      ? [
+          {
+            id: "your-words",
+            title: "In your words",
+            body: `On Day ${intention.day} you wrote: “${intention.text}”`,
+          },
+        ]
+      : []),
+    ...ideas.filter((i) => i.when).map(({ id, title, body }) => ({ id, title, body })),
+  ].slice(0, 3);
+
+  // In your own words — verbatim, dated, private. Never paraphrased or explained.
+  const excerpts = selectExcerpts(input.journalEntries);
+  let ownWords: GlowReflection["words"] = null;
+  if (J > 0) {
+    const weeksQuoted = new Set(excerpts.map((e) => e.week));
+    const lines: string[] = [];
+    if (excerpts.length === 0) {
+      lines.push(
+        "Your entries stay in your Journal exactly as you wrote them. This page quotes a sentence only when it clearly describes something you noticed, so none are quoted here.",
+      );
+    } else {
+      lines.push("A few sentences from your own entries, exactly as you wrote them.");
+      if (excerpts.some((e) => e.kind === "change"))
+        lines.push("Where a sentence describes a change, that is how you described it yourself.");
+      if (excerpts.some((e) => e.kind === "reason"))
+        lines.push("Where a sentence gives a reason, the reason is yours.");
+    }
+    ownWords = {
+      excerpts,
+      lines,
+      question:
+        weeksQuoted.has(1) && weeksQuoted.has(3)
+          ? "Reading your Week 1 words beside your Week 3 words, what do you notice?"
+          : excerpts.length
+            ? "Reading these now, what would you add?"
+            : "If you look back through your Journal, what stands out to you?",
+    };
+  }
 
   // 6. Closing
   const closing = {
@@ -410,6 +455,7 @@ export function buildGlowReflection(input: ReflectionInput): GlowReflection {
     carryForward,
     closing,
     themes,
+    words: ownWords,
     card,
   };
 }
