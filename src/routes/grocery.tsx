@@ -1,5 +1,5 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -7,6 +7,7 @@ import { DAYS, GROCERY_LIST, REDS_URL, RECIPES } from "@/lib/content";
 import { copyText } from "@/lib/share";
 import { SWAPS } from "@/lib/swaps";
 import { ShareStatus } from "@/components/ShareStatus";
+import { customCheckId, useCustomGrocery, type AddResult } from "@/lib/custom-grocery";
 
 export const Route = createFileRoute("/grocery")({ component: Grocery });
 
@@ -60,14 +61,40 @@ function getWeekGroceryIds(week: 1 | 2 | 3): string[] {
 function Grocery() {
   const hydrated = useHydrated();
   const s = useApp();
-  const [customInput, setCustomInput] = useState("");
-  const [customItems, setCustomItems] = useState<string[]>(() => {
-    try {
-      return JSON.parse(localStorage.getItem("noure_grocery_custom") ?? "[]");
-    } catch {
-      return [];
+  const custom = useCustomGrocery();
+  const customItems = custom.items;
+  const [addStatus, setAddStatus] = useState<{ text: string; error: boolean } | null>(null);
+
+  const showAddResult = (result: AddResult, typed: string) => {
+    if (result.ok) {
+      setAddStatus({ text: `Added “${result.item}” to your list.`, error: false });
+    } else if (result.reason === "duplicate") {
+      setAddStatus({ text: `“${typed.trim()}” is already on your list.`, error: false });
+    } else if (result.reason === "empty") {
+      setAddStatus({ text: "Type an item first, then tap Add.", error: false });
+    } else {
+      setAddStatus({
+        text: "Couldn’t save that item on this device. Please try again.",
+        error: true,
+      });
     }
-  });
+    return result.ok;
+  };
+
+  // Add or Return pressed before the app finished loading: the browser submits the form
+  // itself (/grocery?item=…). Save that item now, confirm it, and tidy the address.
+  const pendingHandled = useRef(false);
+  useEffect(() => {
+    if (pendingHandled.current) return;
+    pendingHandled.current = true;
+    const url = new URL(window.location.href);
+    const pending = url.searchParams.get("item");
+    if (pending === null) return;
+    showAddResult(custom.add(pending), pending);
+    url.searchParams.delete("item");
+    window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once, on first load
+  }, []);
   const [copyLabel, setCopyLabel] = useState("Copy list");
   const [copyManual, setCopyManual] = useState<string | null>(null);
 
@@ -76,7 +103,9 @@ function Grocery() {
   const checked = s.groceryChecked;
   const totalItems =
     GROCERY_LIST.reduce((sum, cat) => sum + cat.items.length, 0) + customItems.length;
-  const checkedCount = Object.values(checked).filter(Boolean).length;
+  const checkedCount =
+    GROCERY_LIST.reduce((sum, cat) => sum + cat.items.filter((i) => checked[i.id]).length, 0) +
+    customItems.filter((i) => checked[customCheckId(i)]).length;
 
   const generateWeek = (week: 1 | 2 | 3) => {
     const ids = getWeekGroceryIds(week);
@@ -85,19 +114,22 @@ function Grocery() {
     }
   };
 
-  const addCustom = () => {
-    const val = customInput.trim();
-    if (!val || customItems.includes(val)) return;
-    const next = [...customItems, val];
-    setCustomItems(next);
-    localStorage.setItem("noure_grocery_custom", JSON.stringify(next));
-    setCustomInput("");
+  const addCustom = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.currentTarget;
+    // The field is read directly: it is uncontrolled, so text typed while the page was still
+    // loading stays in it and is what gets saved.
+    const typed = String(new FormData(form).get("item") ?? "");
+    if (showAddResult(custom.add(typed), typed)) form.reset();
   };
 
   const removeCustom = (item: string) => {
-    const next = customItems.filter((i) => i !== item);
-    setCustomItems(next);
-    localStorage.setItem("noure_grocery_custom", JSON.stringify(next));
+    if (!custom.remove(item)) {
+      setAddStatus({ text: "Couldn’t remove that item. Please try again.", error: true });
+      return;
+    }
+    if (checked[customCheckId(item)]) s.toggleGrocery(customCheckId(item));
+    setAddStatus(null);
   };
 
   const copyList = () => {
@@ -108,9 +140,10 @@ function Grocery() {
       lines.push(`\n${cat.name.toUpperCase()}`);
       for (const item of catItems) lines.push(`☐ ${item.name}`);
     }
-    if (customItems.length > 0) {
+    if (customItems.some((i) => !checked[customCheckId(i)])) {
       lines.push("\nCUSTOM");
-      for (const item of customItems) lines.push(`☐ ${item}`);
+      for (const item of customItems.filter((i) => !checked[customCheckId(i)]))
+        lines.push(`☐ ${item}`);
     }
     const text = lines.join("\n").trim();
     setCopyManual(null);
@@ -225,48 +258,92 @@ function Grocery() {
         manualText={copyManual}
       />
 
-      {/* Custom item input */}
-      <div className="mt-4">
+      {/* Custom item input. A form, so the keyboard's return key adds too. */}
+      <form className="mt-4" method="get" action="/grocery" onSubmit={addCustom} noValidate>
         <div className="flex gap-2">
+          <label htmlFor="custom-item" className="sr-only">
+            Add a custom item
+          </label>
           <input
+            id="custom-item"
+            name="item"
             type="text"
-            value={customInput}
-            onChange={(e) => setCustomInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addCustom()}
+            defaultValue=""
+            onChange={() => {
+              if (addStatus) setAddStatus(null);
+            }}
+            enterKeyHint="done"
+            autoComplete="off"
+            maxLength={80}
             placeholder="Add a custom item…"
             className="flex-1 rounded-full border border-[var(--taupe)]/30 bg-white px-4 py-2.5 font-serif text-[14px] text-[var(--charcoal)] placeholder:text-[var(--charcoal)]/30 focus:border-[var(--gold)] focus:outline-none"
           />
           <button
-            onClick={addCustom}
-            disabled={!customInput.trim()}
-            className="rounded-full bg-[var(--charcoal)] px-5 py-2.5 font-serif text-[13px] text-[var(--ivory)] disabled:opacity-30 cursor-pointer"
+            type="submit"
+            className="rounded-full bg-[var(--charcoal)] px-5 py-2.5 font-serif text-[13px] text-[var(--ivory)] cursor-pointer"
           >
             Add
           </button>
         </div>
-      </div>
+        <p
+          role={addStatus?.error ? "alert" : "status"}
+          aria-live="polite"
+          data-testid="custom-item-status"
+          className={`mt-2 min-h-[1.25em] font-serif italic text-[12.5px] ${
+            addStatus?.error ? "text-[var(--berry)]" : "text-[var(--charcoal)]/60"
+          }`}
+        >
+          {addStatus?.text ?? ""}
+        </p>
+      </form>
 
       {/* Custom items */}
       {customItems.length > 0 && (
-        <div className="mt-4">
-          <p className="label-caps text-[var(--charcoal)]/40 mb-2">Custom items</p>
-          <div className="space-y-1.5">
-            {customItems.map((item) => (
-              <div
-                key={item}
-                className="flex items-center justify-between rounded-xl bg-white border border-[var(--taupe)]/20 px-4 py-3"
-              >
-                <span className="font-serif text-[15px] text-[var(--charcoal)]">{item}</span>
-                <button
-                  onClick={() => removeCustom(item)}
-                  className="text-[var(--taupe)] hover:text-[var(--berry)] cursor-pointer text-[12px]"
+        <section className="mt-2" aria-labelledby="custom-items-heading" data-testid="custom-items">
+          <p id="custom-items-heading" className="label-caps text-[var(--charcoal)]/40 mb-2">
+            Custom items
+          </p>
+          <ul className="space-y-1.5">
+            {customItems.map((item) => {
+              const done = !!checked[customCheckId(item)];
+              return (
+                <li
+                  key={item}
+                  className={`flex items-center gap-3 rounded-xl border px-3 py-1.5 ${
+                    done
+                      ? "bg-[var(--gold)]/6 border-transparent"
+                      : "bg-white border-[var(--taupe)]/20"
+                  }`}
                 >
-                  Remove
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={done}
+                    onClick={() => s.toggleGrocery(customCheckId(item))}
+                    className={`flex min-h-[44px] flex-1 items-center gap-3 text-left cursor-pointer ${done ? "opacity-50" : ""}`}
+                  >
+                    <span className="flex-shrink-0">
+                      {done ? <CheckCircle /> : <EmptyCircle />}
+                    </span>
+                    <span
+                      className={`font-serif text-[15px] text-[var(--charcoal)] ${done ? "line-through" : ""}`}
+                    >
+                      {item}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeCustom(item)}
+                    aria-label={`Remove ${item}`}
+                    className="min-h-[44px] px-2 text-[var(--charcoal)]/55 hover:text-[var(--berry)] cursor-pointer text-[12px]"
+                  >
+                    Remove
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
       )}
 
       {/* Grocery categories */}

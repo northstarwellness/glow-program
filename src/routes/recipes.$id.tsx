@@ -1,3 +1,4 @@
+import { readCustomGrocery, sameItem, writeCustomGrocery } from "@/lib/custom-grocery";
 import { createFileRoute, Link, Navigate, useParams } from "@tanstack/react-router";
 import { useId, useRef, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
@@ -58,7 +59,7 @@ function RecipeView() {
   const [active, setActive] = useState<string | null>(null);
   const [blendMode, setBlendMode] = useState<BlendMode>("thick");
   const ingChecks = useIngredientChecks(r?.id ?? id, r?.ingredients ?? []);
-  const [groceryAdded, setGroceryAdded] = useState(false);
+  const [groceryAdded, setGroceryAdded] = useState<"idle" | "added" | "failed">("idle");
   const [shareMsg, setShareMsg] = useState("");
   const [shareManual, setShareManual] = useState<string | null>(null);
   const whyBase = useId();
@@ -75,15 +76,10 @@ function RecipeView() {
     (x) => !x.bonus && x.id !== r.id && x.benefitTag === r.benefitTag,
   ).slice(0, 2);
   const addToGrocery = () => {
-    const key = "noure_grocery_custom";
-    try {
-      const existing: string[] = JSON.parse(localStorage.getItem(key) ?? "[]");
-      const newItems = r.ingredients.filter((i) => !existing.includes(i));
-      localStorage.setItem(key, JSON.stringify([...existing, ...newItems]));
-      setGroceryAdded(true);
-    } catch {
-      /* silent */
-    }
+    const existing = readCustomGrocery();
+    const newItems = r.ingredients.filter((i) => !existing.some((x) => sameItem(x, i)));
+    // "Added" only once the list is really saved; otherwise say it didn't work.
+    setGroceryAdded(writeCustomGrocery([...existing, ...newItems]) ? "added" : "failed");
   };
   const blendTip = BLEND_TIPS[r.id];
   const glowStory = GLOW_BOOST_STORIES[r.id];
@@ -418,13 +414,18 @@ function RecipeView() {
           type="button"
           onClick={addToGrocery}
           className={`mt-3 w-full rounded-full border py-3 font-serif text-[14px] transition-all cursor-pointer ${
-            groceryAdded
+            groceryAdded === "added"
               ? "border-[var(--gold)]/40 text-[var(--gold)]"
               : "border-[var(--plum)]/15 text-[var(--plum)]"
           }`}
         >
-          {groceryAdded ? "Added to grocery list ✓" : "Add ingredients to grocery list"}
+          {groceryAdded === "added" ? "Added to grocery list ✓" : "Add ingredients to grocery list"}
         </button>
+        {groceryAdded === "failed" && (
+          <p role="alert" className="mt-2 font-serif italic text-[12.5px] text-[var(--berry)]">
+            Couldn’t save to your grocery list on this device. Please try again.
+          </p>
+        )}
       </section>
 
       {/* Method */}
