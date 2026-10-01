@@ -48,8 +48,8 @@ async function expectPearl(loc: Locator) {
   const st = await look(loc);
   expect(st.bg).toContain("rgb(255, 255, 255)");
   expect(st.bg).toContain("rgb(247, 243, 238)");
-  // The app's charcoal token; browsers report it as oklch(0.205 0 0) or rgb(42, 42, 42).
-  expect(["rgb(42, 42, 42)", "oklch(0.205 0 0)"]).toContain(st.color);
+  // The app's charcoal token (Option B, 2026-09-30: #29282D).
+  expect(st.color).toBe("rgb(41, 40, 45)");
   expect(st.shadow).not.toBe("none");
   expect((await loc.boundingBox())!.height).toBeGreaterThanOrEqual(43.5);
 }
@@ -107,12 +107,12 @@ test.describe("buttons: day actions wear their day's recipe; general actions are
     await expectPearl(
       page.getByTestId("path-everyday").getByRole("link", { name: /^Browse recipes/ }),
     );
-    const reflection = page.getByRole("link", { name: "Your Glow Reflection" });
+    const reflection = page.getByRole("link", { name: "Your Reflection", exact: true });
     const r = await look(reflection);
     expect(r.bg).toBe("none");
     expect(r.shadow).toBe("none");
     await page.goto("/reflection");
-    await expectPearl(page.getByRole("button", { name: "Save My Glow Reflection Card" }));
+    await expectPearl(page.getByRole("button", { name: "Save My Reflection Card" }));
   });
 
   test("in progress, Everyday's Browse recipes stays a quiet outline", async ({ page }) => {
@@ -256,7 +256,7 @@ test.describe("review evidence", () => {
     await center(page.getByTestId("path-everyday"));
     await shot("general-b-day21-browse-pearl");
     await page.goto("/reflection");
-    await center(page.getByRole("button", { name: "Save My Glow Reflection Card" }));
+    await center(page.getByRole("button", { name: "Save My Reflection Card" }));
     await shot("general-c-reflection-save-pearl");
     for (const w of [320, 412]) {
       await page.setViewportSize({ width: w, height: 700 });

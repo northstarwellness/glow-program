@@ -107,7 +107,7 @@ export function BuildYourOwn() {
         </div>
 
         <div className="sand-card mt-5 p-5">
-          <p className="label-caps text-[var(--gold)]">Your benefits</p>
+          <p className="label-caps text-[var(--cranberry)]">Your benefits</p>
           <ul className="mt-3 space-y-2.5">
             {benefits.map((b, i) => (
               <li
@@ -128,12 +128,12 @@ export function BuildYourOwn() {
             rel="noreferrer"
             className="mt-5 block overflow-hidden rounded-3xl border border-[var(--gold)]/40 bg-[var(--card)] p-5 text-center shadow-sm"
           >
-            <p className="label-caps text-[var(--gold)]">Make it a glow ritual</p>
+            <p className="label-caps text-[var(--cranberry)]">Make it a glow ritual</p>
             <p className="mt-2 font-serif text-[20px] text-[var(--plum)]">Add Radiant Reds</p>
             <p className="mt-1 font-serif italic text-[13px] text-[var(--plum)]/65">
               The polyphenol blend that makes any glass a Reset glass.
             </p>
-            <p className="mt-3 font-serif text-[13px] tracking-[0.18em] uppercase text-[var(--gold)]">
+            <p className="mt-3 font-serif text-[13px] tracking-[0.18em] uppercase text-[var(--cranberry)]">
               Shop the blend
             </p>
           </a>
@@ -163,11 +163,11 @@ export function BuildYourOwn() {
           />
         ))}
       </div>
-      <p className="mt-4 label-caps text-[var(--gold)]">
+      <p className="mt-4 label-caps text-[var(--cranberry)]">
         Step {step + 1} of {STEPS.length}
       </p>
       <h2 className="mt-1 font-serif text-[26px] leading-tight text-[var(--plum)]">{cur.title}</h2>
-      <p className="mt-1 font-serif italic text-[14px] text-[var(--plum)]/60">{cur.sub}</p>
+      <p className="mt-1 font-serif italic text-[14px] text-[var(--ink-2)]">{cur.sub}</p>
 
       <div className="mt-5 space-y-2.5">
         {cur.opts.map((o) => {
@@ -193,10 +193,7 @@ export function BuildYourOwn() {
       </div>
 
       {step > 0 && (
-        <button
-          onClick={() => setStep(step - 1)}
-          className="mt-5 text-[12px] text-[var(--plum)]/55"
-        >
+        <button onClick={() => setStep(step - 1)} className="mt-5 text-[12px] text-[var(--ink-2)]">
           ← Back
         </button>
       )}

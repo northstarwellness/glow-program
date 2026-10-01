@@ -44,12 +44,12 @@ function Milestone() {
     <div className="ivory-frame fade-rise relative min-h-screen">
       <Confetti />
       <div className="mx-auto flex min-h-screen max-w-[440px] flex-col items-center justify-center px-6 text-center">
-        <p className="label-caps text-[var(--gold)]">Milestone</p>
+        <p className="label-caps text-[var(--cranberry)]">Milestone</p>
         <h1 className="mt-4 font-serif text-[42px] leading-tight text-[var(--plum)]">{title}</h1>
         <p className="mt-4 font-serif italic text-[18px] text-[var(--plum)]/70">{m.sub}</p>
 
         <div className="mt-10 flex h-32 w-32 items-center justify-center rounded-full bg-[var(--gold)]/15 ring-1 ring-[var(--gold)]/40">
-          <p className="px-3 text-center font-serif text-[18px] leading-tight text-[var(--gold)]">
+          <p className="px-3 text-center font-serif text-[18px] leading-tight text-[var(--cranberry)]">
             {m.badge}
           </p>
         </div>

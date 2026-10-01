@@ -41,7 +41,9 @@ describe("Radiant Reds servings copy", () => {
     expect(note).toContain(`${REDS_SERVINGS_PER_BAG} servings`);
     expect(note).toContain("9 left over");
     const src = readFileSync(resolve(__dirname, "../../src/routes/grocery.tsx"), "utf8");
-    expect(src).toContain("30 servings: one scoop a morning covers all 21 Reset days");
+    // Optional everywhere (owner rule): never framed as needed for the 21 days.
+    expect(note).toMatch(/^Optional\./);
+    expect(src).toContain("One jar holds 30 scoops. Every recipe is complete without it.");
     expect(src + note).not.toMatch(/covers the full 21 days/);
   });
 });

@@ -1,11 +1,10 @@
 /**
- * Renders the Day 21 Glow Card (the same fields shown on /celebrate) to a PNG
+ * Renders the Day 21 Ritual Card (the same fields shown on /celebrate) to a PNG
  * with the Canvas 2D API — no extra dependency, deterministic on iOS Safari.
  */
 
 export type GlowCardData = {
   name: string;
-  score: number;
   daysDone: number;
   entries: number;
   redsDays: number;
@@ -63,35 +62,38 @@ export async function renderGlowCard(d: GlowCardData): Promise<Blob> {
   ctx.font = `italic 400 88px ${SERIF}`;
   ctx.fillText(`${d.name}.`, W / 2, 420, W - 200);
 
-  label("Your Glow Score", 560);
+  label("Your Ritual", 560);
   ctx.fillStyle = C.plum;
   ctx.font = `400 200px ${SERIF}`;
-  ctx.fillText(String(d.score), W / 2, 760);
+  ctx.fillText(String(d.daysDone), W / 2, 740);
+  ctx.font = `italic 400 40px ${SERIF}`;
+  ctx.globalAlpha = 0.7;
+  ctx.fillText("mornings complete", W / 2, 800);
+  ctx.globalAlpha = 1;
 
   ctx.fillStyle = C.gold;
   ctx.globalAlpha = 0.5;
-  ctx.fillRect(W / 2 - 60, 810, 120, 2);
+  ctx.fillRect(W / 2 - 60, 840, 120, 2);
   ctx.globalAlpha = 1;
 
   const stats: [string, number][] = [
-    ["Days Done", d.daysDone],
-    ["Entries", d.entries],
+    ["Journal entries", d.entries],
     ["Reds Days", d.redsDays],
   ];
   stats.forEach(([k, v], i) => {
-    const x = W / 2 + (i - 1) * 280;
+    const x = W / 2 + (i === 0 ? -170 : 170);
     ctx.fillStyle = C.plum;
     ctx.font = `400 64px ${SERIF}`;
-    ctx.fillText(String(v), x, 920);
+    ctx.fillText(String(v), x, 930);
     ctx.font = `500 22px ${SANS}`;
     ctx.globalAlpha = 0.55;
-    ctx.fillText(k.toUpperCase(), x, 960);
+    ctx.fillText(k.toUpperCase(), x, 970);
     ctx.globalAlpha = 1;
   });
 
   ctx.fillStyle = C.blush;
   ctx.fillRect(140, 1040, W - 280, 170);
-  label("Inner Glow Reset — Complete", 1100, C.gold, 22);
+  label("Your 21 Mornings · Complete", 1100, C.gold, 22);
   ctx.fillStyle = C.plum;
   ctx.font = `400 40px ${SERIF}`;
   ctx.fillText(d.name, W / 2, 1152, W - 320);
@@ -106,7 +108,7 @@ export async function renderGlowCard(d: GlowCardData): Promise<Blob> {
 }
 
 /**
- * The Day 21 Glow Reflection card. Carries only counts and the fixed feeling labels
+ * The Day 21 Reflection card. Carries only counts and the fixed feeling labels
  * she chose — never journal text, journal topics, app URLs or account details.
  */
 export async function renderReflectionCard(
@@ -144,7 +146,7 @@ export async function renderReflectionCard(
     ctx.fillText(text.toUpperCase().split("").join(String.fromCharCode(8202)), W / 2, y);
   };
 
-  label("My Glow Reflection", 170);
+  label("My Reflection", 170);
   ctx.fillStyle = C.plum;
   ctx.font = `italic 400 84px ${SERIF}`;
   ctx.fillText(d.name || "21 days", W / 2, 290, W - 200);
@@ -208,7 +210,7 @@ export async function renderReflectionCard(
     ctx.fillText("One morning at a time.", W / 2, 930);
   }
 
-  label("Inner Glow Reset · 21 Days", 1150, C.gold, 22);
+  label("Your 21 Mornings", 1150, C.gold, 22);
   ctx.fillStyle = C.plum;
   ctx.font = `400 26px ${SANS}`;
   ctx.globalAlpha = 0.55;

@@ -106,7 +106,8 @@ describe("legacy data", () => {
     expect(journalTextForDay({ 2: { entry: 5 } }, 2)).toBe("");
   });
 
-  it("adds no new stored fields", () => {
+  // lastVisitAt is the one deliberate addition (2026-09-29, Daily Notes / Your Ritual).
+  it("adds no stored fields beyond the known set", () => {
     useApp.getState().toggleOutcomeForDay(1, "Glowy");
     expect(Object.keys(stored()).sort()).toEqual(
       [
@@ -124,6 +125,7 @@ describe("legacy data", () => {
         "shownMilestones",
         "groceryChecked",
         "outcomesByDay",
+        "lastVisitAt",
       ].sort(),
     );
   });
@@ -145,7 +147,7 @@ describe("check-in options stay backward compatible", () => {
   });
   it("adds only new, non-duplicate neutral options", () => {
     const added = OUTCOMES.slice(8);
-    expect(added).toEqual(["Rested", "Focused", "Just okay", "Tired"]);
+    expect(added).toEqual(["Rested", "Focused", "Just okay", "Tired", "Calm", "Overwhelmed"]);
     expect(new Set(OUTCOMES.map((o) => o.toLowerCase())).size).toBe(OUTCOMES.length);
   });
   it("reads legacy selections exactly as before", () => {

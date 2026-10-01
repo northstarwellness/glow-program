@@ -1,7 +1,7 @@
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Frame, Wordmark } from "@/components/Frame";
-import { useApp, activeDay, isProgramComplete } from "@/lib/store";
+import { useApp, activeDay, daysBetween, isProgramComplete } from "@/lib/store";
 import { ProgressSkeleton } from "@/components/ProgressSkeleton";
 import { recipeLinkSearch } from "@/lib/recipe-entry";
 import { dayButtonStyle } from "@/lib/recipe-button";
@@ -16,6 +16,7 @@ import {
   type Recipe,
 } from "@/lib/content";
 import { SmoothieImage } from "@/components/SmoothieImage";
+import { KnowledgeLinks } from "@/components/Knowledge";
 
 export const Route = createFileRoute("/home")({ component: Home });
 
@@ -25,6 +26,14 @@ function Home() {
   const navigate = useNavigate();
 
   // All hooks must be called before any conditional returns
+  // The previous visit, read once after saved data loads, then today's visit is recorded.
+  const previousVisit = useRef<string | null | undefined>(undefined);
+  const setLastVisit = useApp((st) => st.setLastVisit);
+  useEffect(() => {
+    if (!hydrated || previousVisit.current !== undefined) return;
+    previousVisit.current = useApp.getState().lastVisitAt;
+    setLastVisit(new Date().toISOString());
+  }, [hydrated, setLastVisit]);
   useEffect(() => {
     if (!hydrated) return;
     const trigger = (id: string) => {
@@ -53,8 +62,13 @@ function Home() {
   const today = DAYS[day - 1];
   const recipe = RECIPES.find((r) => r.id === today.recipeId)!;
   const promptText = JOURNAL_PROMPTS[day]?.(s.name ?? "") ?? "";
-  const streak = calcStreak(s.completedDays, day);
-  const daysLeft = 21 - done;
+  const notesWritten = Object.keys(s.journalEntries).length;
+  // Back after two or more calendar days away: a plain welcome. Nothing was lost or skipped.
+  const away =
+    previousVisit.current === undefined
+      ? daysBetween(s.lastVisitAt)
+      : daysBetween(previousVisit.current);
+  const welcomeBack = !complete && done > 0 && away >= 2;
 
   const reset = (
     <ResetCard
@@ -93,10 +107,27 @@ function Home() {
         </h1>
       </header>
 
-      {/* Small counters from real progress. Glow Score stays on Progress only. */}
+      {welcomeBack && (
+        <p
+          data-testid="welcome-back"
+          className="mt-3 font-serif italic text-[16px] leading-snug text-[var(--charcoal)]/75"
+        >
+          Welcome back. Your {done} {done === 1 ? "morning is" : "mornings are"} saved, and Day{" "}
+          {day} is ready whenever you are.
+        </p>
+      )}
+
+      {/* Your Ritual: counts of completed mornings, never a score or a streak. */}
       <div className="mt-3 grid grid-cols-2 gap-2.5" data-testid="counters">
-        <Counter value={streak} label="Day streak" />
-        <Counter value={daysLeft} label="Days left" />
+        <Counter value={done} label={done === 1 ? "Morning complete" : "Mornings complete"} />
+        {complete ? (
+          <Counter
+            value={notesWritten}
+            label={notesWritten === 1 ? "Journal entry" : "Journal entries"}
+          />
+        ) : (
+          <Counter value={`Day ${day}`} label="Next morning" />
+        )}
       </div>
 
       {/* The two paths, always both visible. After Day 21, Everyday Mornings leads. */}
@@ -122,18 +153,13 @@ function Home() {
         <HomeRow
           to={complete ? "/journal" : "/journal/$n"}
           params={complete ? undefined : { n: String(day) }}
-          title="Glow Journal"
-          note={complete ? "Your entries and Daily Reflections" : `Today’s prompt · ${promptText}`}
+          title="Morning Journal"
+          note={complete ? "Your reflections from all 21 mornings" : `Optional · ${promptText}`}
         />
         <HomeRow
           to="/progress"
           title="Progress"
-          note={`${done} ${done === 1 ? "day" : "days"} complete`}
-        />
-        <HomeRow
-          to="/bonuses"
-          title="Glow Guide"
-          note="Bonus recipes · polyphenols · ingredients · sounds"
+          note={`${done} ${done === 1 ? "morning" : "mornings"} complete`}
         />
         <a
           href={REDS_URL}
@@ -145,12 +171,20 @@ function Home() {
               Radiant Reds
             </span>
             <span className="mt-1 block text-[13px] leading-snug text-[var(--charcoal)]/70">
-              The polyphenol blend in every morning
+              An optional addition to your glass
             </span>
           </span>
           <Chevron external />
         </a>
       </nav>
+
+      {/* The Ritual Guide: each part as its own tile, so it is clear what opens. */}
+      <section aria-labelledby="home-guide" className="mt-6">
+        <p id="home-guide" className="label-caps mb-3 text-[var(--ink-2)]">
+          The Ritual Guide
+        </p>
+        <KnowledgeLinks />
+      </section>
 
       <Link
         to="/profile"
@@ -179,10 +213,10 @@ function SectionLabel({ children, id }: { children: React.ReactNode; id: string 
   );
 }
 
-function Counter({ value, label }: { value: number; label: string }) {
+function Counter({ value, label }: { value: number | string; label: string }) {
   return (
     <div className="flex items-baseline gap-2 rounded-2xl border border-[var(--taupe)]/25 bg-white px-4 py-2 shadow-sm">
-      <p className="font-serif text-[24px] leading-none lining-nums text-[var(--charcoal)]">
+      <p className="whitespace-nowrap font-serif text-[24px] leading-none lining-nums text-[var(--charcoal)]">
         {value}
       </p>
       <p className="text-[10px] uppercase tracking-[0.14em] text-[var(--charcoal)]/70">{label}</p>
@@ -303,7 +337,7 @@ function ResetCard({
       {/* A thin band in today's own recipe colors ties the Reset to its smoothie. */}
       <SmoothieImage recipe={recipe} className="h-1.5 w-full" />
       <div className="px-5 pb-4 pt-3.5">
-        <SectionLabel id="path-reset">The 21-Day Inner Glow Reset</SectionLabel>
+        <SectionLabel id="path-reset">Your 21 Mornings</SectionLabel>
 
         {complete ? (
           <>
@@ -315,7 +349,7 @@ function ResetCard({
             </div>
             <div className="mt-4 grid gap-2.5">
               <Link to="/reflection" className="ink-btn-outline">
-                Your Glow Reflection
+                Your Reflection
               </Link>
               <Link to="/rituals" className="ink-btn-outline">
                 All 21 days
@@ -329,7 +363,7 @@ function ResetCard({
                 <div>
                   <p className="font-serif text-[44px] leading-none lining-nums text-[var(--charcoal)]">
                     {String(day).padStart(2, "0")}
-                    <span className="ml-1 text-[20px] text-[var(--charcoal)]/60">/ 21</span>
+                    <span className="ml-1 text-[20px] text-[var(--ink-2)]">/ 21</span>
                   </p>
                   <p className="mt-1.5 text-[12px] text-[var(--charcoal)]/70">
                     {done} of 21 complete
@@ -397,7 +431,7 @@ function EverydayMornings({ primary }: { primary: boolean }) {
   );
 }
 
-/** The existing Quick Glow Mornings bonus, with its approved wording. Separate from Everyday Mornings. */
+/** The Quick Mornings bonus (formerly Quick Glow Mornings), with its approved wording. Separate from Everyday Mornings. */
 function QuickGlowBonus() {
   return (
     <Link
@@ -416,10 +450,10 @@ function QuickGlowBonus() {
           Bonus
         </span>
         <span className="mt-0.5 block font-serif text-[18px] leading-snug text-[var(--charcoal)]">
-          Quick Glow Mornings.
+          Quick Mornings.
         </span>
         <span className="mt-0.5 block text-[13px] leading-snug text-[var(--charcoal)]/70">
-          Seven five-minute smoothies for rushed mornings.
+          Short on time? Choose a simple smoothie for this morning.
         </span>
         <span className="mt-1.5 block text-[11px] uppercase tracking-[0.2em] text-[var(--charcoal)]">
           Open the set →
@@ -435,7 +469,7 @@ function HomeRow({
   title,
   note,
 }: {
-  to: "/journal" | "/journal/$n" | "/progress" | "/bonuses";
+  to: "/journal" | "/journal/$n" | "/progress";
   params?: { n: string };
   title: string;
   note: string;
@@ -472,22 +506,11 @@ function Chevron({ external = false }: { external?: boolean }) {
       strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="flex-shrink-0 text-[var(--charcoal)]/45"
+      className="flex-shrink-0 text-[var(--ink-2)]"
     >
       {external ? <path d="M8 16L16 8M9 8h7v7" /> : <path d="M9 6l6 6-6 6" />}
     </svg>
   );
-}
-
-function calcStreak(completedDays: number[], currentDay: number): number {
-  let streak = 0;
-  // The active day is usually not done yet; count back from the latest finished day.
-  const start = completedDays.includes(currentDay) ? currentDay : currentDay - 1;
-  for (let d = start; d >= 1; d--) {
-    if (completedDays.includes(d)) streak++;
-    else break;
-  }
-  return streak;
 }
 
 function parseMilestone(id: string): number {

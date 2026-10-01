@@ -41,6 +41,9 @@
   --color-plum-deep: var(--plum-deep);
   --color-gold: var(--gold);
   --color-berry: var(--berry);
+  --color-cranberry: var(--cranberry);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
 
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -49,24 +52,31 @@
 :root {
   --radius: 0.875rem;
 
-  --ivory: oklch(0.974 0.01 75); /* #FAF7F3 */
-  --sand: oklch(0.942 0.018 70);
-  --sand-deep: oklch(0.912 0.022 68);
-  --beige: oklch(0.938 0.022 70); /* #F1EAE0 */
-  --taupe: oklch(0.748 0.012 65); /* #B9B1A6 */
-  --charcoal: oklch(0.205 0 0); /* #2A2A2A */
-  --plum: oklch(0.388 0.108 354);
-  --plum-deep: oklch(0.255 0.072 354);
-  --gold: oklch(0.72 0.082 65); /* #C8A46A */
+  --ivory: oklch(0.974 0.01 75); /* #FAF7F3, still the light text on dark recipe surfaces */
+  /* Interface palette, Option B "Black Cranberry" (owner-approved 2026-09-30): soft-white canvas,
+     white cards, charcoal text, neutral dividers and one deep cranberry accent. Recipe colors,
+     smoothie circles, bonus cards, recipe borders and the Get Radiant Reds link do not use these. */
+  --canvas: #fafaf8;
+  --sand: #f4f3f2;
+  --sand-deep: #ecebee;
+  --beige: #f4f3f2;
+  --taupe: #b5b1ba;
+  --charcoal: #29282d;
+  --ink-2: #5f5c66; /* secondary text, 6.3:1 on the canvas */
+  --line: #e6e4e8; /* fine neutral dividers */
+  --cranberry: #4a1a34; /* the accent: selected states, small accents, selective headings */
+  --plum: #29282d; /* was deep berry text; now charcoal */
+  --plum-deep: #29282d;
+  --gold: oklch(0.72 0.082 65); /* #C8A46A, unchanged: the Get Radiant Reds underline uses it */
   --gold-deep: oklch(0.65 0.09 60);
-  --berry: oklch(0.42 0.155 18);
-  --rose: oklch(0.82 0.06 10);
-  --blush: oklch(0.946 0.018 12); /* #F6E6E1 */
+  --berry: #4a1a34;
+  --rose: #d9d6dd;
+  --blush: #f3f1f2;
   --sage: oklch(0.83 0.038 145);
 
-  --background: var(--ivory);
+  --background: var(--canvas);
   --foreground: var(--charcoal);
-  --card: oklch(0.998 0.005 75);
+  --card: #ffffff;
   --card-foreground: var(--charcoal);
   --popover: var(--card);
   --popover-foreground: var(--charcoal);
@@ -75,13 +85,13 @@
   --secondary: var(--beige);
   --secondary-foreground: var(--charcoal);
   --muted: var(--beige);
-  --muted-foreground: oklch(0.52 0 0);
-  --accent: var(--gold);
-  --accent-foreground: oklch(0.99 0 0);
+  --muted-foreground: var(--ink-2);
+  --accent: var(--cranberry);
+  --accent-foreground: #ffffff;
   --destructive: oklch(0.55 0.2 25);
   --destructive-foreground: var(--ivory);
-  --border: oklch(0.9 0.012 70);
-  --input: oklch(0.94 0.01 70);
+  --border: var(--line);
+  --input: var(--line);
   --ring: var(--gold);
 }
 
@@ -118,10 +128,7 @@
 
 @layer utilities {
   .ivory-frame {
-    background:
-      radial-gradient(80% 40% at 50% 0%, oklch(0.99 0.015 70 / 0.9) 0%, transparent 70%),
-      radial-gradient(60% 30% at 80% 100%, oklch(0.92 0.025 10 / 0.25) 0%, transparent 60%),
-      var(--color-background);
+    background: var(--color-background);
   }
   .gold-divider {
     height: 1px;
@@ -138,19 +145,19 @@
     box-shadow: 0 2px 12px oklch(0.205 0 0 / 0.05);
   }
   .sand-card {
-    background: var(--color-beige);
-    border: 1px solid oklch(0.9 0.012 70);
+    background: var(--card);
+    border: 1px solid var(--line);
     border-radius: var(--radius-2xl);
     box-shadow: 0 2px 8px oklch(0.205 0 0 / 0.04);
   }
   .glass-card {
-    background: oklch(0.999 0.004 75 / 0.85);
+    background: var(--card);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid oklch(0.9 0.012 70 / 0.7);
+    border: 1px solid var(--line);
     border-radius: var(--radius-2xl);
     box-shadow:
-      0 4px 20px oklch(0.205 0 0 / 0.06),
+      0 4px 20px oklch(0.205 0 0 / 0.05),
       0 1px 0 oklch(0.99 0 0 / 0.8) inset;
   }
   .glow-card {
@@ -301,6 +308,313 @@
     border-style: dashed;
   }
   /* Completed day: no fill, a check mark and the recipe edge, clearly "done". */
+  /* Recipe header actions: compact pearl pills in the recipe's own ink (44px targets). */
+  .recipe-action {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 0.45rem;
+    border-radius: 9999px;
+    border: 1px solid var(--recipe-edge, rgba(0, 0, 0, 0.12));
+    background: #ffffff;
+    padding: 0 0.95rem;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--recipe-ink, var(--charcoal));
+    box-shadow: 0 1px 2px rgba(42, 30, 34, 0.06);
+    cursor: pointer;
+  }
+  /* Recipe header edge light: two tiny highlights at fixed points fade in and out, quietly.
+     Only opacity animates; nothing travels and the text never moves. */
+  .edge-glint {
+    opacity: 0;
+    animation: edgeGlint var(--g-cycle) ease-in-out var(--g-delay) infinite;
+  }
+  @keyframes edgeGlint {
+    0%,
+    66% {
+      opacity: 0;
+    }
+    78% {
+      opacity: var(--g-peak);
+    }
+    90%,
+    100% {
+      opacity: 0;
+    }
+  }
+  .sparkle-toggle {
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+  }
+  .sparkle-toggle:hover {
+    opacity: 1;
+  }
+  .sparkle-toggle:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: -4px;
+  }
+  /* Radiant Reds card link: an editorial text link in the card's serif, with a slender arrow and
+     a fine gold underline as the persistent cue (owner refinements of cf0fc5e7 and 46ee50e4).
+     Nothing draws a box in any state: no border, background, outline or radius. Depth comes from a
+     soft, narrow text shadow in the app's plum ink. Hover sends one faint sheen along the underline
+     (600ms, once) and nudges the arrow 2px. Keyboard focus shows a stronger ivory underline under
+     the whole text and arrow instead of a ring. A press only dims it. The link stays a 44px target. */
+  .reds-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    color: #faf7f3;
+    font-family: var(--font-serif);
+    font-size: 17px;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    outline: none;
+    /* Keyboard focus scrolls it clear of the fixed bottom navigation. */
+    scroll-margin-bottom: 120px;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.12s ease;
+  }
+  .reds-link-inner {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+  .reds-link-label {
+    position: relative;
+    padding-bottom: 3px;
+    text-shadow:
+      0 1px 1px rgba(42, 30, 34, 0.3),
+      0 3px 6px rgba(42, 30, 34, 0.28);
+  }
+  /* The persistent underline, and the one sheen that passes along it on hover. */
+  .reds-link-label::before,
+  .reds-link-label::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+  }
+  .reds-link-label::before {
+    background: var(--gold);
+    opacity: 0.6;
+  }
+  .reds-link-label::after {
+    opacity: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(250, 247, 243, 0) 38%,
+      rgba(250, 247, 243, 0.9) 50%,
+      rgba(250, 247, 243, 0) 62%,
+      transparent 100%
+    );
+    background-size: 300% 100%;
+    background-position: 100% 0;
+  }
+  .reds-link-arrow {
+    flex-shrink: 0;
+    color: var(--gold);
+    filter: drop-shadow(0 2px 3px rgba(42, 30, 34, 0.3));
+    transition: transform 260ms ease;
+  }
+  /* Keyboard focus: a stronger underline under the complete text and arrow. */
+  .reds-link-inner::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: -2px; /* reaches the arrow tip after its 2px focus shift */
+    bottom: 0;
+    height: 2px;
+    border-radius: 1px;
+    background: #faf7f3;
+    opacity: 0;
+  }
+  @media (hover: hover) {
+    .reds-link:hover .reds-link-label::after {
+      animation: redsSheen 600ms ease-out 1;
+    }
+    .reds-link:hover .reds-link-arrow {
+      transform: translateX(2px);
+    }
+  }
+  .reds-link:focus-visible {
+    outline: none;
+  }
+  .reds-link:focus-visible .reds-link-inner::after {
+    opacity: 1;
+  }
+  .reds-link:focus-visible .reds-link-arrow {
+    transform: translateX(2px);
+  }
+  .reds-link:active {
+    opacity: 0.7;
+    transition: none;
+  }
+  @keyframes redsSheen {
+    0% {
+      opacity: 1;
+      background-position: 100% 0;
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      background-position: 0% 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reds-link,
+    .reds-link-arrow {
+      transition: none;
+    }
+    .reds-link:hover .reds-link-label::after {
+      animation: none;
+    }
+  }
+  /* Ritual Guide tiles and topic sheets. */
+  /* Radiant Reds information panel (Ritual Guide, Grocery): white card, fine cranberry rule. */
+  .reds-info {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 16px 18px 16px 20px;
+    box-shadow:
+      0 1px 2px rgba(41, 40, 45, 0.04),
+      0 12px 26px -22px rgba(41, 40, 45, 0.35);
+  }
+  .reds-info::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 16px;
+    bottom: 16px;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--cranberry);
+  }
+  .reds-info-link {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--cranberry);
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .knowledge-tile {
+    transition: background-color 0.15s;
+  }
+  .knowledge-tile:active {
+    background: oklch(0.938 0.022 70 / 0.55);
+  }
+  /* Selected section in the Ritual Guide: a fine cranberry border and inner edge (Option B). */
+  .knowledge-tile-on {
+    border: 1.5px solid var(--cranberry) !important;
+    box-shadow: inset 3px 0 0 var(--cranberry);
+  }
+  .knowledge-tile:focus-visible {
+    outline: 2px solid var(--cranberry);
+    outline-offset: 2px;
+  }
+  .topic-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 480px;
+    max-height: 88dvh;
+    padding: 0;
+    border: 0;
+    border-radius: 24px 24px 0 0;
+    background: var(--card);
+    color: var(--plum);
+    box-shadow: 0 -12px 40px -16px rgba(42, 30, 34, 0.35);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .topic-sheet::backdrop {
+    background: rgba(42, 30, 34, 0.38);
+  }
+  .topic-sheet[open] {
+    animation: sheetUp 240ms ease-out;
+  }
+  .topic-sheet-inner {
+    padding: 20px 22px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+  .topic-more summary::-webkit-details-marker {
+    display: none;
+  }
+  .topic-more summary::after {
+    content: "+";
+    margin-left: 8px;
+    color: var(--gold);
+  }
+  .topic-more[open] summary::after {
+    content: "−";
+  }
+  @keyframes sheetUp {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+    to {
+      transform: none;
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .topic-sheet[open] {
+      animation: none;
+    }
+  }
+  /* Day title card and Today's ritual reading card: a fine inset border, a delicate top edge
+     highlight and soft depth, in the existing beige, taupe and gold. No animation. */
+  .day-hero {
+    background: var(--beige);
+    border: 1px solid oklch(0.748 0.012 65 / 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 1px 2px rgba(42, 30, 34, 0.05),
+      0 18px 34px -26px rgba(42, 30, 34, 0.35);
+  }
+  .day-hero::before,
+  .reading-card::before {
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border: 1px solid oklch(0.72 0.082 65 / 0.22);
+    border-radius: 18px;
+    pointer-events: none;
+  }
+  .reading-card {
+    position: relative;
+    background: #ffffff;
+    border: 1px solid oklch(0.748 0.012 65 / 0.2);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 1px 2px rgba(42, 30, 34, 0.04),
+      0 14px 30px -26px rgba(42, 30, 34, 0.3);
+  }
+  .reading-card::before {
+    border-radius: 12px;
+    border-color: oklch(0.72 0.082 65 / 0.16);
+  }
+  .recipe-action:focus-visible {
+    outline: 2px solid var(--recipe-ink, var(--charcoal));
+    outline-offset: 2px;
+  }
+  .recipe-action[aria-pressed="true"] {
+    background: var(--recipe-tint, #fbf8f4);
+  }
   .btn-done {
     display: flex;
     align-items: center;

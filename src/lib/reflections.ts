@@ -73,6 +73,16 @@ export function persistedFeelingsForDay(
 
 /** Tappable starters in the journal. Stripped before reading themes, so they never count as the customer's own words. */
 export const JOURNAL_NUDGES = [
+  "What I blended:",
+  "I swapped",
+  "Next time I'll",
+  "I'd make this again because",
+  "What helped this morning:",
+  "This morning felt",
+];
+
+/** Openers offered before 2026-09-29. Saved notes may still contain them, so they are still stripped. */
+const LEGACY_JOURNAL_NUDGES = [
   "What I noticed today.",
   "My digestion felt",
   "I felt lighter when",
@@ -80,3 +90,6 @@ export const JOURNAL_NUDGES = [
   "What helped me stay consistent:",
   "Did I feel fuller, lighter, or more energized:",
 ];
+
+/** Every opener ever offered, for removing opener text from saved notes. */
+export const ALL_JOURNAL_NUDGES = [...JOURNAL_NUDGES, ...LEGACY_JOURNAL_NUDGES];

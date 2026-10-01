@@ -45,28 +45,27 @@ function Reflection() {
     if (!card.file) {
       setSaveMsg(
         card.failed
-          ? "We couldn't create your Glow Reflection card on this device."
+          ? "We couldn't create your Reflection card on this device."
           : "Your card is still being prepared. Try again in a moment.",
       );
       return;
     }
-    void shareOrDownloadFile(card.file, "My Glow Reflection").then((outcome) => {
-      if (outcome === "downloaded") setSaveMsg("Your Glow Reflection card download has started.");
-      if (outcome === "failed")
-        setSaveMsg("We couldn't save your Glow Reflection card on this device.");
+    void shareOrDownloadFile(card.file, "My Reflection").then((outcome) => {
+      if (outcome === "downloaded") setSaveMsg("Your Reflection card download has started.");
+      if (outcome === "failed") setSaveMsg("We couldn't save your Reflection card on this device.");
     });
   };
 
   return (
     <Frame>
       <TopBar name={s.name} day={21} />
-      <Link to="/progress" className="text-[12px] text-[var(--charcoal)]/55">
+      <Link to="/progress" className="text-[12px] text-[var(--ink-2)]">
         ← Progress
       </Link>
 
       {/* 1. Opening */}
       <header className="mt-4">
-        <p className="label-caps text-[var(--gold-deep)]">Day 21 · Your Glow Reflection</p>
+        <p className="label-caps text-[var(--gold-deep)]">Day 21 · Your Reflection</p>
         <h1 className="mt-3 font-serif text-[32px] leading-tight text-[var(--charcoal)]">
           {r.opening.title}
         </h1>
@@ -97,7 +96,7 @@ function Reflection() {
                 className="rounded-full border border-[var(--gold)]/45 bg-[var(--blush)] px-3.5 py-1.5 font-serif text-[15px] text-[var(--charcoal)]"
               >
                 {t.label}
-                <span className="ml-1.5 text-[12px] text-[var(--charcoal)]/55">
+                <span className="ml-1.5 text-[12px] text-[var(--ink-2)]">
                   {t.days} {t.days === 1 ? "day" : "days"}
                 </span>
               </li>
@@ -112,13 +111,11 @@ function Reflection() {
                 className="rounded-xl bg-[var(--beige)] px-2 py-3 text-center"
                 data-testid={`week-${w.week}`}
               >
-                <p className="label-caps text-[10px] text-[var(--charcoal)]/55">Week {w.week}</p>
+                <p className="label-caps text-[10px] text-[var(--ink-2)]">Week {w.week}</p>
                 <p className="mt-1 font-serif text-[15px] leading-snug text-[var(--charcoal)]">
-                  {w.top.length ? w.top.join(" · ") : "—"}
+                  {w.top.length ? w.top.join(" · ") : "None"}
                 </p>
-                <p className="mt-1 text-[11px] text-[var(--charcoal)]/55">
-                  {w.checkInDays} of 7 days
-                </p>
+                <p className="mt-1 text-[11px] text-[var(--ink-2)]">{w.checkInDays} of 7 days</p>
               </div>
             ))}
           </div>
@@ -155,7 +152,7 @@ function Reflection() {
             In Your Own Words
           </h2>
           <p className="mb-4 text-[12px] text-[var(--charcoal)]/70">
-            Private to this screen. Not included on your Glow Reflection card.
+            Private to this screen. Not included on your Reflection card.
           </p>
           {r.words.lines.map((l) => (
             <p key={l} className="mb-2 text-[14px] leading-relaxed text-[var(--charcoal)]/80">
@@ -213,10 +210,10 @@ function Reflection() {
       {/* 7. Card */}
       <div className="mt-8">
         <button type="button" onClick={saveCard} className="gold-pill-btn w-full">
-          Save My Glow Reflection Card
+          Save My Reflection Card
         </button>
         <ShareStatus className="mt-2 text-center" message={saveMsg} />
-        <p className="mt-2 text-center text-[12px] text-[var(--charcoal)]/55">
+        <p className="mt-2 text-center text-[12px] text-[var(--ink-2)]">
           The card shows your counts and chosen words. Your journal entries stay private.
         </p>
       </div>
@@ -227,7 +224,7 @@ function Reflection() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mt-6 rounded-2xl border border-[var(--taupe)]/20 bg-white p-5 shadow-sm">
-      <h2 className="label-caps mb-4 text-[var(--charcoal)]/55">{title}</h2>
+      <h2 className="label-caps mb-4 text-[var(--ink-2)]">{title}</h2>
       {children}
     </section>
   );
@@ -237,9 +234,7 @@ function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="rounded-xl bg-[var(--beige)] py-3">
       <p className="font-serif text-[28px] leading-none text-[var(--charcoal)]">{value}</p>
-      <p className="mt-1 text-[9.5px] tracking-[0.12em] uppercase text-[var(--charcoal)]/55">
-        {label}
-      </p>
+      <p className="mt-1 text-[9.5px] tracking-[0.12em] uppercase text-[var(--ink-2)]">{label}</p>
     </div>
   );
 }
@@ -270,7 +265,7 @@ function useReflectionCardFile(dataJson: string | null) {
         (blob) =>
           live &&
           setState({
-            file: new File([blob], "noure-glow-reflection.png", { type: "image/png" }),
+            file: new File([blob], "noure-reflection.png", { type: "image/png" }),
             failed: false,
           }),
       )

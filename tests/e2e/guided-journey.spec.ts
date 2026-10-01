@@ -163,7 +163,7 @@ test.describe("independent recipe library", () => {
     ["Foundation", "foundation"],
     ["Build", "build"],
     ["Glow", "glow"],
-    ["Quick Glow", "quick"],
+    ["Quick Mornings", "quick"],
   ] as const) {
     test(`${label} → recipe → Back to ${label}`, async ({ page }) => {
       await seed(page, customer({ savedRecipes: [] }));
@@ -232,7 +232,7 @@ test.describe("context safety", () => {
     await seed(page, customer({ completedDays: [], savedRecipes: [] }));
     await page.goto(`/recipes/${recipeFor(1)}?source=day&day=1`);
     await page.getByRole("button", { name: "Save recipe" }).click();
-    await page.locator("button[aria-controls][aria-expanded]").first().click();
+    await page.locator('button[aria-controls][aria-expanded][aria-label^="Why "]').first().click();
     await page.getByRole("button", { name: "Share", exact: true }).click();
     await page.waitForTimeout(300);
     await expect(page).toHaveURL(/source=day&day=1$/);

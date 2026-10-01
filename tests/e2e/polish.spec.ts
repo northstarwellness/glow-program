@@ -25,16 +25,22 @@ async function clipboard(page: Page, mode: "ok" | "deny") {
 }
 
 test.describe("Grocery: servings copy, Simple swaps, Copy list", () => {
-  test("Radiant Reds line states 30 servings and the real 21 + 9 split", async ({ page }) => {
+  test("Radiant Reds is optional on Grocery, with the real 30 servings and 21 + 9 split", async ({
+    page,
+  }) => {
     await seed(page, onDay(3));
     await page.goto("/grocery");
     await expect(
+      page.getByText("One jar holds 30 scoops. Every recipe is complete without it.", {
+        exact: false,
+      }),
+    ).toBeVisible();
+    await expect(
       page.getByText(
-        "30 servings: one scoop a morning covers all 21 Reset days, with 9 left to enjoy afterward.",
-        { exact: false },
+        "Optional. 30 servings a jar: one scoop a morning would cover all 21 days, with 9 left over",
       ),
     ).toBeVisible();
-    await expect(page.getByText(/covers the full 21 days/)).toHaveCount(0);
+    await expect(page.getByText(/covers the full 21 days|base of every ritual/)).toHaveCount(0);
   });
 
   test("Simple swaps lists every curated swap, honestly framed, and is readable on a phone", async ({
@@ -113,7 +119,9 @@ test.describe("Check-in options and Today’s prompt", () => {
   }) => {
     await seed(page, onDay(4));
     await page.goto("/day/4");
-    const card = page.locator('a[href="/journal/4"]').filter({ hasText: "Today's prompt" });
+    const card = page
+      .locator('a[href="/journal/4"]')
+      .filter({ hasText: "Morning Journal · optional" });
     await expect(card).toBeVisible();
     expect(await card.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(
       "rgb(255, 255, 255)",
@@ -167,7 +175,7 @@ test.describe("Private Glow Reflection", () => {
     const words = page.getByTestId("own-words");
     await words.scrollIntoViewIfNeeded();
     await expect(words).toContainText(
-      "Private to this screen. Not included on your Glow Reflection card.",
+      "Private to this screen. Not included on your Reflection card.",
     );
     await expect(words.locator("blockquote")).toHaveText([
       `“${LINES[2]}”`,

@@ -20,7 +20,7 @@ export function ShareStatus({
   useEffect(() => {
     if (manualText) ref.current?.select();
   }, [manualText]);
-  const color = tone === "light" ? "text-[var(--ivory)]/85" : "text-[var(--charcoal)]/60";
+  const color = tone === "light" ? "text-[var(--ivory)]/85" : "text-[var(--ink-2)]";
 
   return (
     <div className={className}>

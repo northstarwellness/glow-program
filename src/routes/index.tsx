@@ -6,7 +6,7 @@ import { useHydrated } from "@/lib/use-hydrated";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ritual App — The Inner Glow Reset" },
+      { title: "Ritual App | The Inner Glow Reset" },
       {
         name: "description",
         content:
@@ -45,7 +45,7 @@ function NameCapture() {
       <div className="mx-auto flex min-h-screen max-w-[440px] flex-col px-8">
         {/* Top wordmark */}
         <div className="pt-14 pb-0">
-          <p className="font-serif text-[11px] tracking-[0.55em] text-[var(--charcoal)]/40 uppercase">
+          <p className="font-serif text-[11px] tracking-[0.55em] text-[var(--ink-2)] uppercase">
             RITUAL APP
           </p>
         </div>
@@ -61,13 +61,13 @@ function NameCapture() {
             made a ritual.
           </h1>
 
-          <p className="mt-5 font-serif italic text-[16px] leading-relaxed text-[var(--charcoal)]/50 max-w-[30ch]">
-            The Inner Glow Reset is a 21-day morning ritual of beautiful glasses, quiet minutes and
-            gentle check-ins, made for the woman who wants her routine to feel like care.
+          <p className="mt-5 font-serif italic text-[16px] leading-relaxed text-[var(--ink-2)] max-w-[30ch]">
+            Your 21 Mornings: a morning ritual of beautiful glasses, quiet minutes and gentle
+            check-ins, made for the woman who wants her routine to feel like care.
           </p>
 
           <form onSubmit={submit} className="mt-12">
-            <label className="block font-serif text-[11px] tracking-[0.38em] uppercase text-[var(--charcoal)]/40 mb-5">
+            <label className="block font-serif text-[11px] tracking-[0.38em] uppercase text-[var(--ink-2)] mb-5">
               Who's doing this reset?
             </label>
             <input
@@ -88,7 +88,7 @@ function NameCapture() {
           </form>
 
           {/* Bottom note */}
-          <p className="mt-8 font-serif italic text-[12px] text-[var(--charcoal)]/30 text-center">
+          <p className="mt-8 font-serif italic text-[12px] text-[var(--ink-2)] text-center">
             21 days. One morning ritual. No shortcuts.
           </p>
         </div>

@@ -1,10 +1,17 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
+import { createFileRoute, Navigate, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { Frame, TopBar } from "@/components/Frame";
 import { useApp, activeDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 
-export const Route = createFileRoute("/boosts")({ component: Boosts });
+// Retired (release pass, 2026-09-30): not linked anywhere, and its legacy wording predates the
+// claim rules. Any old link lands on Home.
+export const Route = createFileRoute("/boosts")({
+  beforeLoad: () => {
+    throw redirect({ to: "/home", replace: true });
+  },
+  component: Boosts,
+});
 
 type Boost = {
   id: string;
@@ -134,14 +141,14 @@ const BOOSTS: Boost[] = [
       "Prepare your Radiant Reds — 1 scoop in 8–10oz cold or room temp water",
       "Drink slowly. Don't rush this.",
       "This is your moment, before the day asks anything of you.",
-      "Track it — every Reds day moves your glow score.",
+      "Tick Radiant Reds in today's check-ins.",
     ],
   },
 ];
 
 const CATEGORY_COLORS: Record<string, string> = {
   skin: "text-[var(--berry)] bg-[var(--berry)]/10",
-  gut: "text-[var(--gold)] bg-[var(--gold)]/12",
+  gut: "text-[var(--cranberry)] bg-[var(--gold)]/12",
   energy: "text-[var(--sage)] bg-[oklch(0.83_0.038_145)]/15",
   ritual: "text-[var(--plum)] bg-[var(--plum)]/8",
 };
@@ -157,7 +164,7 @@ function Boosts() {
     <Frame>
       <TopBar name={s.name} day={day} />
       <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">Boosts.</h1>
-      <p className="mt-1 font-serif italic text-[15px] text-[var(--plum)]/55 max-w-[30ch]">
+      <p className="mt-1 font-serif italic text-[15px] text-[var(--ink-2)] max-w-[30ch]">
         Small, lovely practices for your morning and evening. Stack them with your daily ritual or
         use them alone.
       </p>
@@ -185,7 +192,7 @@ function Boosts() {
                       >
                         {boost.tag}
                       </span>
-                      <span className="text-[11px] text-[var(--plum)]/40">{boost.duration}</span>
+                      <span className="text-[11px] text-[var(--ink-2)]">{boost.duration}</span>
                     </div>
                     <h3 className="font-serif text-[19px] leading-tight text-[var(--plum)]">
                       {boost.title}
@@ -194,7 +201,7 @@ function Boosts() {
                       {boost.teaser}
                     </p>
                     {boost.polyphenol && (
-                      <p className="mt-2 text-[11px] tracking-wide text-[var(--gold)] label-caps">
+                      <p className="mt-2 text-[11px] tracking-wide text-[var(--cranberry)] label-caps">
                         {boost.polyphenol}
                       </p>
                     )}
@@ -206,7 +213,7 @@ function Boosts() {
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="1.6"
-                    className={`flex-shrink-0 mt-1 text-[var(--plum)]/35 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+                    className={`flex-shrink-0 mt-1 text-[var(--ink-2)] transition-transform duration-200 ${open ? "rotate-180" : ""}`}
                   >
                     <path d="M6 9l6 6 6-6" />
                   </svg>
@@ -215,11 +222,11 @@ function Boosts() {
 
               {open && (
                 <div className="border-t border-[var(--gold)]/15 px-5 pb-5 pt-4">
-                  <p className="label-caps text-[var(--gold)] mb-3">How to do it</p>
+                  <p className="label-caps text-[var(--cranberry)] mb-3">How to do it</p>
                   <ol className="space-y-3">
                     {boost.steps.map((step, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[var(--gold)]/15 font-serif text-[11px] text-[var(--gold)]">
+                        <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-[var(--gold)]/15 font-serif text-[11px] text-[var(--cranberry)]">
                           {i + 1}
                         </span>
                         <p className="text-[13.5px] leading-relaxed text-[var(--plum)]/80">

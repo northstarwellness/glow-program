@@ -66,7 +66,7 @@ test.describe("ingredient Why", () => {
     }) => {
       await seed(page, customer());
       await page.goto(`/recipes/${r.id}`);
-      const whys = page.locator("button[aria-controls][aria-expanded]");
+      const whys = page.locator('button[aria-controls][aria-expanded][aria-label^="Why "]');
       await expect(whys).toHaveCount(expected);
       for (let i = 0; i < expected; i++) {
         const btn = whys.nth(i);
@@ -146,7 +146,7 @@ test.describe("ingredient Why", () => {
     await page.setViewportSize({ width: 375, height: 667 });
     await seed(page, customer());
     await page.goto("/recipes/pomegranate-elixir");
-    const why = page.locator("button[aria-controls][aria-expanded]").last();
+    const why = page.locator('button[aria-controls][aria-expanded][aria-label^="Why "]').last();
     await why.scrollIntoViewIfNeeded();
     await page.evaluate(() => window.scrollBy(0, 120)); // put the row near the nav
     await page.waitForTimeout(400);
@@ -234,7 +234,7 @@ test.describe("Grocery Copy list", () => {
   });
 });
 
-test.describe("Save My Glow Card", () => {
+test.describe("Save My Ritual Card", () => {
   test.beforeEach(async ({ page }) =>
     seed(
       page,
@@ -249,13 +249,13 @@ test.describe("Save My Glow Card", () => {
     await mockShare(page, { share: "ok", clipboard: "ok", canShareFiles: true });
     await page.goto("/celebrate");
     await page.waitForTimeout(1200); // card pre-render
-    await page.getByRole("button", { name: "Save My Glow Card" }).click();
+    await page.getByRole("button", { name: "Save My Ritual Card" }).click();
     await expect.poll(async () => (await recorded(page)).shares.length).toBe(1);
     const info = await page.evaluate(() => {
       const f = (window as unknown as Recorded).__shares[0].data.files![0];
       return { type: f.type, size: f.size, name: f.name };
     });
-    expect(info).toMatchObject({ type: "image/png", name: "noure-glow-card.png" });
+    expect(info).toMatchObject({ type: "image/png", name: "noure-ritual-card.png" });
     expect(info.size).toBeGreaterThan(5_000);
   });
 
@@ -273,8 +273,8 @@ test.describe("Save My Glow Card", () => {
     await page.goto("/celebrate");
     await page.waitForTimeout(1200);
     const dl = page.waitForEvent("download");
-    await page.getByRole("button", { name: "Save My Glow Card" }).click();
-    expect((await dl).suggestedFilename()).toBe("noure-glow-card.png");
+    await page.getByRole("button", { name: "Save My Ritual Card" }).click();
+    expect((await dl).suggestedFilename()).toBe("noure-ritual-card.png");
     await expect(
       page.getByRole("status").filter({ hasText: "download has started" }),
     ).toBeVisible();

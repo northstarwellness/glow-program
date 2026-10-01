@@ -91,9 +91,9 @@ test.describe("Home: the two paths", () => {
       /\bink-btn\b/,
     );
     await expect(reset(page)).toContainText("Complete · 21 of 21");
-    await reset(page).getByRole("link", { name: "Your Glow Reflection" }).click();
+    await reset(page).getByRole("link", { name: "Your Reflection", exact: true }).click();
     await expect(page).toHaveURL(/\/reflection$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Glow Reflection");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("21-day reflection");
     await page.goto("/home");
     await reset(page).getByRole("link", { name: "All 21 days" }).click();
     await expect(page).toHaveURL(/\/rituals$/);
@@ -127,15 +127,22 @@ test.describe("Home: the two paths", () => {
     await seed(page, onDay(3));
     const nav = page.getByRole("navigation", { name: "More in your ritual" });
     for (const [name, url, landed] of [
-      [/^Glow Journal/, /\/journal\/3$/, "Daily Reflection · Day 3"],
+      [/^Morning Journal/, /\/journal\/3$/, "Optional · How this morning felt · Day 3"],
       [/^Progress/, /\/progress$/, "Every morning you've kept."],
-      [/^Glow Guide/, /\/bonuses$/, "Everything inside."],
     ] as const) {
       await page.goto("/home");
       await nav.getByRole("link", { name }).click();
       await expect(page).toHaveURL(url);
       await expect(page.getByText(landed)).toBeVisible();
     }
+    // The Ritual Guide now has its own tiles below the rows.
+    await page.goto("/home");
+    await page
+      .getByTestId("knowledge-tiles")
+      .getByRole("link", { name: /^Ritual Guide/ })
+      .click();
+    await expect(page).toHaveURL(/\/bonuses\?section=guide$/);
+    await expect(page.getByText("Everything inside.")).toBeVisible();
     await page.goto("/home");
     await expect(nav.getByRole("link", { name: /^Radiant Reds/ })).toHaveAttribute(
       "href",
@@ -175,27 +182,28 @@ test.describe("Home: the two paths", () => {
   });
 });
 
-test.describe("Home: counters, weeks, Quick Glow, recipe colors", () => {
+test.describe("Home: counters, weeks, Quick Mornings, recipe colors", () => {
   const counter = (page: Page, label: string) =>
     page.getByTestId("counters").locator("div", { hasText: label }).locator("p").first();
 
-  for (const [name, v, streak, left] of [
-    ["untouched profile", () => onDay(1), "0", "21"],
-    ["Day 6 in progress", () => onDay(6), "5", "16"],
-    ["Day 21 complete", () => finished(), "21", "0"],
+  for (const [name, v, mornings, second, secondLabel] of [
+    ["untouched profile", () => onDay(1), "0", "Day 1", "Next morning"],
+    ["Day 6 in progress", () => onDay(6), "5", "Day 6", "Next morning"],
+    ["Day 21 complete", () => finished(), "21", "1", "Journal entry"],
     [
       "legacy gap (1,2,4 done)",
       () => customer({ completedDays: [1, 2, 4], shownMilestones: ["day-1"] }),
-      "2",
-      "18",
+      "3",
+      "Day 3",
+      "Next morning",
     ],
   ] as const) {
-    test(`Day streak and Days left: ${name}`, async ({ page }) => {
+    test(`Mornings complete and next morning: ${name}`, async ({ page }) => {
       await seed(page, v());
       await page.goto("/home");
-      await expect(counter(page, "Day streak")).toHaveText(streak);
-      await expect(counter(page, "Days left")).toHaveText(left);
-      await expect(page.getByText(/Glow Score/i)).toHaveCount(0);
+      await expect(counter(page, "complete")).toHaveText(mornings);
+      await expect(counter(page, secondLabel)).toHaveText(second);
+      await expect(page.getByText(/Glow Score|streak/i)).toHaveCount(0);
     });
   }
 
@@ -240,18 +248,16 @@ test.describe("Home: counters, weeks, Quick Glow, recipe colors", () => {
     await expect(page.getByTestId("week-2")).toContainText("Day 9 is today");
   });
 
-  test("Quick Glow Mornings keeps its own section, wording and Open the set link", async ({
-    page,
-  }) => {
+  test("Quick Mornings keeps its own section, wording and Open the set link", async ({ page }) => {
     await seed(page, onDay(4));
     await page.goto("/home");
     const q = page.getByTestId("quick-glow");
-    await expect(q).toContainText("Quick Glow Mornings.");
-    await expect(q).toContainText("Seven five-minute smoothies for rushed mornings.");
+    await expect(q).toContainText("Quick Mornings.");
+    await expect(q).toContainText("Short on time? Choose a simple smoothie for this morning.");
     await expect(q).toContainText("Open the set");
     await expect(q).not.toContainText("Everyday");
     await expect(q).toHaveAttribute("href", "/recipes#quick-glow");
-    await expect(everyday(page)).not.toContainText("Quick Glow");
+    await expect(everyday(page)).not.toContainText("Quick Mornings");
   });
 
   for (const [day, id] of [
@@ -501,7 +507,7 @@ test.describe("review evidence", () => {
     await page.getByRole("button", { name: "Ingredients", exact: true }).click();
     await shot("12-glow-guide-ingredient-cards");
     await page.goto("/recipes/beet-glow");
-    await page.locator("button[aria-controls][aria-expanded]").first().click();
+    await page.locator('button[aria-controls][aria-expanded][aria-label^="Why "]').first().click();
     await page
       .locator('[role="region"][aria-label^="Why "]')
       .evaluate((el) => el.scrollIntoView({ block: "center" }));

@@ -1,4 +1,4 @@
-import { INGREDIENTS } from "@/lib/content";
+import { INGREDIENTS, RECIPES } from "@/lib/content";
 
 type Ingredient = (typeof INGREDIENTS)[number];
 
@@ -21,4 +21,16 @@ export function findIngredient(line: string): Ingredient | null {
   const exact = INGREDIENTS.find((i) => i.name.toLowerCase() === line.toLowerCase());
   if (exact) return exact;
   return patterns.find((p) => p.re.test(line))?.ing ?? null;
+}
+
+/**
+ * Names of the recipes whose ingredient list uses this ingredient, in recipe order.
+ * Derived from the recipes themselves, so it always matches their current names.
+ */
+export function recipesUsing(ingredientName: string, exceptRecipeId?: string): string[] {
+  return RECIPES.filter(
+    (r) =>
+      r.id !== exceptRecipeId &&
+      r.ingredients.some((line) => findIngredient(line)?.name === ingredientName),
+  ).map((r) => r.name);
 }

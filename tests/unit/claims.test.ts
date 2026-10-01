@@ -1,11 +1,12 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
+import { RECIPE_WHY } from "@/lib/recipe-why";
+import { REDS_BY_RECIPE, REDS_SECTION } from "@/lib/recipe-reds";
 import {
   ARTICLES,
   BLEND_TIPS,
   DAYS,
-  GLOW_BOOST_STORIES,
   GROCERY_LIST,
   INGREDIENTS,
   JOURNAL_PROMPTS,
@@ -83,7 +84,9 @@ describe("customer-facing copy", () => {
       POLYPHENOLS,
       ARTICLES,
       BLEND_TIPS,
-      GLOW_BOOST_STORIES,
+      RECIPE_WHY,
+      REDS_SECTION,
+      REDS_BY_RECIPE,
       MILESTONES,
       GROCERY_LIST,
       Object.values(JOURNAL_PROMPTS).map((f) => f("QA")),
@@ -115,9 +118,9 @@ describe("customer-facing copy", () => {
     expect(w).not.toMatch(
       /Photo Timeline|compare where you started|before and after|before-and-after/i,
     );
-    expect(w).toContain("Your Glow Reflection");
+    expect(w).toContain('name: "Your Reflection"');
     expect(w).toContain(
-      "A private place to notice and remember how the ritual felt across your 21 days.",
+      "On Day 21, a private look back at the mornings you completed and the feelings you chose.",
     );
   });
 
@@ -214,7 +217,7 @@ describe("identity and saved data survive the copy change", () => {
       useApp.getInitialState(),
     );
     const saved = RECIPES.filter((r) => s.savedRecipes.includes(r.id));
-    expect(saved.map((r) => r.name)).toEqual(["Rose Strawberry Float"]);
+    expect(saved.map((r) => r.name)).toEqual(["Strawberry Rose Spritz"]);
   });
 
   it("keeps stored check-in values and shows the new display text", () => {

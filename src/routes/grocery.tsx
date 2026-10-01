@@ -163,36 +163,27 @@ function Grocery() {
       <TopBar name={s.name} />
 
       {/* Radiant Reds reminder — top */}
-      <a
-        href={REDS_URL}
-        target="_top"
-        className="block rounded-2xl px-5 py-4 mb-5"
-        style={{
-          background:
-            "linear-gradient(135deg, oklch(0.968 0.028 68) 0%, oklch(0.985 0.016 65) 100%)",
-          border: "1px solid oklch(0.720 0.082 65 / 0.22)",
-        }}
-      >
-        <p className="label-caps text-[var(--charcoal)]/70">Don't forget</p>
+      <a href={REDS_URL} target="_top" className="reds-info mb-5 block">
+        <p className="label-caps font-semibold text-[var(--cranberry)]">Optional</p>
         <p className="mt-1 font-serif text-[15px] text-[var(--charcoal)]">
-          Radiant Reds — the base of every ritual.
+          Radiant Reds, if you&rsquo;d like it with your glass.
         </p>
-        <p className="mt-1 text-[12.5px] leading-snug text-[var(--charcoal)]/75">
-          30 servings: one scoop a morning covers all 21 Reset days, with 9 left to enjoy afterward.
-          Shop now →
+        <p className="mt-1 text-[12.5px] leading-snug text-[var(--ink-2)]">
+          One jar holds 30 scoops. Every recipe is complete without it.{" "}
+          <span className="font-medium text-[var(--cranberry)]">Shop now →</span>
         </p>
       </a>
 
       <div className="flex items-end justify-between">
         <div>
-          <p className="label-caps text-[var(--charcoal)]/40">Shopping list</p>
+          <p className="label-caps text-[var(--ink-2)]">Shopping list</p>
           <h1 className="mt-1 font-serif text-[34px] leading-tight text-[var(--charcoal)]">
             Your groceries.
           </h1>
         </div>
         <div className="text-right">
-          <p className="font-serif text-[26px] text-[var(--gold)]">{checkedCount}</p>
-          <p className="text-[11px] tracking-[0.16em] uppercase text-[var(--charcoal)]/45">
+          <p className="font-serif text-[26px] text-[var(--cranberry)]">{checkedCount}</p>
+          <p className="text-[11px] tracking-[0.16em] uppercase text-[var(--ink-2)]">
             of {totalItems}
           </p>
         </div>
@@ -207,7 +198,7 @@ function Grocery() {
 
       {/* Week generation buttons */}
       <div className="mt-5">
-        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Generate by week</p>
+        <p className="label-caps text-[var(--ink-2)] mb-3">Generate by week</p>
         <div className="grid grid-cols-3 gap-2">
           {([1, 2, 3] as const).map((week) => {
             const labels = ["Foundation", "Build", "Glow"];
@@ -217,7 +208,7 @@ function Grocery() {
                 onClick={() => generateWeek(week)}
                 className="rounded-xl border border-[var(--taupe)]/25 bg-white p-3 text-center transition-all cursor-pointer hover:border-[var(--gold)]/40 hover:bg-[var(--gold)]/5"
               >
-                <p className="label-caps text-[var(--gold)]">Week {week}</p>
+                <p className="label-caps text-[var(--cranberry)]">Week {week}</p>
                 <p className="font-serif text-[13px] text-[var(--charcoal)] mt-0.5">
                   {labels[week - 1]}
                 </p>
@@ -239,7 +230,7 @@ function Grocery() {
         {checkedCount > 0 && (
           <button
             onClick={s.clearGrocery}
-            className="flex-1 rounded-full border border-[var(--taupe)]/20 py-2.5 font-serif text-[13px] text-[var(--charcoal)]/45 cursor-pointer"
+            className="flex-1 rounded-full border border-[var(--taupe)]/20 py-2.5 font-serif text-[13px] text-[var(--ink-2)] cursor-pointer"
           >
             Clear checks
           </button>
@@ -276,7 +267,7 @@ function Grocery() {
             autoComplete="off"
             maxLength={80}
             placeholder="Add a custom item…"
-            className="flex-1 rounded-full border border-[var(--taupe)]/30 bg-white px-4 py-2.5 font-serif text-[14px] text-[var(--charcoal)] placeholder:text-[var(--charcoal)]/30 focus:border-[var(--gold)] focus:outline-none"
+            className="flex-1 rounded-full border border-[var(--taupe)]/30 bg-white px-4 py-2.5 font-serif text-[14px] text-[var(--charcoal)] placeholder:text-[var(--ink-2)] focus:border-[var(--gold)] focus:outline-none"
           />
           <button
             type="submit"
@@ -290,7 +281,7 @@ function Grocery() {
           aria-live="polite"
           data-testid="custom-item-status"
           className={`mt-2 min-h-[1.25em] font-serif italic text-[12.5px] ${
-            addStatus?.error ? "text-[var(--berry)]" : "text-[var(--charcoal)]/60"
+            addStatus?.error ? "text-[var(--berry)]" : "text-[var(--ink-2)]"
           }`}
         >
           {addStatus?.text ?? ""}
@@ -300,7 +291,7 @@ function Grocery() {
       {/* Custom items */}
       {customItems.length > 0 && (
         <section className="mt-2" aria-labelledby="custom-items-heading" data-testid="custom-items">
-          <p id="custom-items-heading" className="label-caps text-[var(--charcoal)]/40 mb-2">
+          <p id="custom-items-heading" className="label-caps text-[var(--ink-2)] mb-2">
             Custom items
           </p>
           <ul className="space-y-1.5">
@@ -335,7 +326,7 @@ function Grocery() {
                     type="button"
                     onClick={() => removeCustom(item)}
                     aria-label={`Remove ${item}`}
-                    className="min-h-[44px] px-2 text-[var(--charcoal)]/55 hover:text-[var(--berry)] cursor-pointer text-[12px]"
+                    className="min-h-[44px] px-2 text-[var(--ink-2)] hover:text-[var(--berry)] cursor-pointer text-[12px]"
                   >
                     Remove
                   </button>
@@ -354,9 +345,9 @@ function Grocery() {
           return (
             <section key={cat.name}>
               <div className="mb-3 flex items-center justify-between">
-                <p className="label-caps text-[var(--charcoal)]/50">{cat.name}</p>
+                <p className="label-caps text-[var(--ink-2)]">{cat.name}</p>
                 {catChecked > 0 && (
-                  <span className="text-[11px] text-[var(--gold)]">
+                  <span className="text-[11px] text-[var(--cranberry)]">
                     {catChecked}/{cat.items.length}
                   </span>
                 )}
@@ -456,7 +447,7 @@ function SimpleSwaps() {
 
 function CheckCircle() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--gold)]">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--cranberry)]">
       <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.15" />
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
       <path
@@ -472,7 +463,7 @@ function CheckCircle() {
 
 function EmptyCircle() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--taupe)]/50">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" className="text-[var(--ink-2)]">
       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
     </svg>
   );

@@ -15,7 +15,7 @@ export function SaveRecipeButton({
 }: {
   recipeId: string;
   /** "light" sits on the photo hero; "dark" sits on an ivory card. */
-  tone?: "light" | "dark";
+  tone?: "light" | "dark" | "ink";
   onResult?: (message: string) => void;
   className?: string;
 }) {
@@ -45,11 +45,13 @@ export function SaveRecipeButton({
   };
 
   const colors =
-    tone === "light"
-      ? "text-[var(--ivory)]/85 focus-visible:ring-[var(--ivory)]/70"
-      : saved
-        ? "text-[var(--berry)] focus-visible:ring-[var(--gold)]/60"
-        : "text-[var(--plum)]/55 focus-visible:ring-[var(--gold)]/60";
+    tone === "ink"
+      ? "" // styled by .recipe-action in the recipe's own ink
+      : tone === "light"
+        ? "text-[var(--ivory)]/85 focus-visible:ring-[var(--ivory)]/70"
+        : saved
+          ? "text-[var(--berry)] focus-visible:ring-[var(--gold)]/60"
+          : "text-[var(--ink-2)] focus-visible:ring-[var(--gold)]/60";
 
   return (
     <button

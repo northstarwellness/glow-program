@@ -62,11 +62,31 @@ test("Glow Guide tabs render clean copy and the new ingredient labels", async ({
   await seed(page, customer());
   await page.goto("/bonuses");
   await ready(page);
-  for (const tab of ["Polyphenols", "Ingredients", "Glow Guide"]) {
-    await page.getByRole("button", { name: tab, exact: true }).click();
+  const tiles = page.getByTestId("knowledge-tiles");
+  for (const tab of ["Polyphenols", "Ingredients", "Ritual Guide", "Bonus recipes", "Sounds"]) {
+    await tiles
+      .getByRole("button")
+      .filter({ has: page.getByText(tab, { exact: true }) })
+      .click();
     await expectClean(page, `/bonuses › ${tab}`);
   }
-  await page.getByRole("button", { name: "Ingredients", exact: true }).click();
+  // Every Guide topic sheet, including the full article under Read more.
+  await tiles
+    .getByRole("button")
+    .filter({ has: page.getByText("Ritual Guide", { exact: true }) })
+    .click();
+  const topics = page.getByTestId("guide-topics").getByRole("button");
+  for (let i = 0; i < (await topics.count()); i++) {
+    await topics.nth(i).click();
+    await page.getByRole("dialog").getByText("Read more").click();
+    await expectClean(page, `/bonuses › topic ${i + 1}`);
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+  await tiles
+    .getByRole("button")
+    .filter({ has: page.getByText("Ingredients", { exact: true }) })
+    .click();
   await expect(page.getByText("Nutrition note:").first()).toBeAttached();
   await expect(page.getByText("In the glass:").first()).toBeAttached();
   await expect(page.getByText("Gut:", { exact: true })).toHaveCount(0);
@@ -77,7 +97,9 @@ test("recipe page uses the new labels and keeps the Beet line", async ({ page })
   await seed(page, customer());
   await page.goto("/recipes/beet-glow");
   await ready(page);
-  await expect(page.getByText("Why this glass", { exact: true })).toBeVisible();
+  // The recipe opens with its own description; nutrition lives under "Why these ingredients".
+  await expect(page.getByTestId("recipe-description")).toBeVisible();
+  await expect(page.getByText("Why this glass", { exact: true })).toHaveCount(0);
   await page.getByRole("button", { name: "Why Beet" }).click();
   const why = page.getByRole("region", { name: "Why Beet" });
   await expect(why.getByText("In the glass", { exact: true })).toBeVisible();
@@ -94,13 +116,18 @@ test("onboarding and landing render clean copy", async ({ page }) => {
   await expectClean(page, "/landing");
 });
 
-test("welcome shows Your Glow Reflection and no Boosts or photo promise", async ({ page }) => {
+test("welcome shows Your Reflection and no Boosts, photo promise or value stack", async ({
+  page,
+}) => {
   await seed(page, customer({ seenWelcome: false }));
   await page.goto("/welcome");
   await ready(page);
   await expectClean(page, "/welcome");
-  await expect(page.getByText("Your Glow Reflection")).toBeVisible();
+  await expect(page.getByText("Your Reflection", { exact: true })).toBeVisible();
   await expect(page.getByText(/Photo Timeline|Boosts/)).toHaveCount(0);
+  const text = await page.locator("body").innerText();
+  expect(text).not.toMatch(/\$\d|Priceless|Total value|Bonus \d|bonuses/i);
+  await expect(page.getByRole("heading", { name: "Also included" })).toBeVisible();
 });
 
 test("stored check-ins keep their values and read with the new display text", async ({ page }) => {
@@ -116,17 +143,21 @@ test("stored check-ins keep their values and read with the new display text", as
   await expect(page.getByText(/^Comfortable/)).toBeVisible(); // shares a line with the "Most felt" badge
   await expect(page.getByText("Settled", { exact: true })).toBeVisible();
   await expect(page.getByText("Less bloated", { exact: true })).toHaveCount(0);
-  await page.goto("/day/3");
+  // Day 2's saved feelings still show (ticked) under their display text, and can be unticked.
+  await page.goto("/day/2");
   await ready(page);
-  await page.getByRole("button", { name: "Comfortable" }).click();
-  await expect.poll(async () => (await stored(page)).outcomesByDay[3]).toEqual(["Less bloated"]);
+  const settled = page.getByRole("button", { name: "Settled" });
+  await expect(settled).toHaveAttribute("aria-pressed", "true");
+  await settled.click();
+  await expect.poll(async () => (await stored(page)).outcomesByDay[2]).toEqual(["Glowy"]);
+  expect((await stored(page)).outcomesByDay[1]).toEqual(["Less bloated"]);
 });
 
 test("a saved recipe still opens under its new name", async ({ page }) => {
   await seed(page, customer({ savedRecipes: ["bonus-rose-collagen"] }));
   await page.goto("/recipes/bonus-rose-collagen");
   await ready(page);
-  await expect(page.getByRole("heading", { name: "Rose Strawberry Float" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Strawberry Rose Spritz" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Save recipe" }).first()).toHaveAttribute(
     "aria-pressed",
     "true",

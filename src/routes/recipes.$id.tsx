@@ -4,14 +4,18 @@ import { useId, useRef, useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
-import { RECIPES, REDS_URL, BLEND_TIPS, GLOW_BOOST_STORIES } from "@/lib/content";
-import { findIngredient } from "@/lib/ingredients";
+import { RECIPES, BLEND_TIPS } from "@/lib/content";
+import { OptionalReds } from "@/components/OptionalReds";
+import { WhyTheseIngredients } from "@/components/WhyTheseIngredients";
+import { findIngredient, recipesUsing } from "@/lib/ingredients";
 import { shareOrCopy, PRODUCT_URL } from "@/lib/share";
 import { ShareStatus } from "@/components/ShareStatus";
 import { SaveRecipeButton } from "@/components/SaveRecipeButton";
-import { dayButtonStyle } from "@/lib/recipe-button";
+import { dayButtonStyle, mix } from "@/lib/recipe-button";
+import { recipeHeaderColors } from "@/lib/recipe-header";
+import { SparkleBorder, SparkleMotionToggle } from "@/components/SparkleBorder";
+import { useSparkleMotion } from "@/lib/sparkle-motion";
 import { BuildYourOwn } from "@/components/BuildYourOwn";
-import { SmoothieImage } from "@/components/SmoothieImage";
 import {
   entryDestination,
   recipeLinkSearch,
@@ -46,6 +50,9 @@ export const Route = createFileRoute("/recipes/$id")({
 
 type BlendMode = "thick" | "thin" | "pro";
 
+/** Background of the pressed Save pill: 88% white over the recipe's own first stop. */
+const savedTint = (stop: string) => mix(stop, "#FFFFFF", 0.88);
+
 function RecipeView() {
   const { id } = useParams({ from: "/recipes/$id" });
   const search = Route.useSearch();
@@ -63,6 +70,7 @@ function RecipeView() {
   const [shareMsg, setShareMsg] = useState("");
   const [shareManual, setShareManual] = useState<string | null>(null);
   const whyBase = useId();
+  const [motionOn, setMotion] = useSparkleMotion();
 
   if (hydrated && !s.name) return <Navigate to="/" />;
   if (id === "build") return <BuildShell />;
@@ -82,7 +90,7 @@ function RecipeView() {
     setGroceryAdded(writeCustomGrocery([...existing, ...newItems]) ? "added" : "failed");
   };
   const blendTip = BLEND_TIPS[r.id];
-  const glowStory = GLOW_BOOST_STORIES[r.id];
+  const hc = recipeHeaderColors(r.gradient);
 
   const share = () => {
     setShareMsg("");
@@ -90,7 +98,7 @@ function RecipeView() {
     // Called straight from the tap so iOS keeps the user gesture for the share sheet.
     shareOrCopy({
       title: r.name,
-      text: `${r.name} — ${r.benefitTag}. ${r.benefit}`,
+      text: `${r.name}. ${r.benefit}`,
       url: PRODUCT_URL,
     }).then((res) => {
       if (res.status === "copied") setShareMsg("Link copied");
@@ -118,7 +126,7 @@ function RecipeView() {
           to="/day/$n"
           params={back.params}
           hash={back.hash}
-          className="inline-flex min-h-11 items-center text-[12px] text-[var(--plum)]/60"
+          className="inline-flex min-h-11 items-center text-[12px] text-[var(--ink-2)]"
         >
           ← {entry.backLabel}
         </Link>
@@ -126,64 +134,73 @@ function RecipeView() {
         <Link
           to="/recipes"
           search={back.search}
-          className="inline-flex min-h-11 items-center text-[12px] text-[var(--plum)]/60"
+          className="inline-flex min-h-11 items-center text-[12px] text-[var(--ink-2)]"
         >
           ← {entry.backLabel}
         </Link>
       )}
       {entry.kind === "day" && (
-        <p className="mt-1 label-caps text-[var(--gold)]">{entry.eyebrow}</p>
+        <p className="mt-1 label-caps text-[var(--cranberry)]">{entry.eyebrow}</p>
       )}
 
-      {/* Hero — smoothie photo with gradient overlay */}
-      <div
-        className="relative mt-3 overflow-hidden rounded-3xl text-[var(--ivory)] shadow-xl"
-        style={{ minHeight: "220px" }}
+      {/* Header: the recipe's ORIGINAL gradient fills the whole card, through the title and the
+          actions, inside a fine sparkle border in the same palette. Text is the recipe's own deep
+          ink on light gradients, or ivory on dark ones (with a veil of the recipe's own deep tone
+          only where the gradient is too light for it). */}
+      <header
+        className="relative mt-3 overflow-hidden rounded-3xl"
+        data-testid="recipe-header"
+        data-gradient={r.gradient}
+        data-text-mode={hc.mode}
+        data-text-samples={hc.samples.join(" ")}
+        style={
+          {
+            background: hc.background,
+            "--recipe-ink": hc.pillInk,
+            "--recipe-edge": hc.line[1],
+            // Saved-state pill: a pale wash of the recipe's first color, so its ink stays readable.
+            "--recipe-tint": savedTint(hc.stops[0]),
+            boxShadow: "0 1px 2px rgba(42,30,34,0.08), 0 16px 32px -22px rgba(42,30,34,0.5)",
+          } as React.CSSProperties
+        }
       >
-        <SmoothieImage
-          recipe={r}
-          className="absolute inset-0 h-full w-full"
-          style={{ minHeight: "220px" }}
-        />
-        {/* Gradient overlay — top dark for legibility, bottom fade */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.1) 40%, rgba(0,0,0,0.55) 100%)",
-          }}
-        />
-        <div className="relative px-7 pb-0 pt-7">
-          <p className="label-caps text-[var(--ivory)]/70">
-            Recipe · {r.prep} · Serves {r.servings}
-          </p>
-          <h1 className="mt-2 font-serif text-[34px] leading-[1.1] drop-shadow-sm">{r.name}</h1>
-          <div className="mt-4 flex flex-wrap gap-2">
-            <Pill>{r.benefitTag}</Pill>
-            {saved && <Pill>Saved</Pill>}
+        <SparkleBorder line={hc.line} spark={hc.spark} glow={hc.glow} motion={motionOn} />
+        <div className="relative px-6 pt-5 pb-5">
+          <div className="flex items-start justify-between gap-2">
+            <p
+              className="pt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em]"
+              style={{ color: hc.text }}
+            >
+              Recipe · {r.prep} · Serves {r.servings} ·{" "}
+              <span data-testid="recipe-tag">{r.benefitTag}</span>
+            </p>
+            <SparkleMotionToggle on={motionOn} onChange={setMotion} color={hc.text} />
           </div>
-          <div className="mt-6 h-1 w-full bg-[var(--ivory)]/15" />
-          <div className="flex items-center justify-between py-4">
+          <h1
+            className="mt-0.5 font-serif text-[31px] leading-[1.1] [text-wrap:balance]"
+            style={{ color: hc.text }}
+          >
+            {r.name}
+          </h1>
+          <div className="mt-4 flex flex-wrap items-center gap-2.5">
             <SaveRecipeButton
               recipeId={r.id}
-              tone="light"
+              tone="ink"
+              className="recipe-action"
               onResult={(m) => {
                 setShareManual(null);
                 setShareMsg(m);
               }}
             />
-            <button
-              type="button"
-              onClick={share}
-              className="flex min-h-11 items-center gap-2 rounded-full px-1 text-[var(--ivory)]/80 text-[13px] font-medium cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ivory)]/70"
-            >
+            <button type="button" onClick={share} className="recipe-action">
               <svg
-                width="16"
-                height="16"
+                width="15"
+                height="15"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="1.8"
+                aria-hidden="true"
               >
                 <circle cx="18" cy="5" r="3" />
                 <circle cx="6" cy="12" r="3" />
@@ -193,144 +210,25 @@ function RecipeView() {
               Share
             </button>
           </div>
-          {(shareMsg || shareManual) && (
-            <ShareStatus
-              message={shareMsg}
-              manualText={shareManual}
-              tone="light"
-              className="pb-4"
-            />
-          )}
         </div>
-        {/* end relative content */}
-      </div>
-      {/* end hero */}
+      </header>
+      {(shareMsg || shareManual) && (
+        <ShareStatus message={shareMsg} manualText={shareManual} className="pt-3" />
+      )}
 
-      {/* Glow benefit */}
-      <div className="mt-4 glass-card p-5">
-        <p className="label-caps text-[var(--gold)] mb-2">Why this glass</p>
-        <p className="text-[14px] leading-relaxed text-[var(--plum)]/80">{r.benefit}</p>
-      </div>
-
-      {/* RADIANT REDS GLOW BOOST — premium, personalized */}
-      <div
-        className="mt-5 overflow-hidden rounded-3xl text-[var(--ivory)]"
-        style={{ background: "linear-gradient(145deg, #5C2541 0%, #7B2D4E 60%, #9B1B3A 100%)" }}
+      {/* The glass itself: a plain description of taste and texture */}
+      <p
+        className="mt-5 font-serif text-[18px] leading-relaxed text-[var(--plum)]/85"
+        data-testid="recipe-description"
       >
-        <div className="px-6 pt-6 pb-5">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
-            <p className="label-caps text-[var(--gold)]">Radiant Reds Glow Boost</p>
-          </div>
-          {glowStory ? (
-            <>
-              <h3 className="font-serif text-[22px] leading-tight text-[var(--ivory)]">
-                {glowStory.headline}
-              </h3>
-              <p className="mt-3 text-[14px] leading-relaxed text-[var(--ivory)]/80">
-                {glowStory.skinStory}
-              </p>
-              <div className="mt-4 rounded-2xl bg-white/10 p-4 backdrop-blur-sm">
-                <p className="label-caps text-[var(--gold)]/80 mb-1.5">How to add it</p>
-                <p className="text-[13px] leading-relaxed text-[var(--ivory)]/85">
-                  {glowStory.moment}
-                </p>
-              </div>
-            </>
-          ) : (
-            <p className="mt-2 font-serif italic text-[15px] leading-relaxed text-[var(--ivory)]/80">
-              {r.redsBoost.why}
-            </p>
-          )}
-        </div>
-
-        <div className="px-6 pb-3">
-          <div className="grid grid-cols-1 gap-2">
-            {r.redsBoost.proof.map((p, i) => (
-              <div key={i} className="flex items-start gap-2.5 rounded-xl bg-white/8 px-3.5 py-2.5">
-                <span className="mt-[3px] h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--gold)]" />
-                <span className="text-[12.5px] leading-relaxed text-[var(--ivory)]/80">{p}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <a
-          href={REDS_URL}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center justify-between border-t border-white/15 px-6 py-4"
-        >
-          <div>
-            <p className="font-serif text-[15px] tracking-wide text-[var(--gold)]">
-              Shop Radiant Reds
-            </p>
-            <p className="font-serif italic text-[12px] text-[var(--ivory)]/55 mt-0.5">
-              The blend behind every morning
-            </p>
-          </div>
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            className="text-[var(--gold)]/60"
-          >
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </a>
-      </div>
-
-      {/* HOW TO BLEND IT — new section */}
-      <div className="mt-5 glass-card overflow-hidden">
-        <div className="p-5 pb-4">
-          <p className="label-caps text-[var(--plum)]/45 mb-3">How to blend it</p>
-          <div className="flex gap-2">
-            {(["thick", "thin", "pro"] as BlendMode[]).map((m) => (
-              <button
-                key={m}
-                onClick={() => setBlendMode(m)}
-                className={`flex-1 rounded-full py-2.5 text-[12px] font-medium tracking-[0.1em] uppercase transition-all cursor-pointer ${
-                  blendMode === m
-                    ? "bg-[var(--plum)] text-[var(--ivory)]"
-                    : "bg-[var(--plum)]/8 text-[var(--plum)]/60 hover:bg-[var(--plum)]/15"
-                }`}
-              >
-                {m === "pro" ? "Pro tip" : `Make it ${m}`}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="border-t border-[var(--gold)]/15 px-5 py-4">
-          {blendMode === "pro" && (
-            <div className="flex items-center gap-2 mb-2">
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                className="text-[var(--gold)]"
-              >
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-              </svg>
-              <span className="label-caps text-[var(--gold)]">Pro tip</span>
-            </div>
-          )}
-          <p className="text-[14px] leading-relaxed text-[var(--plum)]/80">
-            {blendContent[blendMode]}
-          </p>
-        </div>
-      </div>
+        {r.benefit}
+      </p>
 
       {/* Ingredients — checkable */}
       <section className="mt-5">
         <div className="flex items-baseline justify-between mb-3">
           <h3 className="font-serif text-[22px] text-[var(--plum)]">Ingredients</h3>
-          <p className="text-[11px] italic text-[var(--plum)]/40">Tap to check off</p>
+          <p className="text-[11px] italic text-[var(--ink-2)]">Tap to check off</p>
         </div>
         <div className="rounded-2xl overflow-hidden border border-[var(--plum)]/8 bg-white divide-y divide-[var(--plum)]/5">
           {r.ingredients.map((name, idx) => {
@@ -368,7 +266,7 @@ function RecipeView() {
                       )}
                     </span>
                     <span
-                      className={`font-serif text-[16px] ${ingChecks.checked[name] ? "line-through text-[var(--plum)]/35" : "text-[var(--plum)]"}`}
+                      className={`font-serif text-[16px] ${ingChecks.checked[name] ? "line-through text-[var(--ink-2)]" : "text-[var(--plum)]"}`}
                     >
                       {name}
                     </span>
@@ -380,8 +278,8 @@ function RecipeView() {
                       aria-expanded={open}
                       aria-controls={panelId}
                       aria-label={`Why ${info.name}`}
-                      className={`mr-1 flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[11px] tracking-wide transition-colors cursor-pointer hover:text-[var(--gold)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 ${
-                        open ? "text-[var(--gold)]" : "text-[var(--plum)]/55"
+                      className={`mr-1 flex min-h-11 min-w-11 items-center justify-center gap-1 rounded-full px-3 text-[11px] tracking-wide transition-colors cursor-pointer hover:text-[var(--cranberry)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)]/60 ${
+                        open ? "text-[var(--cranberry)]" : "text-[var(--ink-2)]"
                       }`}
                     >
                       Why
@@ -400,13 +298,13 @@ function RecipeView() {
                     </button>
                   )}
                 </div>
-                {open && info && <WhyCard id={panelId} ing={info} />}
+                {open && info && <WhyCard id={panelId} ing={info} recipeId={r.id} />}
               </div>
             );
           })}
         </div>
         {ingChecks.allChecked && (
-          <p className="mt-2 font-serif italic text-[13px] text-[var(--gold)]">
+          <p className="mt-2 font-serif italic text-[13px] text-[var(--cranberry)]">
             All gathered. Ready to blend.
           </p>
         )}
@@ -415,7 +313,7 @@ function RecipeView() {
           onClick={addToGrocery}
           className={`mt-3 w-full rounded-full border py-3 font-serif text-[14px] transition-all cursor-pointer ${
             groceryAdded === "added"
-              ? "border-[var(--gold)]/40 text-[var(--gold)]"
+              ? "border-[var(--gold)]/40 text-[var(--cranberry)]"
               : "border-[var(--plum)]/15 text-[var(--plum)]"
           }`}
         >
@@ -446,6 +344,55 @@ function RecipeView() {
         </ol>
       </section>
 
+      {/* How to blend it: texture options, after the method */}
+      <div className="mt-6 glass-card overflow-hidden">
+        <div className="p-5 pb-4">
+          <p className="label-caps text-[var(--ink-2)] mb-3">How to blend it</p>
+          <div className="flex gap-2">
+            {(["thick", "thin", "pro"] as BlendMode[]).map((m) => (
+              <button
+                key={m}
+                onClick={() => setBlendMode(m)}
+                className={`flex-1 rounded-full py-2.5 text-[12px] font-medium tracking-[0.1em] uppercase transition-all cursor-pointer ${
+                  blendMode === m
+                    ? "bg-[var(--cranberry)] text-white"
+                    : "bg-[var(--sand)] text-[var(--ink-2)] hover:bg-[var(--sand-deep)]"
+                }`}
+              >
+                {m === "pro" ? "Pro tip" : `Make it ${m}`}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="border-t border-[var(--gold)]/15 px-5 py-4">
+          {blendMode === "pro" && (
+            <div className="flex items-center gap-2 mb-2">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                className="text-[var(--cranberry)]"
+              >
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+              </svg>
+              <span className="label-caps text-[var(--cranberry)]">Pro tip</span>
+            </div>
+          )}
+          <p className="text-[14px] leading-relaxed text-[var(--plum)]/80">
+            {blendContent[blendMode]}
+          </p>
+        </div>
+      </div>
+
+      {/* Why these ingredients: sourced, recipe-specific, closed by default */}
+      <WhyTheseIngredients recipeId={r.id} />
+
+      {/* Optional addition, after the recipe. Every recipe is complete without it. */}
+      <OptionalReds recipeId={r.id} className="mt-4" />
+
       {/* Guided journey: the one primary action at the end of the method. */}
       {entry.kind === "day" && back.to === "/day/$n" && (
         <Link
@@ -462,7 +409,7 @@ function RecipeView() {
       {/* Related recipes */}
       {related.length > 0 && (
         <section className="mt-6">
-          <p className="label-caps text-[var(--plum)]/45 mb-3">More {r.benefitTag} rituals</p>
+          <p className="label-caps text-[var(--ink-2)] mb-3">More like this</p>
           <div className="grid grid-cols-2 gap-3">
             {related.map((rel) => (
               <Link
@@ -484,7 +431,7 @@ function RecipeView() {
                     <p className="font-serif text-[14px] leading-tight text-[var(--plum)]">
                       {rel.name}
                     </p>
-                    <p className="mt-0.5 text-[11px] text-[var(--plum)]/45">{rel.prep}</p>
+                    <p className="mt-0.5 text-[11px] text-[var(--ink-2)]">{rel.prep}</p>
                   </div>
                 </div>
               </Link>
@@ -501,7 +448,8 @@ function RecipeView() {
 type IngredientInfo = NonNullable<ReturnType<typeof findIngredient>>;
 
 /** Inline benefit card under the selected ingredient — no overlay, page stays put. */
-function WhyCard({ id, ing }: { id: string; ing: IngredientInfo }) {
+function WhyCard({ id, ing, recipeId }: { id: string; ing: IngredientInfo; recipeId: string }) {
+  const alsoIn = recipesUsing(ing.name, recipeId);
   const ref = useRef<HTMLDivElement>(null);
   return (
     <div
@@ -535,14 +483,12 @@ function WhyCard({ id, ing }: { id: string; ing: IngredientInfo }) {
             <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--plum)]/85">{ing.skin}</p>
           </div>
           <div className="rounded-xl bg-[var(--gold)]/10 px-3 py-2.5">
-            <p className="label-caps text-[var(--gold)]">Nutrition note</p>
+            <p className="label-caps text-[var(--cranberry)]">Nutrition note</p>
             <p className="mt-0.5 text-[12.5px] leading-snug text-[var(--plum)]/85">{ing.gut}</p>
           </div>
         </div>
-        {ing.alsoIn.length > 0 && (
-          <p className="mt-3 text-[11.5px] text-[var(--plum)]/55">
-            Also in: {ing.alsoIn.join(", ")}
-          </p>
+        {alsoIn.length > 0 && (
+          <p className="mt-3 text-[11.5px] text-[var(--ink-2)]">Also in: {alsoIn.join(", ")}</p>
         )}
       </div>
     </div>
@@ -554,25 +500,17 @@ function BuildShell() {
   return (
     <Frame>
       <TopBar name={s.name} />
-      <Link to="/recipes" className="text-[12px] text-[var(--plum)]/50">
+      <Link to="/recipes" className="text-[12px] text-[var(--ink-2)]">
         ← Recipes
       </Link>
-      <p className="mt-3 label-caps text-[var(--gold)]">Custom ritual</p>
+      <p className="mt-3 label-caps text-[var(--cranberry)]">Custom ritual</p>
       <h1 className="mt-1 font-serif text-[32px] leading-tight text-[var(--plum)]">
         Compose your morning glass.
       </h1>
-      <p className="mt-1 font-serif italic text-[14.5px] text-[var(--plum)]/55">
+      <p className="mt-1 font-serif italic text-[14.5px] text-[var(--ink-2)]">
         Choose your layers, and we'll tell you what each one brings.
       </p>
       <BuildYourOwn />
     </Frame>
-  );
-}
-
-function Pill({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="rounded-full bg-[var(--ivory)]/20 px-3 py-1 text-[11px] tracking-wide text-[var(--ivory)]">
-      {children}
-    </span>
   );
 }

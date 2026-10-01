@@ -20,8 +20,27 @@ export const OUTCOMES = [
   "Focused",
   "Just okay",
   "Tired",
+  // Added 2026-09-30, appended so every earlier value and record stays exactly as saved.
+  "Calm",
+  "Overwhelmed",
 ] as const;
 export type Outcome = (typeof OUTCOMES)[number];
+
+/**
+ * The feelings offered on the Day page and in the Morning Journal (2026-09-29; Calm and
+ * Overwhelmed added 2026-09-30): eight neutral, everyday words, including honest low ones. Every value above stays valid, so any day
+ * that already holds another feeling keeps it, shows it, and can still untick it.
+ */
+export const VISIBLE_OUTCOMES = [
+  "Rested",
+  "Energized",
+  "Calm",
+  "Focused",
+  "Satisfied",
+  "Just okay",
+  "Tired",
+  "Overwhelmed",
+] as const satisfies readonly Outcome[];
 
 /** Display text only. Stored values in outcomesByDay never change, so saved history stays readable. */
 const OUTCOME_DISPLAY: Record<string, string> = {
@@ -46,6 +65,8 @@ type State = {
   groceryChecked: Record<string, boolean>;
   /** Feeling chips selected per day */
   outcomesByDay: Record<number, string[]>;
+  /** When she last opened Home (ISO). Added 2026-09-29; absent in older saved data. */
+  lastVisitAt: string | null;
 
   setVerifiedEmail: (email: string) => void;
   setName: (n: string) => void;
@@ -54,6 +75,9 @@ type State = {
   toggleLog: (day: number, key: keyof DailyLog) => void;
   setLog: (day: number, key: keyof DailyLog, value: boolean) => void;
   saveJournal: (day: number, e: JournalEntry) => void;
+  /** Removes a day's note only when she has cleared its text. */
+  clearJournal: (day: number) => void;
+  setLastVisit: (iso: string) => void;
   completeDay: (day: number) => void;
   toggleSavedRecipe: (id: string) => void;
   setRecipeSaved: (id: string, saved: boolean) => void;
@@ -135,6 +159,7 @@ export const useApp = create<State>()(
       shownMilestones: [],
       groceryChecked: {},
       outcomesByDay: {},
+      lastVisitAt: null,
 
       setVerifiedEmail: (email) => set({ verifiedEmail: email }),
       setName: (n) => set({ name: n.trim() }),
@@ -154,6 +179,14 @@ export const useApp = create<State>()(
             : { dailyLogs: { ...s.dailyLogs, [day]: { ...s.dailyLogs[day], [key]: value } } },
         ),
       saveJournal: (day, e) => set((s) => ({ journalEntries: { ...s.journalEntries, [day]: e } })),
+      clearJournal: (day) =>
+        set((s) => {
+          if (!(day in s.journalEntries)) return s;
+          const rest = { ...s.journalEntries };
+          delete rest[day];
+          return { journalEntries: rest };
+        }),
+      setLastVisit: (iso) => set({ lastVisitAt: iso }),
       completeDay: (day) =>
         set((s) => {
           const current = normalizeCompletedDays(s.completedDays);
@@ -217,6 +250,7 @@ export const useApp = create<State>()(
           shownMilestones: [],
           groceryChecked: {},
           outcomesByDay: {},
+          lastVisitAt: null,
         }),
     }),
     {
@@ -318,14 +352,30 @@ export function isDayPersisted(
   }
 }
 
-export function glowScore(s: {
-  completedDays: number[];
-  journalEntries: Record<number, unknown>;
-  dailyLogs: Record<number, DailyLog>;
-}): number {
-  const ritualPts = (s.completedDays.length / 21) * 50;
-  const journalPts = (Object.keys(s.journalEntries).length / 21) * 30;
-  const logPts =
-    (Object.values(s.dailyLogs).filter((l) => l.reds || l.ritual || l.journal).length / 21) * 20;
-  return Math.round(ritualPts + journalPts + logPts);
+/**
+ * Factual 21-day progress. Every number is a count of completed mornings, never a score:
+ * `completed` is how many of Days 1–21 are marked complete, `next` is the morning she is
+ * on (the earliest one not yet complete), or null once all 21 are done.
+ */
+export function ritualProgress(completedDays: unknown): {
+  completed: number;
+  remaining: number;
+  next: number | null;
+} {
+  const completed = normalizeCompletedDays(completedDays).length;
+  return {
+    completed,
+    remaining: 21 - completed,
+    next: completed === 21 ? null : activeDay(completedDays),
+  };
+}
+
+/** Whole calendar days between two ISO times, by local date. Invalid input → 0. */
+export function daysBetween(fromIso: string | null, to: Date = new Date()): number {
+  if (!fromIso) return 0;
+  const from = new Date(fromIso);
+  if (Number.isNaN(from.getTime())) return 0;
+  const a = new Date(from).setHours(0, 0, 0, 0);
+  const b = new Date(to).setHours(0, 0, 0, 0);
+  return Math.max(0, Math.round((b - a) / 86400000));
 }

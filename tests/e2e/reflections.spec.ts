@@ -29,7 +29,9 @@ async function progressCount(page: Page, label: string) {
 }
 
 async function expectUncovered(page: Page, loc: ReturnType<Page["locator"]>) {
-  await loc.scrollIntoViewIfNeeded();
+  // Center it: a fixed tab bar covers anything parked on the viewport's bottom edge, so the
+  // question is whether the control can sit clear of it, not where a browser happens to stop.
+  await loc.evaluate((el) => el.scrollIntoView({ block: "center" }));
   const hit = await loc.evaluate((el) => {
     const r = el.getBoundingClientRect();
     const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
@@ -49,21 +51,23 @@ test.describe("Daily Reflection: each day's feelings reach that Journal day and 
       await seed(page, onDay(day));
       await page.goto(`/day/${day}`);
       await chip(page, "Energized").click();
-      await chip(page, "Comfortable").click(); // display label; stored value stays "Less bloated"
+      await chip(page, "Rested").click();
       await expect(chip(page, "Energized")).toHaveAttribute("aria-pressed", "true");
-      await expect(page.getByText("Saved to your 21-day record and your journal.")).toBeVisible();
+      await expect(
+        page.getByText("Saved to your 21-day record and your Morning Journal."),
+      ).toBeVisible();
       expect((await stored(page)).outcomesByDay).toEqual({
-        [day]: ["Energized", "Less bloated"],
+        [day]: ["Energized", "Rested"],
       });
 
       await page.goto("/journal");
       const card = reflectionCard(page, day);
       await expect(card).toBeVisible();
-      await expect(card.getByRole("listitem")).toHaveText(["Comfortable", "Energized"]);
+      await expect(card.getByRole("listitem")).toHaveText(["Energized", "Rested"]);
       await expect(page.locator('[data-testid^="daily-reflection-"]')).toHaveCount(1);
 
       expect(await progressCount(page, "Energized")).toBe(1);
-      expect(await progressCount(page, "Comfortable")).toBe(1);
+      expect(await progressCount(page, "Rested")).toBe(1);
     });
   }
 });
@@ -73,34 +77,34 @@ test("changing or removing a feeling in the Journal updates the Day page and Pro
 }) => {
   await seed(page, onDay(6));
   await page.goto("/day/5");
-  await chip(page, "Glowy").click();
-  await chip(page, "Lighter").click();
+  await chip(page, "Focused").click();
+  await chip(page, "Tired").click();
 
   // Edit from the Journal day
   await page.goto("/journal");
   await reflectionCard(page, 5).click();
   await expect(page).toHaveURL(/\/journal\/5$/);
-  await expect(page.getByText("Daily Reflection · Day 5")).toBeVisible();
-  await expect(chip(page, "Glowy")).toHaveAttribute("aria-pressed", "true");
-  await chip(page, "Lighter").click();
+  await expect(page.getByText("Optional · How this morning felt · Day 5")).toBeVisible();
+  await expect(chip(page, "Focused")).toHaveAttribute("aria-pressed", "true");
+  await chip(page, "Tired").click();
   await chip(page, "Satisfied").click();
   await expect(page.getByText("Saved to Day 5 and your Progress.")).toBeVisible();
 
   await page.goto("/day/5");
-  await expect(chip(page, "Lighter")).toHaveAttribute("aria-pressed", "false");
+  await expect(chip(page, "Tired")).toHaveAttribute("aria-pressed", "false");
   await expect(chip(page, "Satisfied")).toHaveAttribute("aria-pressed", "true");
-  expect(await progressCount(page, "Lighter")).toBe(0);
+  expect(await progressCount(page, "Tired")).toBe(0);
   expect(await progressCount(page, "Satisfied")).toBe(1);
 
   // Remove everything: the Daily Reflection card goes, the plain row returns.
   await page.goto("/journal/5");
-  await chip(page, "Glowy").click();
+  await chip(page, "Focused").click();
   await chip(page, "Satisfied").click();
   await page.goto("/journal");
   await expect(reflectionCard(page, 5)).toHaveCount(0);
-  await expect(page.getByTestId("journal-day-5")).toContainText("Not yet written");
+  await expect(page.getByTestId("journal-day-5")).toContainText("No entry");
   await page.goto("/progress");
-  await expect(page.getByText("Your Ritual Outcomes")).toHaveCount(0);
+  await expect(page.getByText("How mornings felt")).toHaveCount(0);
 });
 
 test("repeated taps, reloads and reopening never duplicate; the written entry is kept", async ({
@@ -179,8 +183,19 @@ test("a locked day's legacy feelings show read-only and the locked link still re
 test("feeling chips and the edit area sit clear of the bottom nav", async ({ page }) => {
   await seed(page, onDay(8, { outcomesByDay: { 7: ["Glowy"] } }));
   await page.goto("/journal/7");
-  for (const label of ["Lighter", "Clearer mood"]) await expectUncovered(page, chip(page, label));
-  const box = await chip(page, "Lighter").boundingBox();
+  // The last visible chip ("Tired") and an earlier saved one ("Glowy") sit lowest on the screen.
+  for (const label of ["Tired", "Glowy"]) await expectUncovered(page, chip(page, label));
+  await expectUncovered(page, page.getByRole("button", { name: "Save entry" }));
+  // The page ends with enough room that its last control scrolls fully above the tab bar.
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const clear = await page.evaluate(() => {
+    const nav = document.querySelector("nav.fixed")!.getBoundingClientRect();
+    const controls = [...document.querySelectorAll("main button, main a")];
+    const last = controls[controls.length - 1].getBoundingClientRect();
+    return last.bottom <= nav.top;
+  });
+  expect(clear, "last control can scroll above the tab bar").toBe(true);
+  const box = await chip(page, "Tired").boundingBox();
   expect(box!.height).toBeGreaterThanOrEqual(44);
   await noSidewaysScroll(page);
   await page.goto("/journal");
@@ -236,9 +251,8 @@ const shares = (page: Page) =>
   page.evaluate(
     () => (window as unknown as { __shares: { name: string; size: number }[] }).__shares,
   );
-const saveBtn = (page: Page) => page.getByRole("button", { name: "Save My Glow Reflection Card" });
-const statusLine = (page: Page) =>
-  page.getByRole("status").filter({ hasText: /card|Glow Reflection/ });
+const saveBtn = (page: Page) => page.getByRole("button", { name: "Save My Reflection Card" });
+const statusLine = (page: Page) => page.getByRole("status").filter({ hasText: /card|Reflection/ });
 
 async function reflectionText(page: Page) {
   return page.evaluate(() => document.querySelector("main")?.innerText ?? "");
@@ -252,7 +266,7 @@ test("rich history: every section, her own words and weeks, clean copy, no priva
   for (const h of ["Your 21-Day Rhythm", "What You Noticed", "Your Reflection", "Carry It Forward"])
     await expect(page.getByText(h, { exact: true })).toBeVisible();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Maya, this is your Glow Reflection.",
+    "Maya, this is your 21-day reflection.",
   );
   await expect(page.getByTestId("week-1")).toContainText("Lighter");
   await expect(page.getByTestId("week-3")).toContainText("Energized");
@@ -283,10 +297,10 @@ test("not finished yet: /reflection goes to the active day; Celebrate links to t
   await expect(page).toHaveURL(/\/day\/9$/);
   await page.evaluate((v) => localStorage.setItem("noure_app_v1", v), JSON.stringify(rich));
   await page.goto("/celebrate");
-  await page.getByRole("link", { name: "Read Your Glow Reflection →" }).click();
+  await page.getByRole("link", { name: "Read Your Reflection →" }).click();
   await expect(page).toHaveURL(/\/reflection$/);
   await page.goto("/progress");
-  await expect(page.getByRole("link", { name: /Your Glow Reflection/ })).toBeVisible();
+  await expect(page.getByRole("link", { name: /Your Reflection/ })).toBeVisible();
 });
 
 test.describe("saving the Glow Reflection card", () => {
@@ -298,7 +312,7 @@ test.describe("saving the Glow Reflection card", () => {
     await saveBtn(page).click();
     await expect.poll(async () => (await shares(page)).length).toBe(1);
     const [f] = await shares(page);
-    expect(f.name).toBe("noure-glow-reflection.png");
+    expect(f.name).toBe("noure-reflection.png");
     expect(f.size).toBeGreaterThan(5_000);
   });
 
@@ -324,8 +338,8 @@ test.describe("saving the Glow Reflection card", () => {
     await page.waitForTimeout(1200);
     const dl = page.waitForEvent("download");
     await saveBtn(page).click();
-    expect((await dl).suggestedFilename()).toBe("noure-glow-reflection.png");
-    await expect(statusLine(page)).toHaveText("Your Glow Reflection card download has started.");
+    expect((await dl).suggestedFilename()).toBe("noure-reflection.png");
+    await expect(statusLine(page)).toHaveText("Your Reflection card download has started.");
   });
 
   test("share and download both failing is reported as a failure", async ({ page }) => {
@@ -340,7 +354,7 @@ test.describe("saving the Glow Reflection card", () => {
     await page.waitForTimeout(1200);
     await saveBtn(page).click();
     await expect(statusLine(page)).toHaveText(
-      "We couldn't save your Glow Reflection card on this device.",
+      "We couldn't save your Reflection card on this device.",
     );
   });
 });
@@ -406,21 +420,21 @@ test.describe("review evidence", () => {
     await feel.scrollIntoViewIfNeeded();
     await shot("01-day5-before-selection");
     await chip(page, "Energized").click();
-    await chip(page, "Glowy").click();
+    await chip(page, "Focused").click();
     await shot("02-day5-after-selection");
     await page.goto("/journal");
     await reflectionCard(page, 5).scrollIntoViewIfNeeded();
     await shot("03-journal-day5-daily-reflection");
     await page.goto("/progress");
-    await page.getByText("Your Ritual Outcomes").scrollIntoViewIfNeeded();
+    await page.getByText("How mornings felt").scrollIntoViewIfNeeded();
     await shot("04-progress-same-selection");
     await page.goto("/journal/5");
     await chip(page, "Energized").click();
     await chip(page, "Satisfied").click();
-    await page.getByText("Daily Reflection · Day 5").scrollIntoViewIfNeeded();
+    await page.getByText("Optional · How this morning felt · Day 5").scrollIntoViewIfNeeded();
     await shot("05-journal-day5-edited");
     await page.goto("/progress");
-    await page.getByText("Your Ritual Outcomes").scrollIntoViewIfNeeded();
+    await page.getByText("How mornings felt").scrollIntoViewIfNeeded();
     await shot("06-progress-after-edit");
     await page.goto("/journal");
     await reflectionCard(page, 5).scrollIntoViewIfNeeded();

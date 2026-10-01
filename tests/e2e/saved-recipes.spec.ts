@@ -52,7 +52,7 @@ test.describe("Saved Recipes", () => {
         expect(text.toLowerCase(), `${where}: card text "${text}"`).not.toContain("saved");
       }
     };
-    for (const label of ["All", "Foundation", "Build", "Glow", "Bonus", "Quick Glow"]) {
+    for (const label of ["All", "Foundation", "Build", "Glow", "Bonus", "Quick Mornings"]) {
       await page.getByRole("button", { name: label, exact: true }).click();
       await expect(cardLinks(page).first()).toBeVisible();
       await noCardMarkers(`filter ${label}`);

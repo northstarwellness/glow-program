@@ -1,69 +1,75 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Frame, TopBar, GoldDivider } from "@/components/Frame";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { recipeLinkSearch } from "@/lib/recipe-entry";
-import { ARTICLES, INGREDIENTS, POLYPHENOLS, RECIPES, SOUNDS, REDS_URL } from "@/lib/content";
+import { ARTICLES, INGREDIENTS, POLYPHENOLS, RECIPES, REDS_URL } from "@/lib/content";
+import { SoundLibrary } from "@/components/Sounds";
+import {
+  KnowledgeSwitcher,
+  TopicSheet,
+  knowledgeTiles,
+  type KnowledgeSection,
+} from "@/components/Knowledge";
+import { GUIDE_TOPICS } from "@/lib/guide-topics";
+import { recipeHeaderColors } from "@/lib/recipe-header";
+import { recipesUsing } from "@/lib/ingredients";
 
-export const Route = createFileRoute("/bonuses")({ component: Bonuses });
+const SECTIONS: KnowledgeSection[] = ["guide", "recipes", "poly", "ing", "sound"];
+
+export const Route = createFileRoute("/bonuses")({
+  validateSearch: (search: Record<string, unknown>): { section?: KnowledgeSection } =>
+    SECTIONS.includes(search.section as KnowledgeSection)
+      ? { section: search.section as KnowledgeSection }
+      : {},
+  component: Bonuses,
+});
 
 function Bonuses() {
   const hydrated = useHydrated();
   const s = useApp();
-  const [tab, setTab] = useState<"recipes" | "poly" | "ing" | "sound" | "guide">("recipes");
+  const search = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const tab: KnowledgeSection = search.section ?? "guide";
+  const setTab = (t: KnowledgeSection) =>
+    navigate({ search: { section: t }, replace: true, resetScroll: false });
   if (hydrated && !s.name) return <Navigate to="/" />;
 
   return (
     <Frame>
       <TopBar name={s.name} />
-      <p className="label-caps text-[var(--plum)]/55">The Glow Guide</p>
+      <p className="label-caps text-[var(--ink-2)]">The Ritual Guide</p>
       <h1 className="font-serif text-[34px] leading-tight text-[var(--plum)]">
         Everything inside.
       </h1>
 
-      <div className="mt-5 flex gap-2 overflow-x-auto pb-2">
-        {(["recipes", "poly", "ing", "sound", "guide"] as const).map((t) => (
-          <button
-            key={t}
-            onClick={() => setTab(t)}
-            className={`flex-shrink-0 rounded-full px-4 py-2 text-[12px] tracking-wide transition ${
-              tab === t
-                ? "bg-[var(--plum)] text-[var(--ivory)]"
-                : "bg-[var(--sand)] text-[var(--plum)]"
-            }`}
-          >
-            {t === "recipes"
-              ? "Bonus Recipes"
-              : t === "poly"
-                ? "Polyphenols"
-                : t === "ing"
-                  ? "Ingredients"
-                  : t === "sound"
-                    ? "Sounds"
-                    : "Glow Guide"}
-          </button>
-        ))}
+      <div className="mt-5">
+        <KnowledgeSwitcher active={tab} onChange={setTab} />
       </div>
 
-      {tab === "recipes" && <BonusRecipes />}
-      {tab === "poly" && <PolyTab />}
-      {tab === "ing" && <IngTab />}
-      {tab === "sound" && <SoundTab />}
-      {tab === "guide" && <GuideTab />}
+      <section aria-label={knowledgeTiles().find((t) => t.id === tab)?.title} className="mt-2">
+        {tab === "recipes" && <BonusRecipes />}
+        {tab === "poly" && <PolyTab />}
+        {tab === "ing" && <IngTab />}
+        {tab === "sound" && <SoundTab />}
+        {tab === "guide" && <GuideTab />}
+      </section>
 
       <GoldDivider />
-      <a
-        href={REDS_URL}
-        target="_blank"
-        rel="noreferrer"
-        className="block sand-card p-5 text-center"
-      >
-        <p className="font-serif italic text-[14px] text-[var(--plum)]/70">
-          The blend behind every morning
+      {/* Radiant Reds information: compact, optional and secondary (Option B). */}
+      <div className="reds-info" data-testid="reds-info">
+        <p className="label-caps font-semibold text-[var(--cranberry)]">Optional</p>
+        <p className="mt-1.5 font-serif text-[21px] leading-tight text-[var(--charcoal)]">
+          Radiant Reds
         </p>
-        <p className="mt-1 font-serif text-[22px] text-[var(--plum)]">Radiant Reds Superfood</p>
-      </a>
+        <p className="mt-1 text-[13px] leading-relaxed text-[var(--ink-2)]">
+          An optional addition to your glass. Every recipe is complete without it.
+        </p>
+        <a href={REDS_URL} target="_blank" rel="noreferrer" className="reds-info-link">
+          About Radiant Reds <span aria-hidden="true">→</span>
+        </a>
+      </div>
     </Frame>
   );
 }
@@ -78,18 +84,28 @@ function BonusRecipes() {
           to="/recipes/$id"
           params={{ id: r.id }}
           search={recipeLinkSearch({ kind: "library", filter: "bonus" })}
-          className="block"
+          className="block rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--charcoal)] focus-visible:ring-offset-2"
+          data-testid="bonus-card"
         >
+          {/* Compact card: the recipe's own approved colors, unchanged; only the size is smaller. */}
           <div
-            className="aspect-[4/5] overflow-hidden rounded-2xl shadow-sm"
-            style={{ background: r.gradient }}
+            className="min-h-[124px] overflow-hidden rounded-2xl shadow-sm"
+            style={{ background: recipeHeaderColors(r.gradient).background }}
           >
-            <div className="flex h-full flex-col justify-end p-3 text-[var(--ivory)]">
-              <span className="self-start rounded-full bg-[var(--ivory)]/25 px-2 py-0.5 text-[9px] tracking-wider uppercase">
+            <div
+              className="flex h-full min-h-[124px] flex-col justify-between p-3.5"
+              style={{ color: recipeHeaderColors(r.gradient).text }}
+            >
+              <span className="self-start rounded-full bg-white/25 px-2 py-0.5 text-[10px] tracking-wider uppercase">
                 {r.benefitTag}
               </span>
-              <h3 className="mt-2 font-serif text-[16px] leading-tight">{r.name}</h3>
-              <p className="mt-1 text-[10px] tracking-wide opacity-80">{r.prep}</p>
+              <span>
+                <h3 className="font-serif text-[17px] leading-tight">{r.name}</h3>
+                <p className="mt-0.5 flex items-center justify-between text-[11px] tracking-wide">
+                  {r.prep}
+                  <span aria-hidden="true">→</span>
+                </p>
+              </span>
             </div>
           </div>
         </Link>
@@ -117,7 +133,7 @@ function PolyTab() {
               <div className="p-3">
                 <h4 className="font-serif text-[18px] text-[var(--plum)]">{p.name}</h4>
                 <p className="text-[11px] text-[var(--plum)]/65">{p.topBenefit}</p>
-                <p className="mt-1 text-[10px] text-[var(--gold)]">
+                <p className="mt-1 text-[10px] text-[var(--cranberry)]">
                   {expanded ? "Close ↑" : "Learn more ↓"}
                 </p>
               </div>
@@ -129,9 +145,7 @@ function PolyTab() {
                     <li key={i}>· {pt}</li>
                   ))}
                 </ul>
-                <p className="mt-3 text-[12px] italic text-[var(--plum)]/60">
-                  How to use: {p.howTo}
-                </p>
+                <p className="mt-3 text-[12px] italic text-[var(--ink-2)]">How to use: {p.howTo}</p>
               </div>
             )}
           </div>
@@ -158,26 +172,30 @@ function IngTab() {
             <summary className="flex cursor-pointer items-center justify-between">
               <div>
                 <p className="font-serif text-[17px] text-[var(--plum)]">{i.name}</p>
-                <p className="text-[11px] text-[var(--gold)]">{i.tagline}</p>
+                <p className="text-[11px] text-[var(--cranberry)]">{i.tagline}</p>
               </div>
-              <span className="text-[var(--plum)]/40">+</span>
+              <span className="text-[var(--ink-2)]">+</span>
             </summary>
             <p className="mt-3 text-[13px] text-[var(--plum)]/85">{i.description}</p>
             <div className="mt-3 grid grid-cols-2 gap-2 text-[12px]">
               <p>
-                <span className="text-[var(--gold)]">Nutrition note:</span>{" "}
+                <span className="text-[var(--cranberry)]">Nutrition note:</span>{" "}
                 <span className="text-[var(--plum)]/75">{i.gut}</span>
               </p>
               <p>
-                <span className="text-[var(--gold)]">In the glass:</span>{" "}
+                <span className="text-[var(--cranberry)]">In the glass:</span>{" "}
                 <span className="text-[var(--plum)]/75">{i.skin}</span>
               </p>
             </div>
-            <p className="mt-2 text-[11px] text-[var(--plum)]/55">Also in: {i.alsoIn.join(", ")}</p>
+            {recipesUsing(i.name).length > 0 && (
+              <p className="mt-2 text-[11px] text-[var(--ink-2)]">
+                Also in: {recipesUsing(i.name).join(", ")}
+              </p>
+            )}
           </details>
         ))}
         {list.length === 0 && (
-          <p className="text-center text-[13px] text-[var(--plum)]/50">No matches.</p>
+          <p className="text-center text-[13px] text-[var(--ink-2)]">No matches.</p>
         )}
       </div>
     </div>
@@ -186,119 +204,42 @@ function IngTab() {
 
 function SoundTab() {
   return (
-    <div id="sounds" className="mt-5 space-y-3">
-      {SOUNDS.map((s) => (
-        <SoundPlayer key={s.id} {...s} />
-      ))}
-      <p className="mt-3 text-center text-[11px] italic text-[var(--plum)]/45">
-        Audio streams from Pixabay (royalty-free).
-      </p>
+    <div id="sounds" className="mt-5">
+      <SoundLibrary />
     </div>
-  );
-}
-
-function SoundPlayer({ name, duration, url }: { name: string; duration: string; url: string }) {
-  const ref = useRef<HTMLAudioElement | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    const a = ref.current;
-    if (!a) return;
-    const onTime = () => setProgress(a.duration ? (a.currentTime / a.duration) * 100 : 0);
-    const onEnd = () => setPlaying(false);
-    a.addEventListener("timeupdate", onTime);
-    a.addEventListener("ended", onEnd);
-    return () => {
-      a.removeEventListener("timeupdate", onTime);
-      a.removeEventListener("ended", onEnd);
-    };
-  }, []);
-  const toggle = () => {
-    const a = ref.current;
-    if (!a) return;
-    if (playing) {
-      a.pause();
-      setPlaying(false);
-    } else {
-      a.play()
-        .then(() => setPlaying(true))
-        .catch(() => setPlaying(false));
-    }
-  };
-  return (
-    <div className="sand-card p-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="font-serif text-[18px] text-[var(--plum)]">{name}</p>
-          <p className="text-[11px] tracking-wide uppercase text-[var(--plum)]/55">{duration}</p>
-        </div>
-        <button
-          onClick={toggle}
-          className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--plum)] text-[var(--ivory)]"
-        >
-          {playing ? <PauseIcon /> : <PlayIcon />}
-        </button>
-      </div>
-      <div className="mt-3 h-1 w-full overflow-hidden rounded-full bg-[var(--plum)]/10">
-        <div className="h-full bg-[var(--gold)]" style={{ width: `${progress}%` }} />
-      </div>
-      <audio ref={ref} src={url} preload="none" />
-    </div>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M8 5.14v14l11-7-11-7z" />
-    </svg>
-  );
-}
-function PauseIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
-    </svg>
   );
 }
 
 function GuideTab() {
   const [active, setActive] = useState<string | null>(null);
   const a = active ? ARTICLES.find((x) => x.id === active) : null;
-  if (a) {
-    return (
-      <div className="mt-5 fade-rise">
-        <button onClick={() => setActive(null)} className="text-[12px] text-[var(--plum)]/60">
-          ← All articles
-        </button>
-        <p className="mt-3 label-caps text-[var(--gold)]">The Glow Guide</p>
-        <h2 className="mt-1 font-serif text-[28px] leading-tight text-[var(--plum)]">{a.title}</h2>
-        <GoldDivider />
-        <article className="space-y-4 font-serif text-[16.5px] leading-[1.65] text-[var(--plum)]/85">
-          {a.body.split("\n\n").map((p, i) => (
-            <p key={i} className={i === 0 ? "drop-cap" : ""}>
-              {p}
-            </p>
-          ))}
-        </article>
-      </div>
-    );
-  }
+  const topic = a ? GUIDE_TOPICS[a.id] : null;
   return (
-    <div className="mt-5 space-y-3">
-      {ARTICLES.map((art) => (
-        <button
-          key={art.id}
-          onClick={() => setActive(art.id)}
-          className="block w-full rounded-2xl bg-[var(--card)] p-5 text-left shadow-sm transition hover:bg-[var(--sand)]"
-        >
-          <p className="label-caps text-[var(--gold)]">Article</p>
-          <h3 className="mt-1 font-serif text-[20px] leading-tight text-[var(--plum)]">
-            {art.title}
-          </h3>
-          <p className="mt-2 text-[13px] text-[var(--plum)]/65">{art.body.slice(0, 100)}…</p>
-        </button>
-      ))}
+    <div className="mt-5">
+      <ul className="grid grid-cols-2 gap-2.5" data-testid="guide-topics">
+        {ARTICLES.map((art) => {
+          const t = GUIDE_TOPICS[art.id];
+          return (
+            <li key={art.id} className="min-w-0">
+              <button
+                type="button"
+                onClick={() => setActive(art.id)}
+                className="knowledge-tile flex h-full min-h-[96px] w-full flex-col justify-between rounded-2xl border border-[var(--taupe)]/25 bg-white p-4 text-left shadow-[0_1px_2px_rgba(42,30,34,0.04)]"
+              >
+                <span className="block font-serif text-[17px] leading-tight text-[var(--plum)]">
+                  {t?.short ?? art.title}
+                </span>
+                <span className="mt-1.5 block text-[12px] leading-snug text-[var(--plum)]/70">
+                  {t?.teaser}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {a && topic && (
+        <TopicSheet topic={topic} title={a.title} body={a.body} onClose={() => setActive(null)} />
+      )}
     </div>
   );
 }

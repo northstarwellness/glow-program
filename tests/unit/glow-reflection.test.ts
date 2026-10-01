@@ -208,7 +208,7 @@ describe("Glow Reflection engine", () => {
     const r = buildGlowReflection(HISTORIES.noName);
     expect(r.rhythm.checkInDays).toBe(1);
     expect(r.rhythm.journalDays).toBe(0);
-    expect(r.opening.title).toBe("This is your Glow Reflection.");
+    expect(r.opening.title).toBe("This is your 21-day reflection.");
   });
 
   it("profile thresholds", () => {
@@ -258,5 +258,33 @@ describe("journal privacy", () => {
       [1, 2, 3, 4].map((d) => [d, entry("What helped me stay consistent: nothing much")]),
     );
     expect(journalThemes(nudged)).toEqual([]);
+  });
+});
+
+describe("new feelings (Calm, Overwhelmed) in Your Reflection", () => {
+  const input = (outcomesByDay: Record<number, string[]>): ReflectionInput => ({
+    name: "K",
+    completedDays: ALL,
+    outcomesByDay,
+    journalEntries: {},
+    dailyLogs: {},
+  });
+
+  it("reports them only as recorded, by program day, with no cause or outcome", () => {
+    const r = buildGlowReflection(input({ 2: ["Overwhelmed"], 5: ["Overwhelmed", "Calm"], 9: ["Calm"], 16: ["Calm"] }));
+    const text = reflectionText(r);
+    expect(text).toContain("You chose \u201cCalm\u201d most often, on 3 days.");
+    // With no journal entries it never claims she wrote notes.
+    expect(text).not.toMatch(/\bnotes\b/);
+    expect(text).toMatch(/Overwhelmed/);
+    for (const re of REFLECTION_BANNED) expect(text).not.toMatch(re);
+    // Program days, never calendar dates.
+    expect(text).not.toMatch(/\b(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|September|October)\b/);
+  });
+
+  it("a single Overwhelmed choice is reported once, without a pattern", () => {
+    const text = reflectionText(buildGlowReflection(input({ 7: ["Overwhelmed"] })));
+    expect(text).toContain("On Day 7 you chose \u201cOverwhelmed\u201d.");
+    expect(text).not.toMatch(/most often|pattern|trend/i);
   });
 });

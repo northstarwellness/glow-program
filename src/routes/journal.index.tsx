@@ -21,10 +21,10 @@ function JournalIndex() {
     <Frame>
       <TopBar name={s.name} day={day} />
       <h1 className="font-serif text-[34px] leading-tight text-[var(--charcoal)]">
-        {s.name}'s glow journal.
+        Morning Journal.
       </h1>
-      <p className="mt-1 font-serif italic text-[15px] text-[var(--charcoal)]/55">
-        21 prompts. 21 entries.
+      <p className="mt-1 font-serif italic text-[15px] text-[var(--charcoal)]/65">
+        A little space for what's on your mind.
       </p>
 
       <Link
@@ -32,16 +32,16 @@ function JournalIndex() {
         params={{ n: String(day) }}
         className="mt-5 block rounded-2xl border-l-4 border-[var(--gold)] bg-white border border-[var(--taupe)]/20 shadow-sm p-5"
       >
-        <p className="label-caps text-[var(--gold)]">Today / Day {day}</p>
+        <p className="label-caps text-[var(--cranberry)]">Today / Day {day}</p>
         <p className="mt-2 font-serif italic text-[18px] text-[var(--charcoal)]">
           "{JOURNAL_PROMPTS[day]?.(s.name ?? "")}"
         </p>
-        <p className="mt-3 text-[12px] text-[var(--charcoal)]/50">Tap to write</p>
+        <p className="mt-3 text-[12px] text-[var(--charcoal)]/65">Tap to write · optional</p>
       </Link>
 
       {isProgramComplete(s.completedDays) && <ReflectionLink />}
 
-      <h2 className="mt-8 font-serif text-[22px] text-[var(--charcoal)]">All entries</h2>
+      <h2 className="mt-8 font-serif text-[22px] text-[var(--charcoal)]">Your reflections</h2>
       <div className="mt-3 space-y-2">
         {Array.from({ length: 21 }, (_, i) => i + 1).map((d) => {
           const entry = s.journalEntries[d];
@@ -53,6 +53,7 @@ function JournalIndex() {
                 day={d}
                 feelings={feelings}
                 text={journalTextForDay(s.journalEntries, d)}
+                prompt={entry?.prompt ?? ""}
                 date={journalDateForDay(s.journalEntries, d)}
                 editable={unlocked}
               />
@@ -63,22 +64,30 @@ function JournalIndex() {
                 <span
                   className={`flex h-10 w-10 items-center justify-center rounded-full font-serif text-[16px] ${
                     entry
-                      ? "bg-[var(--gold)] text-[var(--ivory)]"
+                      ? "bg-[var(--cranberry)] text-white"
                       : unlocked
-                        ? "bg-[var(--charcoal)]/8 text-[var(--charcoal)]/55"
+                        ? "bg-[var(--charcoal)]/8 text-[var(--ink-2)]"
                         : "bg-[var(--charcoal)]/4 text-[var(--charcoal)]/25"
                   }`}
                 >
                   {d}
                 </span>
                 <div className="min-w-0 flex-1">
+                  {entry?.prompt && (
+                    <p
+                      className="truncate text-[11.5px] text-[var(--ink-2)]"
+                      data-testid="entry-prompt"
+                    >
+                      {entry.prompt}
+                    </p>
+                  )}
                   <p
-                    className={`truncate font-serif italic text-[14px] ${entry ? "text-[var(--charcoal)]" : "text-[var(--charcoal)]/45"}`}
+                    className={`truncate font-serif italic text-[14px] ${entry ? "text-[var(--charcoal)]" : "text-[var(--ink-2)]"}`}
                   >
                     {entry
                       ? entry.entry.slice(0, 60) + (entry.entry.length > 60 ? "…" : "")
                       : unlocked
-                        ? "Not yet written"
+                        ? "No entry"
                         : "Locked"}
                   </p>
                 </div>
@@ -112,26 +121,28 @@ function DailyReflectionCard({
   text,
   date,
   editable,
+  prompt,
 }: {
   day: number;
   feelings: string[];
   text: string;
   date: Date | null;
   editable: boolean;
+  prompt: string;
 }) {
   return (
     <div
       data-testid={`daily-reflection-${day}`}
       className="flex gap-3 rounded-xl border border-[var(--taupe)]/15 bg-white p-3 shadow-sm"
     >
-      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--gold)] font-serif text-[16px] text-[var(--ivory)]">
+      <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[var(--cranberry)] font-serif text-[16px] text-white">
         {day}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="label-caps text-[10px] text-[var(--gold-deep)]">
-          Day {day} · Daily Reflection
+        <p className="label-caps text-[10px] text-[var(--cranberry)]">
+          Day {day}
           {date && (
-            <span className="text-[var(--charcoal)]/45">
+            <span className="text-[var(--ink-2)]">
               {" · "}
               {date.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
             </span>
@@ -140,13 +151,18 @@ function DailyReflectionCard({
         <div className="mt-2">
           <FeelingTags feelings={feelings} />
         </div>
+        {text && prompt && (
+          <p className="mt-2 truncate text-[11.5px] text-[var(--ink-2)]" data-testid="entry-prompt">
+            {prompt}
+          </p>
+        )}
         {text && (
           <p className="mt-2 line-clamp-2 font-serif italic text-[14px] leading-snug text-[var(--charcoal)]">
             {text}
           </p>
         )}
         {editable && (
-          <p className="mt-2 text-[12px] text-[var(--charcoal)]/55">
+          <p className="mt-2 text-[12px] text-[var(--ink-2)]">
             {text ? "Open to read or edit →" : "Open to write or edit →"}
           </p>
         )}
@@ -164,9 +180,9 @@ function ReflectionLink() {
     >
       <div>
         <p className="label-caps text-[var(--berry)]/70">Day 21 · Complete</p>
-        <p className="mt-1 font-serif text-[19px] text-[var(--charcoal)]">Your Glow Reflection</p>
+        <p className="mt-1 font-serif text-[19px] text-[var(--charcoal)]">Your Reflection</p>
       </div>
-      <span aria-hidden="true" className="font-serif text-[18px] text-[var(--charcoal)]/50">
+      <span aria-hidden="true" className="font-serif text-[18px] text-[var(--ink-2)]">
         →
       </span>
     </Link>

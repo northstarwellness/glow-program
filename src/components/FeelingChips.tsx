@@ -1,4 +1,5 @@
-import { OUTCOMES, outcomeLabel, useApp } from "@/lib/store";
+import { useState } from "react";
+import { VISIBLE_OUTCOMES, outcomeLabel, useApp } from "@/lib/store";
 import { feelingsForDay, persistedFeelingsForDay } from "@/lib/reflections";
 
 /**
@@ -9,6 +10,12 @@ export function FeelingChips({ day, savedNote }: { day: number; savedNote: strin
   const byDay = useApp((s) => s.outcomesByDay);
   const toggle = useApp((s) => s.toggleOutcomeForDay);
   const selected = feelingsForDay(byDay, day);
+  // Feelings saved before the list was shortened stay on screen for this day (as saved),
+  // even after she unticks one, so nothing she chose earlier silently disappears.
+  const [earlier] = useState(() =>
+    selected.filter((o) => !(VISIBLE_OUTCOMES as readonly string[]).includes(o)),
+  );
+  const options = [...VISIBLE_OUTCOMES, ...earlier];
   // Confirm against storage itself before telling her it's saved.
   const persisted = persistedFeelingsForDay(day);
   const saved = persisted !== null && persisted.join("|") === selected.join("|");
@@ -16,7 +23,7 @@ export function FeelingChips({ day, savedNote }: { day: number; savedNote: strin
   return (
     <div>
       <div className="flex flex-wrap gap-2">
-        {OUTCOMES.map((outcome) => {
+        {options.map((outcome) => {
           const active = selected.includes(outcome);
           return (
             <button
@@ -24,10 +31,10 @@ export function FeelingChips({ day, savedNote }: { day: number; savedNote: strin
               type="button"
               aria-pressed={active}
               onClick={() => toggle(day, outcome)}
-              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-4 font-serif text-[15px] transition-all cursor-pointer ${
+              className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-4 font-serif text-[15px] transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cranberry)] focus-visible:ring-offset-2 ${
                 active
-                  ? "border-[var(--gold-deep)] bg-[var(--blush)] text-[var(--charcoal)] shadow-[inset_0_0_0_1px_var(--gold-deep)]"
-                  : "border-[var(--taupe)]/35 bg-[var(--beige)] text-[var(--charcoal)]/75 hover:border-[var(--gold)]/50"
+                  ? "border-[var(--cranberry)] bg-[var(--cranberry)] text-white"
+                  : "border-[#D9D6DD] bg-white text-[var(--charcoal)] hover:border-[var(--cranberry)]/50"
               }`}
             >
               {active && <Check />}
@@ -39,7 +46,7 @@ export function FeelingChips({ day, savedNote }: { day: number; savedNote: strin
       <p
         role="status"
         aria-live="polite"
-        className={`mt-4 font-serif italic text-[12.5px] ${saved ? "text-[var(--charcoal)]/55" : "text-[var(--berry)]"}`}
+        className={`mt-4 font-serif italic text-[12.5px] ${saved ? "text-[var(--ink-2)]" : "text-[var(--berry)]"}`}
       >
         {selected.length === 0
           ? ""
@@ -58,7 +65,7 @@ export function FeelingTags({ feelings }: { feelings: string[] }) {
       {feelings.map((o) => (
         <li
           key={o}
-          className="inline-flex items-center gap-1 rounded-full border border-[var(--gold)]/45 bg-[var(--blush)] px-2.5 py-0.5 font-serif text-[12.5px] text-[var(--charcoal)]/85"
+          className="inline-flex items-center gap-1 rounded-full border border-[var(--cranberry)]/40 bg-white px-2.5 py-0.5 font-serif text-[12.5px] text-[var(--charcoal)]"
         >
           <Check size={10} />
           {outcomeLabel(o)}
@@ -78,7 +85,6 @@ function Check({ size = 12 }: { size?: number }) {
       stroke="currentColor"
       strokeWidth="2.5"
       aria-hidden="true"
-      className="text-[var(--gold-deep)]"
     >
       <path d="M5 13l4 4L19 7" />
     </svg>

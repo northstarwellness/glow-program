@@ -12,7 +12,10 @@ import { useApp, routeAfterComplete, isDayPersisted, isDayUnlocked, activeDay } 
 import { ProgressSkeleton } from "@/components/ProgressSkeleton";
 import { COMPLETION_ANCHOR, recipeLinkSearch } from "@/lib/recipe-entry";
 import { useHydrated } from "@/lib/use-hydrated";
-import { DAYS, JOURNAL_PROMPTS, RECIPES, REDS_URL, phaseFor } from "@/lib/content";
+import { DAYS, JOURNAL_PROMPTS, RECIPES, phaseFor } from "@/lib/content";
+import { OptionalReds } from "@/components/OptionalReds";
+import { DailySound } from "@/components/Sounds";
+import { SOUNDS } from "@/lib/sounds";
 import { SmoothieImage } from "@/components/SmoothieImage";
 import { dayButtonStyle } from "@/lib/recipe-button";
 import { FeelingChips } from "@/components/FeelingChips";
@@ -135,29 +138,26 @@ function DayView() {
 
       {/* Phase breadcrumb */}
       <div className="mb-4 flex items-center gap-2">
-        <Link to="/rituals" className="text-[12px] text-[var(--charcoal)]/45">
+        <Link to="/rituals" className="text-[12px] text-[var(--ink-2)]">
           ← All rituals
         </Link>
-        <span className="text-[var(--taupe)]/60">·</span>
-        <span className="label-caps text-[var(--gold)]">
+        <span className="text-[var(--ink-2)]">·</span>
+        <span className="label-caps text-[var(--cranberry)]">
           Week {phase.week} · {phase.label}
         </span>
       </div>
 
       {/* Day hero — editorial light card */}
       <div
-        className="relative overflow-hidden rounded-3xl px-7 pt-7 pb-8"
-        style={{
-          background: "var(--beige)",
-          border: "1px solid oklch(0.748 0.012 65 / 0.18)",
-        }}
+        className="day-hero relative overflow-hidden rounded-3xl px-7 pt-7 pb-8"
+        data-testid="day-hero"
       >
-        <div className="mb-3 h-px w-8 bg-[var(--gold)]/60" />
-        <p className="label-caps text-[var(--gold)]">
+        <div className="mb-3.5 h-px w-8 bg-[var(--gold)]/60" />
+        <p className="label-caps text-[var(--cranberry)]">
           Week {phase.week} · {phase.label}
         </p>
-        <p className="font-serif text-[72px] leading-none text-[var(--charcoal)]">{dayNum}</p>
-        <h1 className="mt-1 font-serif text-[28px] leading-tight text-[var(--charcoal)]">
+        <p className="mt-3 font-serif text-[72px] leading-[0.9] text-[var(--charcoal)]">{dayNum}</p>
+        <h1 className="mt-3 font-serif text-[28px] leading-tight text-[var(--charcoal)] [text-wrap:balance]">
           {d.title}
         </h1>
         {done && (
@@ -180,26 +180,24 @@ function DayView() {
 
       <GoldDivider />
 
-      {/* Ritual guide */}
-      <div className="bg-white border border-[var(--taupe)]/20 rounded-2xl p-6 shadow-sm">
-        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Today's ritual</p>
-        <p className="font-serif italic text-[17px] leading-relaxed text-[var(--charcoal)]/80 drop-cap">
-          {d.guide}
-        </p>
-      </div>
-
-      <GoldDivider />
+      {/* The morning in order: recipe, optional sound, ritual, optional journal. */}
+      <MorningSteps
+        recipeName={recipe.name}
+        prep={recipe.prep}
+        hasSound={SOUNDS.length > 0}
+        dayNum={dayNum}
+      />
 
       {/* Recipe card with checkable ingredients */}
-      <div>
-        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Today's recipe</p>
+      <div id="day-recipe" className="scroll-mt-6">
+        <p className="label-caps text-[var(--ink-2)] mb-3">Today's recipe</p>
         <div className="overflow-hidden rounded-2xl">
           {/* Recipe hero — photo with gradient fallback */}
           <div className="relative overflow-hidden" style={{ minHeight: "140px" }}>
             <SmoothieImage
               recipe={recipe}
-              className="absolute inset-0 h-full w-full"
-              style={{ minHeight: "140px" }}
+              className="h-full w-full"
+              style={{ position: "absolute", inset: 0 }}
             />
             {/* Gradient overlay for text legibility */}
             <div
@@ -220,9 +218,7 @@ function DayView() {
           </div>
           {/* Checkable ingredient list */}
           <div className="bg-white border border-[var(--taupe)]/15 border-t-0 rounded-b-2xl">
-            <p className="px-5 pt-4 pb-1 label-caps text-[var(--charcoal)]/40">
-              Gather your ingredients
-            </p>
+            <p className="px-5 pt-4 pb-1 label-caps text-[var(--ink-2)]">Gather your ingredients</p>
             <div className="divide-y divide-[var(--taupe)]/15">
               {recipe.ingredients.map((name) => (
                 <button
@@ -252,9 +248,7 @@ function DayView() {
                   </span>
                   <span
                     className={`font-serif text-[16px] transition-all ${
-                      checked[name]
-                        ? "text-[var(--charcoal)]/30 line-through"
-                        : "text-[var(--charcoal)]"
+                      checked[name] ? "text-[var(--ink-2)] line-through" : "text-[var(--charcoal)]"
                     }`}
                   >
                     {name}
@@ -263,7 +257,7 @@ function DayView() {
               ))}
             </div>
             {allChecked && (
-              <p className="px-5 py-3 font-serif italic text-[13px] text-[var(--gold)]">
+              <p className="px-5 py-3 font-serif italic text-[13px] text-[var(--cranberry)]">
                 All gathered. Ready to blend.
               </p>
             )}
@@ -283,44 +277,24 @@ function DayView() {
         </div>
       </div>
 
-      {/* Radiant Reds Boost — warm gold card */}
+      {/* Optional sound. Shown only when a verified sound exists; never affects completion. */}
+      <DailySound day={dayNum} />
+
+      {/* Today's ritual: read once the glass is ready */}
       <div
-        className="mt-5 rounded-3xl overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(135deg, oklch(0.968 0.028 68) 0%, oklch(0.985 0.016 65) 100%)",
-          border: "1px solid oklch(0.720 0.082 65 / 0.25)",
-        }}
+        id="day-ritual"
+        className="reading-card mt-5 scroll-mt-6 rounded-2xl p-6"
+        data-testid="todays-ritual"
       >
-        <div className="px-6 pt-5 pb-2">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="h-1.5 w-1.5 rounded-full bg-[var(--gold)]" />
-            <p className="label-caps text-[var(--gold)]">Radiant Reds Boost</p>
-          </div>
-          <p className="font-serif italic text-[16px] leading-relaxed text-[var(--charcoal)]/75">
-            {recipe.redsBoost.why}
-          </p>
-        </div>
-        <div className="px-6 pb-4 mt-2 space-y-1.5">
-          {recipe.redsBoost.proof.slice(0, 3).map((p, i) => (
-            <div key={i} className="flex items-start gap-2">
-              <span className="mt-1.5 h-1 w-1 flex-shrink-0 rounded-full bg-[var(--gold)]" />
-              <span className="label-caps text-[var(--charcoal)]/55">{p}</span>
-            </div>
-          ))}
-        </div>
-        <a
-          href={REDS_URL}
-          target="_top"
-          className="flex items-center justify-between border-t border-[var(--gold)]/20 px-6 py-3.5"
-        >
-          <span className="font-serif text-[14px] text-[var(--gold)]">Shop Radiant Reds →</span>
-        </a>
+        <p className="label-caps text-[var(--ink-2)] mb-3">Today's ritual</p>
+        <p className="font-serif italic text-[17px] leading-relaxed text-[var(--charcoal)]/80 drop-cap">
+          {d.guide}
+        </p>
       </div>
 
       {/* Check-ins */}
       <div className="mt-5">
-        <p className="label-caps text-[var(--charcoal)]/40 mb-3">Today's check-ins</p>
+        <p className="label-caps text-[var(--ink-2)] mb-3">Today's check-ins</p>
         <div
           className={`grid grid-cols-3 gap-2 rounded-2xl p-2 transition-all ${
             log.reds && log.ritual && log.journal ? "bg-[var(--gold)]/8" : ""
@@ -330,6 +304,7 @@ function DayView() {
             label="Radiant Reds"
             icon="glass"
             done={!!log.reds}
+            optional
             onClick={() => s.toggleLog(dayNum, "reds")}
           />
           <LogTile
@@ -352,17 +327,20 @@ function DayView() {
 
       {/* Journal prompt */}
       <Link
+        id="day-journal"
         to="/journal/$n"
         params={{ n: String(dayNum) }}
         className="mt-4 flex items-center justify-between rounded-2xl border border-[var(--taupe)]/25 bg-white p-5 shadow-sm cursor-pointer"
       >
         <div className="min-w-0 flex-1 pr-3">
           <span aria-hidden="true" className="mb-2.5 block h-px w-7 bg-[var(--berry)]/50" />
-          <p className="label-caps text-[var(--berry)] mb-2">Today's prompt</p>
+          <p className="label-caps text-[var(--berry)] mb-2">Morning Journal · optional</p>
           <p className="font-serif italic text-[18px] leading-snug text-[var(--charcoal)]">
             "{prompt}"
           </p>
-          <p className="mt-2 text-[12px] text-[var(--charcoal)]/70">Tap to write →</p>
+          <p className="mt-2 text-[12px] text-[var(--charcoal)]/70">
+            {s.journalEntries[dayNum] ? "Read or edit your entry →" : "Tap to write →"}
+          </p>
         </div>
         <svg
           width="18"
@@ -371,11 +349,14 @@ function DayView() {
           fill="none"
           stroke="currentColor"
           strokeWidth="1.6"
-          className="text-[var(--taupe)] flex-shrink-0"
+          className="text-[var(--ink-2)] flex-shrink-0"
         >
           <path d="M9 18l6-6-6-6" />
         </svg>
       </Link>
+
+      {/* Optional addition, after the recipe and check-ins. The morning is complete without it. */}
+      <OptionalReds recipeId={recipe.id} className="mt-4" />
 
       <GoldDivider />
 
@@ -386,7 +367,7 @@ function DayView() {
         tabIndex={-1}
         className="scroll-mt-6 outline-none"
       >
-        <p className="label-caps mb-3 text-[var(--charcoal)]/40">Finish today</p>
+        <p className="label-caps mb-3 text-[var(--ink-2)]">Finish today</p>
         <button
           type="button"
           ref={completeBtnRef}
@@ -412,7 +393,7 @@ function DayView() {
           )}
           {done ? `Day ${dayNum} complete` : `Mark Day ${dayNum} Complete →`}
         </button>
-        <p className="mt-3 text-center font-serif italic text-[12px] text-[var(--charcoal)]/35">
+        <p className="mt-3 text-center font-serif italic text-[12px] text-[var(--ink-2)]">
           {done ? "See you tomorrow morning." : "One tap when your ritual is done."}
         </p>
         <p role="alert" className="mt-2 text-center text-[12px] text-[var(--berry)]">
@@ -429,13 +410,14 @@ function RitualFeelChips({ day }: { day: number }) {
       id="feelings"
       className="mt-5 scroll-mt-6 rounded-2xl bg-white border border-[var(--taupe)]/20 shadow-sm p-5"
     >
-      <p className="label-caps text-[var(--charcoal)]/40 mb-1">
-        How do you feel after today's ritual?
+      <p className="label-caps text-[var(--ink-2)] mb-1">Optional</p>
+      <h2 className="font-serif text-[20px] leading-tight text-[var(--charcoal)]">
+        How do you feel today?
+      </h2>
+      <p className="mt-1 mb-4 text-[13px] leading-snug text-[var(--charcoal)]/70">
+        A small check-in, just for you. Tap any that fit, or skip.
       </p>
-      <p className="font-serif italic text-[13px] text-[var(--charcoal)]/45 mb-4">
-        Select all that feel true.
-      </p>
-      <FeelingChips day={day} savedNote="Saved to your 21-day record and your journal." />
+      <FeelingChips day={day} savedNote="Saved to your 21-day record and your Morning Journal." />
     </div>
   );
 }
@@ -444,11 +426,14 @@ function LogTile({
   label,
   icon,
   done,
+  optional = false,
   onClick,
 }: {
   label: string;
   icon: "glass" | "leaf" | "sun";
   done: boolean;
+  /** Logging it never affects completing the day. */
+  optional?: boolean;
   onClick: () => void;
 }) {
   return (
@@ -463,9 +448,9 @@ function LogTile({
       {done ? <CheckIcon /> : <TileIcon name={icon} />}
       <span className="text-[11px] leading-tight">{label}</span>
       <span
-        className={`text-[9px] tracking-wider uppercase ${done ? "text-[var(--gold)]" : "text-[var(--charcoal)]/40"}`}
+        className={`text-[9px] tracking-wider uppercase ${done ? "text-[var(--cranberry)]" : "text-[var(--ink-2)]"}`}
       >
-        {done ? "Logged" : "Begin"}
+        {done ? "Logged" : optional ? "Optional" : "Begin"}
       </span>
     </button>
   );
@@ -524,5 +509,54 @@ function TileIcon({ name }: { name: "glass" | "leaf" | "sun" }) {
       <circle cx="12" cy="12" r="4" />
       <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
     </svg>
+  );
+}
+
+/** A short outline of this morning, in page order, each step linking to its section. */
+function MorningSteps({
+  recipeName,
+  prep,
+  hasSound,
+  dayNum,
+}: {
+  recipeName: string;
+  prep: string;
+  hasSound: boolean;
+  dayNum: number;
+}) {
+  const steps: { href: string; label: string; note: string }[] = [
+    { href: "#day-recipe", label: `Make ${recipeName}`, note: prep },
+    ...(hasSound ? [{ href: "#day-sound", label: "Play a sound", note: "Optional" }] : []),
+    { href: "#day-ritual", label: "Read today's ritual", note: "A few quiet minutes" },
+    { href: "#day-journal", label: "Write in your journal", note: "Optional" },
+  ];
+  return (
+    <nav aria-label={`Day ${dayNum}, this morning`} className="mb-6" data-testid="morning-steps">
+      <p className="label-caps mb-2.5 text-[var(--ink-2)]">This morning</p>
+      <ol className="overflow-hidden rounded-2xl border border-[var(--taupe)]/20 bg-white">
+        {steps.map((st, i) => (
+          <li key={st.label} className={i ? "border-t border-[var(--taupe)]/15" : ""}>
+            <a
+              href={st.href}
+              className="home-row flex min-h-[52px] items-center gap-3.5 px-4 py-2.5"
+            >
+              <span
+                aria-hidden="true"
+                className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border border-[var(--gold)]/50 font-serif text-[13px] text-[var(--charcoal)]/75"
+              >
+                {i + 1}
+              </span>
+              <span className="min-w-0 flex-1 font-serif text-[16.5px] leading-tight text-[var(--charcoal)]">
+                {st.label}
+              </span>
+              <span className="flex-shrink-0 text-[12px] text-[var(--ink-2)]">{st.note}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-2 text-[12px] text-[var(--ink-2)]">
+        When you&rsquo;re done, mark Day {dayNum} complete at the bottom of the page.
+      </p>
+    </nav>
   );
 }

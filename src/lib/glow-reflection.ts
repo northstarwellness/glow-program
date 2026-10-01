@@ -1,5 +1,5 @@
 /**
- * "Your Glow Reflection" — the Day 21 summary, built on-device from the customer's own
+ * "Your Reflection" — the Day 21 summary, built on-device from the customer's own
  * saved activity. Deterministic rules only: no AI service, no randomness, no network.
  *
  * Rules the copy follows:
@@ -18,7 +18,7 @@ import {
   feelingCounts,
   feelingsForDay,
   journalTextForDay,
-  JOURNAL_NUDGES,
+  ALL_JOURNAL_NUDGES,
 } from "./reflections";
 import { latestIntention, selectExcerpts, type JournalExcerpt } from "./journal-excerpts";
 
@@ -131,7 +131,7 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 function stripNudges(text: string): string {
   let t = text;
-  for (const n of JOURNAL_NUDGES) t = t.split(n).join(" ");
+  for (const n of ALL_JOURNAL_NUDGES) t = t.split(n).join(" ");
   return t.toLowerCase();
 }
 
@@ -201,14 +201,15 @@ export function buildGlowReflection(input: ReflectionInput): GlowReflection {
   // 1. Opening
   const who = name ? `${name}, ` : "";
   const opening = {
-    title: `${who}this is your Glow Reflection.`.replace(/^t/, "T"),
+    title: `${who}this is your 21-day reflection.`.replace(/^t/, "T"),
     body: {
       rich: "You finished all 21 days and recorded how they felt, in chosen words and in writing. Everything here comes from what you recorded.",
       feelings:
         "You finished all 21 days and kept choosing words for how you felt. Those choices are the heart of this reflection.",
       writing:
         "You finished all 21 days and kept returning to your journal. Your writing is the thread through this reflection.",
-      steady: `You finished all 21 days and left a few notes along the way. This reflection starts with the rhythm you built.`,
+      // Names only what was recorded: check-ins, journal notes, or both.
+      steady: `You finished all 21 days and ${J === 0 ? "checked in a few times" : C === 0 ? "left a few notes" : "left a few check-ins and notes"} along the way. This reflection starts with the rhythm you built.`,
       quiet: `You finished all 21 days, quietly, one morning at a time. This reflection starts with the rhythm you built.`,
     }[profile],
   };
@@ -314,7 +315,7 @@ export function buildGlowReflection(input: ReflectionInput): GlowReflection {
         "Naming how you feel, one morning at a time, is a practice of its own. You practiced it.",
       writing:
         "Putting a morning into words is a way of noticing it. You did that again and again.",
-      steady: "A few notes and a full 21 days. The rhythm is the part you built.",
+      steady: `${J === 0 ? "A few check-ins" : C === 0 ? "A few notes" : "A few check-ins and notes"} and a full 21 days. The rhythm is the part you built.`,
       quiet: "You kept the ritual without needing to explain it. The 21 days are yours.",
     }[profile],
   );

@@ -25,7 +25,8 @@ export function SmoothieImage({ recipe, className = "", style }: Props) {
   return (
     <div
       className={className}
-      style={{ ...style, background: recipe.gradient, position: "relative", overflow: "hidden" }}
+      // Defaults first, so a caller can place it (e.g. position: absolute to fill a header).
+      style={{ position: "relative", overflow: "hidden", ...style, background: recipe.gradient }}
     >
       {src && (
         <img

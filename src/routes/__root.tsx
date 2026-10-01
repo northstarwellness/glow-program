@@ -74,14 +74,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Ritual App — The Inner Glow Reset" },
+      { title: "Ritual App | The Inner Glow Reset" },
       {
         name: "description",
         content:
           "A 21-day beauty-from-within morning ritual: polyphenol-rich smoothies, gentle check-ins and daily reflection.",
       },
       { name: "author", content: "NOURÉ Wellness" },
-      { property: "og:title", content: "Ritual App — The Inner Glow Reset" },
+      { property: "og:title", content: "Ritual App | The Inner Glow Reset" },
       {
         property: "og:description",
         content:
@@ -90,7 +90,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@nourewellness" },
-      { name: "twitter:title", content: "Ritual App — The Inner Glow Reset" },
+      { name: "twitter:title", content: "Ritual App | The Inner Glow Reset" },
       {
         name: "twitter:description",
         content:

@@ -42,16 +42,16 @@ function BottomNav() {
               className="relative flex flex-1 flex-col items-center gap-0.5 py-1.5 cursor-pointer transition-all duration-200"
             >
               {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-[var(--gold)]" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-6 rounded-full bg-[var(--cranberry)]" />
               )}
               <span
-                className={`transition-colors duration-200 ${active ? "text-[var(--charcoal)]" : "text-[var(--taupe)]"}`}
+                className={`transition-colors duration-200 ${active ? "text-[var(--cranberry)]" : "text-[var(--ink-2)]"}`}
               >
                 {active ? n.activeIcon : n.icon}
               </span>
               <span
                 className={`text-[9px] tracking-[0.12em] uppercase font-medium transition-colors duration-200 ${
-                  active ? "text-[var(--charcoal)]" : "text-[var(--taupe)]"
+                  active ? "text-[var(--cranberry)]" : "text-[var(--ink-2)]"
                 }`}
               >
                 {n.label}

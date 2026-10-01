@@ -2,47 +2,42 @@ import { createFileRoute, useNavigate, Navigate } from "@tanstack/react-router";
 import { useApp } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { GoldDivider } from "@/components/Frame";
+import { SOUNDS } from "@/lib/sounds";
 
 export const Route = createFileRoute("/welcome")({
   component: Welcome,
 });
 
-const BONUSES = [
+/** Everything else inside the app, described plainly. No prices or invented values. */
+const ALSO_INCLUDED = [
   {
-    n: 1,
-    name: "Polyphenol Power Library",
-    value: "$27",
-    body: "Your guide to 30 polyphenol-rich foods and ingredients. What they are, how to use them and how to pair them.",
+    name: "Polyphenol Library",
+    body: "Eight polyphenol-rich foods, what they are and how to use them, plus a guide to every recipe ingredient.",
   },
   {
-    n: 2,
-    name: "The Ingredient Encyclopedia",
-    value: "$19",
+    name: "Ingredient guide",
     body: "Tap any ingredient in a recipe to learn what it brings to your glass, in plain language.",
   },
+  // Listed only while verified sounds exist (see src/lib/sounds.ts).
+  ...(SOUNDS.length
+    ? [
+        {
+          name: "Morning sounds",
+          body: "Nature sounds and quiet instrumental music to play while you make your glass or write in your journal.",
+        },
+      ]
+    : []),
   {
-    n: 3,
-    name: "Morning Sound Rituals",
-    value: "$17",
-    body: "5 curated ambient sound sessions. Play while you journal or prepare your Radiant Reds.",
+    name: "21 journal prompts",
+    body: "One short prompt for each morning. Write about it, write about anything, or skip it.",
   },
   {
-    n: 4,
-    name: "21 Personalized Ritual Prompts",
-    value: "Priceless",
-    body: "One message per day, written for this stage of your reset. Never generic. Never repeated.",
+    name: "Your Reflection",
+    body: "On Day 21, a private look back at the mornings you completed and the feelings you chose.",
   },
   {
-    n: 5,
-    name: "Your Glow Reflection",
-    value: "$37",
-    body: "A private place to notice and remember how the ritual felt across your 21 days.",
-  },
-  {
-    n: 6,
-    name: "Day 21 Celebration + Glow Score",
-    value: "$47",
-    body: "When you complete Day 21, you unlock your Glow Score, a celebration screen, and a shareable card.",
+    name: "Day 21 Celebration",
+    body: "When you complete Day 21, you get a celebration screen and a Ritual Card of your 21 mornings to save or share.",
   },
 ];
 
@@ -62,7 +57,7 @@ function Welcome() {
   return (
     <div className="ivory-frame min-h-screen">
       <div className="mx-auto max-w-[440px] px-5 pt-8 pb-16">
-        <p className="text-center font-serif text-[14px] tracking-[0.45em] text-[var(--charcoal)]/50">
+        <p className="text-center font-serif text-[14px] tracking-[0.45em] text-[var(--ink-2)]">
           RITUAL APP
         </p>
 
@@ -70,9 +65,9 @@ function Welcome() {
           <h1 className="font-serif text-[42px] leading-[1.05] text-[var(--charcoal)]">
             Good morning,
             <br />
-            <em className="text-[var(--gold)]">{name}.</em>
+            <em className="text-[var(--cranberry)]">{name}.</em>
           </h1>
-          <p className="mt-3 font-serif italic text-[18px] text-[var(--charcoal)]/55">
+          <p className="mt-3 font-serif italic text-[18px] text-[var(--ink-2)]">
             Your 21-day reset begins today.
           </p>
           <GoldDivider />
@@ -84,27 +79,27 @@ function Welcome() {
           style={{ background: "var(--blush)", border: "1px solid oklch(0.82 0.06 10 / 0.18)" }}
         >
           <p className="font-serif text-[17px] leading-relaxed text-[var(--charcoal)]/75 italic">
-            "Skincare works on the outside. The Inner Glow Reset is the inside half of your routine:
+            "Skincare works on the outside. Your 21 Mornings are the inside half of your routine:
             one polyphenol-rich glass, every morning for 21 days."
           </p>
         </div>
 
         {/* Core offer */}
         <div className="gold-glow-card mt-6 p-6">
-          <p className="label-caps text-[var(--gold)]">What you have access to</p>
+          <p className="label-caps text-[var(--cranberry)]">What you have access to</p>
           <h2 className="mt-2 font-serif text-[26px] leading-tight text-[var(--charcoal)]">
-            The Inner Glow Reset
+            Your 21 Mornings
           </h2>
-          <p className="mt-0.5 font-serif italic text-[var(--charcoal)]/55">
-            21-Day Beauty Ritual System
+          <p className="mt-0.5 font-serif italic text-[var(--charcoal)]/65">
+            The 21-Day Beauty Ritual
           </p>
           <ul className="mt-5 space-y-2 text-[14px] text-[var(--charcoal)]/70">
             {[
-              "21 daily ritual guides — one unlocks each morning",
+              "21 daily ritual guides, taken in order at your own pace",
               "Beauty-from-within education on polyphenols, plants and color",
               "Polyphenol recipe library built around Radiant Reds",
-              "Daily glow journal with personalized prompts",
-              "Progress tracking, streaks & milestone celebrations",
+              "Morning Journal: a little space for what's on your mind",
+              "Your Ritual: completed mornings and milestone celebrations",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
                 <span className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-[var(--gold)]" />
@@ -112,36 +107,23 @@ function Welcome() {
               </li>
             ))}
           </ul>
-          <div className="mt-5 pt-4 border-t border-[var(--gold)]/20 flex items-center justify-between">
-            <p className="label-caps text-[var(--charcoal)]/45">Total value</p>
-            <p className="font-serif text-[22px] text-[var(--charcoal)]">$244</p>
-          </div>
         </div>
 
-        {/* Bonus stack */}
+        {/* Also included, described plainly */}
         <div className="mt-10">
-          <p className="label-caps text-center text-[var(--charcoal)]/45">
-            Plus six bonuses included
-          </p>
-          <h3 className="mt-2 text-center font-serif text-[24px] text-[var(--charcoal)]">
-            Everything else you receive
+          <h3 className="text-center font-serif text-[24px] text-[var(--charcoal)]">
+            Also included
           </h3>
         </div>
 
         <div className="mt-5 space-y-3">
-          {BONUSES.map((b) => (
-            <div key={b.n} className="glass-card p-5">
-              <div className="flex items-start justify-between gap-3">
-                <span className="label-caps text-[var(--gold)]">Bonus {b.n}</span>
-                <span className="rounded-full border border-[var(--taupe)]/30 px-2.5 py-0.5 text-[11px] tracking-wide text-[var(--charcoal)]/50">
-                  {b.value}
-                </span>
-              </div>
-              <h4 className="mt-2 font-serif text-[19px] leading-tight text-[var(--charcoal)]">
-                {b.name}
+          {ALSO_INCLUDED.map((item) => (
+            <div key={item.name} className="glass-card p-5">
+              <h4 className="font-serif text-[19px] leading-tight text-[var(--charcoal)]">
+                {item.name}
               </h4>
-              <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--charcoal)]/60">
-                {b.body}
+              <p className="mt-1.5 text-[13px] leading-relaxed text-[var(--charcoal)]/65">
+                {item.body}
               </p>
             </div>
           ))}
@@ -149,7 +131,7 @@ function Welcome() {
 
         <div className="mt-12 text-center">
           <div className="warm-divider" />
-          <p className="mt-6 font-serif italic text-[16px] text-[var(--charcoal)]/55">
+          <p className="mt-6 font-serif italic text-[16px] text-[var(--ink-2)]">
             Yours, beginning today.
           </p>
           <div className="warm-divider mt-6" />
@@ -158,8 +140,8 @@ function Welcome() {
         <button onClick={begin} className="gold-pill-btn mt-8 w-full">
           Start Day 1, {name} →
         </button>
-        <p className="mt-4 text-center font-serif italic text-[12px] text-[var(--charcoal)]/40">
-          No account. No app subscription. Just the ritual.
+        <p className="mt-4 text-center font-serif italic text-[12px] text-[var(--ink-2)]">
+          Your progress is saved on this device.
         </p>
       </div>
     </div>

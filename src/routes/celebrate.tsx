@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useApp, glowScore, isProgramComplete, activeDay } from "@/lib/store";
+import { useApp, isProgramComplete, activeDay } from "@/lib/store";
 import { useHydrated } from "@/lib/use-hydrated";
 import { REDS_URL } from "@/lib/content";
 import { renderGlowCard } from "@/lib/glow-card";
@@ -22,7 +22,6 @@ function Celebrate() {
       earnBadge("day-21");
     }
   }, [complete, markMilestoneShown, earnBadge]);
-  const score = glowScore(s);
   // Server renders in UTC; format the local date only on the client to avoid a hydration mismatch.
   const date = hydrated
     ? new Date().toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" })
@@ -31,7 +30,6 @@ function Celebrate() {
     complete && s.name
       ? JSON.stringify({
           name: s.name,
-          score,
           daysDone: s.completedDays.length,
           entries: Object.keys(s.journalEntries).length,
           redsDays: Object.values(s.dailyLogs).filter((l) => l.reds).length,
@@ -51,15 +49,15 @@ function Celebrate() {
     if (!card.file) {
       setSaveMsg(
         card.failed
-          ? "We couldn't create your Glow Card image on this device."
-          : "Your Glow Card is still being prepared. Try again in a moment.",
+          ? "We couldn't create your Ritual Card image on this device."
+          : "Your Ritual Card is still being prepared. Try again in a moment.",
       );
       return;
     }
     // Share sheet (includes "Save Image" on iPhone) — invoked synchronously from the tap.
-    void shareOrDownloadFile(card.file, "My Glow Card").then((outcome) => {
-      if (outcome === "downloaded") setSaveMsg("Your Glow Card download has started.");
-      if (outcome === "failed") setSaveMsg("We couldn't download your Glow Card on this device.");
+    void shareOrDownloadFile(card.file, "My Ritual Card").then((outcome) => {
+      if (outcome === "downloaded") setSaveMsg("Your Ritual Card download has started.");
+      if (outcome === "failed") setSaveMsg("We couldn't download your Ritual Card on this device.");
     });
   };
 
@@ -67,7 +65,7 @@ function Celebrate() {
     <div className="ivory-frame relative min-h-screen">
       <Confetti />
       <div className="mx-auto max-w-[440px] px-6 pt-10 pb-16 text-center">
-        <p className="label-caps text-[var(--gold)]">Day 21 · Complete</p>
+        <p className="label-caps text-[var(--cranberry)]">Day 21 · Complete</p>
 
         <h1 className="mt-4 font-serif text-[44px] leading-tight text-[var(--plum)]">
           You did it,
@@ -79,31 +77,30 @@ function Celebrate() {
           21 days. One ritual. You kept it.
         </p>
 
-        {/* Glow Score */}
-        <div className="gold-glow-card mt-8 p-8">
-          <p className="label-caps text-[var(--gold)]">Your Glow Score</p>
-          <p className="mt-2 font-serif text-[88px] leading-none text-[var(--plum)]">{score}</p>
+        {/* Your Ritual: what she actually did, never a score */}
+        <div className="gold-glow-card mt-8 p-8" data-testid="your-ritual">
+          <p className="label-caps text-[var(--gold-deep)]">Your Ritual</p>
+          <p className="mt-2 font-serif text-[88px] leading-none text-[var(--plum)]">
+            {s.completedDays.length}
+          </p>
+          <p className="mt-1 font-serif italic text-[16px] text-[var(--plum)]/65">
+            mornings complete
+          </p>
           <div className="gold-divider my-5" />
-          <div className="grid grid-cols-3 gap-3 mt-4">
-            <div>
-              <p className="font-serif text-[28px] text-[var(--plum)]">{s.completedDays.length}</p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">
-                Days Done
-              </p>
-            </div>
+          <div className="grid grid-cols-2 gap-3 mt-4">
             <div>
               <p className="font-serif text-[28px] text-[var(--plum)]">
                 {Object.keys(s.journalEntries).length}
               </p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">
-                Entries
+              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--ink-2)] mt-0.5">
+                Journal entries
               </p>
             </div>
             <div>
               <p className="font-serif text-[28px] text-[var(--plum)]">
                 {Object.values(s.dailyLogs).filter((l) => l.reds).length}
               </p>
-              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--plum)]/50 mt-0.5">
+              <p className="text-[10px] tracking-[0.14em] uppercase text-[var(--ink-2)] mt-0.5">
                 Reds Days
               </p>
             </div>
@@ -112,20 +109,20 @@ function Celebrate() {
 
         {/* Certificate card */}
         <div className="glass-card mt-5 p-6">
-          <p className="label-caps text-[var(--gold)]">Inner Glow Reset — Complete</p>
+          <p className="label-caps text-[var(--cranberry)]">Your 21 Mornings · Complete</p>
           <p className="mt-2 font-serif text-[18px] text-[var(--plum)]">{s.name}</p>
-          <p className="mt-1 text-[12px] tracking-wide text-[var(--plum)]/50">Day 21 · {date}</p>
+          <p className="mt-1 text-[12px] tracking-wide text-[var(--ink-2)]">Day 21 · {date}</p>
         </div>
 
         <button type="button" onClick={saveCard} className="gold-pill-btn mt-8 w-full">
-          Save My Glow Card
+          Save My Ritual Card
         </button>
         <ShareStatus className="mt-2" message={saveMsg} />
         <Link
           to="/reflection"
           className="mt-3 block w-full rounded-full border border-[var(--gold)]/50 bg-[var(--blush)] px-6 py-3 font-serif text-[16px] text-[var(--plum)] text-center"
         >
-          Read Your Glow Reflection →
+          Read Your Reflection →
         </Link>
         <a
           href={REDS_URL}
@@ -157,7 +154,7 @@ function useGlowCardFile(dataJson: string | null) {
         (blob) =>
           live &&
           setState({
-            file: new File([blob], "noure-glow-card.png", { type: "image/png" }),
+            file: new File([blob], "noure-ritual-card.png", { type: "image/png" }),
             failed: false,
           }),
       )

@@ -35,7 +35,7 @@ function ProfileForm() {
   return (
     <Frame>
       <TopBar name={s.name} />
-      <Link to="/home" className="text-[12px] text-[var(--charcoal)]/50">
+      <Link to="/home" className="text-[12px] text-[var(--ink-2)]">
         ← Home
       </Link>
       <h1 className="mt-3 font-serif text-[32px] text-[var(--charcoal)]">Your profile.</h1>
@@ -52,7 +52,7 @@ function ProfileForm() {
 
         <Field label="Start date">
           <p className="font-serif text-[16px] text-[var(--charcoal)]">
-            {s.startDate ? new Date(s.startDate).toLocaleDateString() : "—"}
+            {s.startDate ? new Date(s.startDate).toLocaleDateString() : "Not set"}
           </p>
         </Field>
 
@@ -71,12 +71,12 @@ function ProfileForm() {
         <Field label="Badges earned">
           <div className="flex flex-wrap gap-2">
             {s.badgesEarned.length === 0 ? (
-              <p className="text-[13px] text-[var(--charcoal)]/45">None yet — keep showing up.</p>
+              <p className="text-[13px] text-[var(--ink-2)]">None yet. Keep showing up.</p>
             ) : (
               s.badgesEarned.map((b) => (
                 <span
                   key={b}
-                  className="rounded-full bg-[var(--gold)]/15 px-3 py-1 text-[11px] tracking-wide text-[var(--gold)]"
+                  className="rounded-full bg-[var(--gold)]/15 px-3 py-1 text-[11px] tracking-wide text-[var(--cranberry)]"
                 >
                   {b}
                 </span>
@@ -91,7 +91,7 @@ function ProfileForm() {
         onClick={reset}
         className={`w-full rounded-full border px-4 py-3 font-serif text-[14px] ${
           confirm === 0
-            ? "border-[var(--taupe)]/30 text-[var(--charcoal)]/50"
+            ? "border-[var(--taupe)]/30 text-[var(--ink-2)]"
             : confirm === 1
               ? "border-[var(--berry)] text-[var(--berry)]"
               : "bg-[var(--berry)] text-[var(--ivory)]"
@@ -101,7 +101,7 @@ function ProfileForm() {
           ? "Reset my progress"
           : confirm === 1
             ? "Are you sure? This clears all 21 days. Tap again to confirm."
-            : "Tap once more — this can't be undone."}
+            : "Tap once more. This can't be undone."}
       </button>
     </Frame>
   );
@@ -110,7 +110,7 @@ function ProfileForm() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="sand-card p-4">
-      <p className="label-caps text-[var(--gold)]">{label}</p>
+      <p className="label-caps text-[var(--cranberry)]">{label}</p>
       <div className="mt-2">{children}</div>
     </div>
   );

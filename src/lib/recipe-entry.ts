@@ -20,7 +20,7 @@ export const CATEGORY_LABELS: Record<CategoryFilter, string> = {
   build: "Build",
   glow: "Glow",
   bonus: "Bonus",
-  quick: "Quick Glow",
+  quick: "Quick Mornings",
 };
 
 /** Search params carried on /recipes/$id. */

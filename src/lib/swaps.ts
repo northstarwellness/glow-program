@@ -45,7 +45,7 @@ export const SWAPS: Swap[] = [
     ingredient: "Rose water (1 tsp)",
     swap: "Leave it out, or use ¼ tsp vanilla extract",
     note: "Less floral; the rest of the recipe stays the same.",
-    recipes: ["plum-rose", "lavender-honey", "rose-cardamom", "bonus-rose-collagen"],
+    recipes: ["plum-rose", "rose-cardamom", "bonus-rose-collagen"],
     match: "Rose water",
   },
   {
@@ -53,7 +53,7 @@ export const SWAPS: Swap[] = [
     ingredient: "Hibiscus tea (1 cup, cooled)",
     swap: "1 cup cold water with an extra squeeze of lime",
     note: "Lighter in color and less tart.",
-    recipes: ["watermelon-reds", "cucumber-mint", "bonus-warm-elixir"],
+    recipes: ["watermelon-reds", "bonus-warm-elixir"],
     match: "Hibiscus tea",
   },
   {

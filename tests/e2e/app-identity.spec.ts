@@ -42,7 +42,7 @@ test("iPhone tags: Home Screen title “RITUAL APP”, new 180px touch icon; web
   const img = await request.get("/icons/ritual-app/icon-180.png");
   expect(pngSize(await img.body())).toEqual([180, 180]);
   // Search and sharing metadata stay descriptive for people discovering the app.
-  await expect(page).toHaveTitle("Ritual App — The Inner Glow Reset");
+  await expect(page).toHaveTitle("Ritual App | The Inner Glow Reset");
   await expect(head.locator('meta[name="description"]')).toHaveAttribute(
     "content",
     /21-day beauty-from-within morning ritual/,

@@ -11,7 +11,7 @@
  * - Runs on-device. The result is shown on the private reflection screen only; the
  *   shareable card never receives it.
  */
-import { journalTextForDay, JOURNAL_NUDGES } from "./reflections";
+import { journalTextForDay, ALL_JOURNAL_NUDGES } from "./reflections";
 
 export type ExcerptKind = "change" | "reason" | "intention" | "noticed";
 export type JournalExcerpt = { day: number; week: 1 | 2 | 3; text: string; kind: ExcerptKind };
@@ -43,7 +43,7 @@ const MAX = 200;
 
 function sentences(text: string): string[] {
   let t = text;
-  for (const n of JOURNAL_NUDGES) t = t.split(n).join(" ");
+  for (const n of ALL_JOURNAL_NUDGES) t = t.split(n).join(" ");
   return t
     .split(/(?<=[.!?])\s+|\n+/)
     .map((x) => x.replace(/\s+/g, " ").trim())
